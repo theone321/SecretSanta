@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SecretSanta.DataAccess;
 using SecretSanta.DependencyWrappers;
+using SecretSanta.Matching;
 
 namespace SecretSanta {
     public class Startup {
@@ -16,8 +17,9 @@ namespace SecretSanta {
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
             services.AddMvc();
+            services.AddTransient<ICreateSecretMatch, CreateSecretMatch>();
             services.AddTransient<IDataAccessor, DataAccessor>();
-            services.AddTransient<RandomWrapper>();
+            services.AddTransient<IRandomWrapper, RandomWrapper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

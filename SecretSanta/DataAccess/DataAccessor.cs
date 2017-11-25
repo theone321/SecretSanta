@@ -5,9 +5,11 @@ namespace SecretSanta.DataAccess {
         Match GetExistingMatch(string requestor);
         List<Match> GetAllExistingMatches();
         List<MatchRestriction> GetMatchRestrictions(string requestor);
-        void CreateMatch(string requestor, string matchedName);
+        void CreateMatch(string requestor, string matchedName, bool allowReroll);
         List<Name> GetAllRegisteredNames();
-
+        bool AccountAlreadyRegistered(string username);
+        bool VerifyCredentials(string username, string password);
+        void RegisterAccount(string username, string password);
     }
 
     public class DataAccessor : IDataAccessor {
@@ -134,7 +136,7 @@ namespace SecretSanta.DataAccess {
             return restrictions;
         }
 
-        public void CreateMatch(string requestor, string matchedName) {
+        public void CreateMatch(string requestor, string matchedName, bool allowReroll) {
             //Temporary no-op - would actually insert into table.
         }
 
@@ -149,6 +151,27 @@ namespace SecretSanta.DataAccess {
             };
 
             return matches;
+        }
+
+        public bool AccountAlreadyRegistered(string username) {
+            if (username == "Tobias Becker") {
+                return true;
+            }
+            return false;
+        }
+
+        public bool VerifyCredentials(string username, string password) {
+            if (username == "Tobias Becker" && password == "password1!") {
+                return true;
+            }
+            if (username == "Michael Marvin" && password == "Hi") {
+                return true;
+            }
+            return false;
+        }
+
+        public void RegisterAccount(string username, string password) {
+            //no-op for now. Will save to Name table, and mark them as registered.
         }
     }
 }

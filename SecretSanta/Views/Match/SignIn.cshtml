@@ -1,0 +1,41 @@
+﻿@model SecretSanta.Models.AuthenticatedUser
+
+@{
+    ViewData["Title"] = "SignIn";
+}
+<h2>SignIn</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="SignIn">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.Username)
+                @Html.TextBoxFor(m => m.Username)
+                @*<label asp-for="Username" class="control-label"></label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger"></span>*@
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.Password)
+                @Html.PasswordFor(m => m.Password)
+                @*<label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>*@
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Sign In" class="btn btn-default" />
+            </div>
+        </form>
+        <br />
+        <label>Not yet registered?</label>
+        <a asp-action="Register">Register</a>
+    </div>
+</div>
+<br />
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
