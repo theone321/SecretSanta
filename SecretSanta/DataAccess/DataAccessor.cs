@@ -80,6 +80,7 @@ namespace SecretSanta.DataAccess {
 
         public List<MatchRestriction> GetMatchRestrictions(string requestor) {
             //TEMPORARY - in reality would ask database for a list of restrictions.
+            //TODO - I would also use numbers and not names, string comparisons are way less safe than int comparisons
             var restrictions = new List<MatchRestriction> {
                 new MatchRestriction {
                     Id = 1,
