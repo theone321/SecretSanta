@@ -7,7 +7,7 @@ using System;
 
 namespace SecretSanta.Matching {
     public interface ICreateSecretMatch {
-        string FindRandomMatch(string requestor);
+        string FindRandomMatch(string requestor, string previousMatch = null);
     }
 
     public class CreateSecretMatch : ICreateSecretMatch {
@@ -19,9 +19,12 @@ namespace SecretSanta.Matching {
             _random = randomWrapper;
         }
 
-        public string FindRandomMatch(string requestor) {
-            var allNames = _dataAccessor.GetAllRegisteredNames().ToList();
+        public string FindRandomMatch(string requestor, string previousMatch = null) {
+            var allNames = _dataAccessor.GetAllPossibleNames().ToList();
             allNames.RemoveAll(n => string.Equals(n.RegisteredName, requestor, StringComparison.InvariantCultureIgnoreCase));
+            if (!string.IsNullOrEmpty(previousMatch)) {
+                allNames.RemoveAll(n => string.Equals(n.RegisteredName, previousMatch, StringComparison.InvariantCultureIgnoreCase));
+            }
             var removedNames = new List<Name>();
             var restrictions = _dataAccessor.GetMatchRestrictions(requestor);
             var existingMatches = _dataAccessor.GetAllExistingMatches();

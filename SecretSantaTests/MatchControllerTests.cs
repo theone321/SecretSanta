@@ -116,5 +116,150 @@ namespace SecretSantaTests {
             Assert.AreEqual("Test Person1", viewResult.RouteValues["Name"]);
             Assert.AreEqual("Test Person2", viewResult.RouteValues["TheirSecretMatch"]);
         }
+
+        [Test]
+        public void Initial_SignIn_Returns_SignIn_View_With_New_AuthenticatedUser_Model() {
+            var result = _controller.SignIn();
+
+            Assert.NotNull(result);
+            var viewResult = result as ViewResult;
+            Assert.NotNull(viewResult);
+            var model = viewResult.Model as AuthenticatedUser;
+            Assert.NotNull(model);
+        }
+
+        [Test]
+        public void SignIn_With_Valid_Credentials_And_No_Existing_Match_Returns_GetMatch_View() {
+            _dataAccessor.Setup(d => d.VerifyCredentials("Test User", "TestPass!")).Returns(true);
+            _dataAccessor.Setup(d => d.GetExistingMatch("Test User")).Returns((SecretSanta.DataAccess.Models.Match)null);
+
+            var authenticatedUser = new AuthenticatedUser { Username = "Test User", Password = "TestPass!" };
+
+            var result = _controller.SignIn(authenticatedUser);
+
+            Assert.NotNull(result);
+            var viewResult = result as RedirectToActionResult;
+            Assert.NotNull(viewResult);
+            Assert.AreEqual("GetMatch", viewResult.ActionName);
+            Assert.AreEqual("Test User", viewResult.RouteValues["Name"]);
+            Assert.IsTrue((bool)viewResult.RouteValues["AllowReroll"]);
+
+            _dataAccessor.Verify(d => d.VerifyCredentials("Test User", "TestPass!"), Times.Once);
+            _dataAccessor.Verify(d => d.GetExistingMatch("Test User"), Times.Once);
+        }
+
+        [Test]
+        public void SignIn_With_Valid_Credentials_And_Existing_Match_Returns_ExistingMatch_View() {
+            _dataAccessor.Setup(d => d.VerifyCredentials("Test User", "TestPass!")).Returns(true);
+            _dataAccessor.Setup(d => d.GetExistingMatch("Test User")).Returns(new SecretSanta.DataAccess.Models.Match { RequestorName = "Test User", Id = 1, MatchedName = "Test User1", RerollAllowed = false });
+
+            var authenticatedUser = new AuthenticatedUser { Username = "Test User", Password = "TestPass!" };
+
+            var result = _controller.SignIn(authenticatedUser);
+
+            Assert.NotNull(result);
+            var viewResult = result as ViewResult;
+            Assert.NotNull(viewResult);
+            Assert.AreEqual("ExistingMatch", viewResult.ViewName);
+            var model = viewResult.Model as SecretMatch;
+            Assert.NotNull(model);
+            Assert.AreEqual("Test User", model.Name);
+            Assert.AreEqual("Test User1", model.TheirSecretMatch);
+            Assert.IsFalse(model.AllowReroll);
+
+            _dataAccessor.Verify(d => d.VerifyCredentials("Test User", "TestPass!"), Times.Once);
+            _dataAccessor.Verify(d => d.GetExistingMatch("Test User"), Times.Once);
+        }
+
+        [Test]
+        public void SignIn_With_Invalid_Credentials_Returns_InvalidCredentials_View() {
+            _dataAccessor.Setup(d => d.VerifyCredentials("Test User", "TestPass!")).Returns(false);
+
+            var authenticatedUser = new AuthenticatedUser { Username = "Test User", Password = "TestPass!" };
+
+            var result = _controller.SignIn(authenticatedUser);
+
+            Assert.NotNull(result);
+            var viewResult = result as ViewResult;
+            Assert.NotNull(viewResult);
+            Assert.AreEqual("InvalidCredentials", viewResult.ViewName);
+
+            _dataAccessor.Verify(d => d.VerifyCredentials("Test User", "TestPass!"), Times.Once);
+        }
+
+        [Test]
+        public void Initial_Register_Returns_Register_View_With_Model() {
+            var possibleNames = new List<Name> {
+                new Name {
+                    Id = 1,
+                    RegisteredName = "Test User1",
+                    HasRegistered = false
+                },
+                new Name {
+                    Id = 2,
+                    RegisteredName = "Test User2", 
+                    HasRegistered = true
+                }
+            };
+            _dataAccessor.Setup(d => d.GetAllPossibleNames()).Returns(possibleNames);
+
+            var result = _controller.Register();
+
+            Assert.NotNull(result);
+            var viewResult = result as ViewResult;
+            Assert.NotNull(viewResult);
+            Assert.AreEqual("Register", viewResult.ViewName);
+            var model = viewResult.Model as RegisterUser;
+            Assert.NotNull(model);
+            Assert.NotNull(model.PossibleNames);
+            Assert.AreEqual(2, model.PossibleNames.Count);
+
+            _dataAccessor.Verify(d => d.GetAllPossibleNames(), Times.Once);
+        }
+
+        [Test]
+        public void Register_With_Already_Registered_Account_Returns_AlreadyRegistered_View() {
+            _dataAccessor.Setup(d => d.AccountAlreadyRegistered("Test User")).Returns(true);
+            var registerUser = new RegisterUser {
+                NameToRegister = "Test User",
+                ChosenPassword = "12345!"
+            };
+
+            var result = _controller.Register(registerUser);
+
+            Assert.NotNull(result);
+            var viewResult = result as ViewResult;
+            Assert.NotNull(viewResult);
+            Assert.AreEqual("AlreadyRegistered", viewResult.ViewName);
+            var model = viewResult.Model as RegisterUser;
+            Assert.NotNull(model);
+            Assert.AreEqual("Test User", model.NameToRegister);
+            Assert.AreEqual("12345!", model.ChosenPassword);
+
+            _dataAccessor.Verify(d => d.AccountAlreadyRegistered("Test User"), Times.Once);
+            _dataAccessor.Verify(d => d.RegisterAccount("Test User", "12345!"), Times.Never);
+        }
+
+        [Test]
+        public void Register_New_Account_Registers_Account_And_Redirects_To_GetMatch() {
+            _dataAccessor.Setup(d => d.AccountAlreadyRegistered("Test User")).Returns(false);
+            _dataAccessor.Setup(d => d.RegisterAccount("Test User", "12345!"));
+            var registerUser = new RegisterUser {
+                NameToRegister = "Test User",
+                ChosenPassword = "12345!"
+            };
+
+            var result = _controller.Register(registerUser);
+
+            Assert.NotNull(result);
+            var viewResult = result as RedirectToActionResult;
+            Assert.NotNull(viewResult);
+            Assert.AreEqual("GetMatch", viewResult.ActionName);
+            Assert.AreEqual("Test User", viewResult.RouteValues["Name"]);
+            Assert.IsTrue((bool)viewResult.RouteValues["AllowReroll"]);
+
+            _dataAccessor.Verify(d => d.AccountAlreadyRegistered("Test User"), Times.Once);
+            _dataAccessor.Verify(d => d.RegisterAccount("Test User", "12345!"), Times.Once);
+        }
     }
 }

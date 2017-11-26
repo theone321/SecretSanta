@@ -20,19 +20,26 @@ namespace SecretSanta.Controllers {
         public IActionResult GetMatch(SecretMatch secretMatch) {
             return View("GetMatch", secretMatch);
         }
-
-        [HttpPost]
+        
         public IActionResult CreateMatch(SecretMatch secretMatch) {
-            secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name);
+            var previousMatch = secretMatch.TheirSecretMatch;
+            if (previousMatch != null) {
+                _dataAccessor.RemoveMatch(secretMatch.Name, previousMatch);
+            }
+            secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name, previousMatch);
 
             _dataAccessor.CreateMatch(secretMatch.Name, secretMatch.TheirSecretMatch, secretMatch.AllowReroll);
 
             return View("GetMatch", secretMatch);
         }
 
-        [HttpPost]
-        public IActionResult RerollResult(SecretMatch secretMatch) {
-            secretMatch.AllowReroll = false;
+        [HttpGet]
+        public IActionResult RerollResult(string name, string matchName) {
+            var secretMatch = new SecretMatch {
+                Name = name,
+                TheirSecretMatch = matchName,
+                AllowReroll = false
+            };
             return RedirectToAction("CreateMatch", secretMatch);
         }
 
