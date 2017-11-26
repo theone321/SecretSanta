@@ -4,10 +4,8 @@ using System.Linq;
 using SecretSanta.Exceptions;
 using System;
 
-namespace SecretSanta.DataAccess
-{
-    public class DataAccessorSimulated : IDataAccessor
-    {
+namespace SecretSanta.DataAccess {
+    public class DataAccessorSimulated : IDataAccessor {
         private static List<Name> _names = new List<Name> {
                 new Name {
                     Id = 1,
@@ -136,30 +134,24 @@ namespace SecretSanta.DataAccess
 
         private static List<Match> _matches = new List<Match>();
 
-        public IList<Name> GetAllPossibleNames()
-        {
+        public IList<Name> GetAllPossibleNames() {
             return _names;
         }
 
-        public IList<Name> GetAllRegisteredNames()
-        {
+        public IList<Name> GetAllRegisteredNames() {
             return _names.Where(n => n.HasRegistered).ToList();
         }
 
-        public Match GetExistingMatch(string requestor)
-        {
+        public Match GetExistingMatch(string requestor) {
             return _matches.Where(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase))?.FirstOrDefault();
         }
 
-        public IList<MatchRestriction> GetMatchRestrictions(string requestor)
-        {
+        public IList<MatchRestriction> GetMatchRestrictions(string requestor) {
             return _restrictions.Where(r => string.Equals(r.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase)).ToList();
         }
 
-        public void CreateMatch(string requestor, string matchedName, bool allowReroll)
-        {
-            Match match = new Match()
-            {
+        public void CreateMatch(string requestor, string matchedName, bool allowReroll) {
+            Match match = new Match() {
                 Id = _matches.Last().Id + 1,
                 RequestorName = requestor,
                 MatchedName = matchedName,
@@ -168,45 +160,36 @@ namespace SecretSanta.DataAccess
             _matches.Add(match);
         }
 
-        public IList<Match> GetAllExistingMatches()
-        {
+        public IList<Match> GetAllExistingMatches() {
             return _matches;
         }
 
-        public bool AccountAlreadyRegistered(string username)
-        {
+        public bool AccountAlreadyRegistered(string username) {
             return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.HasRegistered == true;
         }
 
-        public bool VerifyCredentials(string username, string password)
-        {
+        public bool VerifyCredentials(string username, string password) {
             Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null)
-            {
+            if (name != null) {
                 return string.Equals(name.Password, password, StringComparison.OrdinalIgnoreCase);
             }
             throw new InvalidCredentialsException();
         }
 
-        public void RegisterAccount(string username, string password)
-        {
+        public void RegisterAccount(string username, string password) {
             Name name = _names.FirstOrDefault(n => !n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null)
-            {
+            if (name != null) {
                 name.Password = password;
                 name.HasRegistered = true;
             }
-            else
-            {
+            else {
                 //TODO: New Exception
                 throw new Exception("This user is already registered.");
             }
         }
 
-        public void CreateRestriction(string requestor, string restrictee, bool strict, bool makeReverse)
-        {
-            MatchRestriction restrict = new MatchRestriction()
-            {
+        public void CreateRestriction(string requestor, string restrictee, bool strict, bool makeReverse) {
+            MatchRestriction restrict = new MatchRestriction() {
                 Id = _restrictions?.LastOrDefault()?.Id + 1 ?? 1,
                 RequestorName = requestor,
                 RestrictedName = restrictee,
@@ -215,10 +198,8 @@ namespace SecretSanta.DataAccess
 
             _restrictions.Add(restrict);
 
-            if (makeReverse)
-            {
-                MatchRestriction restrictReverse = new MatchRestriction()
-                {
+            if (makeReverse) {
+                MatchRestriction restrictReverse = new MatchRestriction() {
                     Id = _restrictions?.LastOrDefault()?.Id + 1 ?? 1,
                     RequestorName = restrictee,
                     RestrictedName = requestor,
