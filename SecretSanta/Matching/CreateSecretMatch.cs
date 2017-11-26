@@ -7,7 +7,7 @@ using System;
 
 namespace SecretSanta.Matching {
     public interface ICreateSecretMatch {
-        string FindRandomMatch(string requestor, string previousMatch = null);
+        string FindRandomMatch(string requestor);
     }
 
     public class CreateSecretMatch : ICreateSecretMatch {
@@ -19,22 +19,19 @@ namespace SecretSanta.Matching {
             _random = randomWrapper;
         }
 
-        public string FindRandomMatch(string requestor, string previousMatch = null) {
-            var allNames = _dataAccessor.GetAllPossibleNames().ToList();
+        public string FindRandomMatch(string requestor) {
+            var allNames = _dataAccessor.GetAllRegisteredNames().ToList();
             allNames.RemoveAll(n => string.Equals(n.RegisteredName, requestor, StringComparison.InvariantCultureIgnoreCase));
-            if (!string.IsNullOrEmpty(previousMatch)) {
-                allNames.RemoveAll(n => string.Equals(n.RegisteredName, previousMatch, StringComparison.InvariantCultureIgnoreCase));
-            }
             var removedNames = new List<Name>();
             var restrictions = _dataAccessor.GetMatchRestrictions(requestor);
             var existingMatches = _dataAccessor.GetAllExistingMatches();
             foreach (var name in allNames) {
-                if (restrictions.Any(r => string.Equals(r.RestrictedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase))) {
+                if (restrictions?.Any(r => string.Equals(r.RestrictedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase)) == true) {
                     removedNames.Add(name);
                     continue;
                 }
                 //Remove any names that have already been matched to someone else.
-                if (existingMatches.Any(m => string.Equals(m.MatchedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase))) {
+                if (existingMatches?.Any(m => string.Equals(m.MatchedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase)) == true) {
                     removedNames.Add(name);
                 }
             }
@@ -44,13 +41,13 @@ namespace SecretSanta.Matching {
                 removedNames.Clear();
                 foreach (var name in allNames)
                 {
-                    if (restrictions.Any(r => r.StrictRestriction && string.Equals(r.RestrictedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase)))
+                    if (restrictions?.Any(r => r.StrictRestriction && string.Equals(r.RestrictedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase)) == true)
                     {
                         removedNames.Add(name);
                         continue;
                     }
                     //Remove any names that have already been matched to someone else.
-                    if (existingMatches.Any(m => m.MatchedName == name.RegisteredName))
+                    if (existingMatches?.Any(m => m.MatchedName == name.RegisteredName) == true)
                     {
                         removedNames.Add(name);
                     }

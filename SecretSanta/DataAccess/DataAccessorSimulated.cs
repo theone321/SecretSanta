@@ -156,7 +156,7 @@ namespace SecretSanta.DataAccess {
 
         public void CreateMatch(string requestor, string matchedName, bool allowReroll) {
             Match match = new Match() {
-                Id = _matches.Any() ? _matches.Last().Id + 1 : 1,
+                Id = _matches.LastOrDefault()?.Id + 1 ?? 1,
                 RequestorName = requestor,
                 MatchedName = matchedName,
                 RerollAllowed = allowReroll

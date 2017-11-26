@@ -1,6 +1,6 @@
 ﻿@model SecretSanta.Models.SecretMatch
 @{
-    ViewData["Title"] = "GetMatch";
+    ViewData["Title"] = "Get Match";
 }
 <h2>Make Your Secret Santa Match</h2>
 <hr />
@@ -14,8 +14,23 @@
                 @if (string.IsNullOrEmpty(Model.TheirSecretMatch)) {
                     <input type="submit" value="Match" class="btn btn-default" />
                 }
-                else {
-                    <input type="submit" value="Match" class="btn btn-default" disabled="disabled" />
+            </div>
+        </form>
+        <form asp-action="RerollResult">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                @Html.HiddenFor(m => m.Name, "name")
+                @Html.HiddenFor(m => m.AllowReroll, "allowReroll")
+                @Html.HiddenFor(m => m.TheirSecretMatch, "theirSecretMatch")
+                @if (!string.IsNullOrEmpty(Model.TheirSecretMatch)) {
+                    if (Model.AllowReroll) {
+                        <input type="submit" value="Re-Match" class="btn btn-default" />
+                        <label>You may only do this once!</label>
+                    }
+                    else {
+                        <input type="submit" value="Re-Match" class="btn btn-default" disabled="disabled" />
+                        <label>You have used all of your re-matches.</label>
+                    }
                 }
             </div>
         </form>
@@ -24,9 +39,9 @@
                 <label>Your match is @Model.TheirSecretMatch.</label>
             </div>
         }
-        @if (Model.AllowReroll) {
+        @*@if (Model.AllowReroll) {
             @Html.ActionLink("Reroll Result", "RerollResult", "Match", new { name = Model.Name, matchName = Model.TheirSecretMatch })
-        }
+        }*@
     </div>
 </div>
 

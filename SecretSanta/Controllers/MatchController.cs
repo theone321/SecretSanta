@@ -5,6 +5,8 @@ using System.Linq;
 using SecretSanta.Matching;
 using System;
 using SecretSanta.Exceptions;
+using SecretSanta.DataAccess.Models;
+using System.Collections.Generic;
 
 namespace SecretSanta.Controllers {
     public class MatchController : Controller {
@@ -22,30 +24,34 @@ namespace SecretSanta.Controllers {
         }
         
         public IActionResult CreateMatch(SecretMatch secretMatch) {
-            var previousMatch = secretMatch.TheirSecretMatch;
-            if (previousMatch != null) {
-                _dataAccessor.RemoveMatch(secretMatch.Name, previousMatch);
-            }
-            secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name, previousMatch);
+            secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name);
 
             _dataAccessor.CreateMatch(secretMatch.Name, secretMatch.TheirSecretMatch, secretMatch.AllowReroll);
 
             return View("GetMatch", secretMatch);
         }
 
-        [HttpGet]
-        public IActionResult RerollResult(string name, string matchName) {
-            var secretMatch = new SecretMatch {
-                Name = name,
-                TheirSecretMatch = matchName,
+        public IActionResult RerollResult(SecretMatch secretMatch) {
+            if (string.IsNullOrEmpty(secretMatch?.Name))
+            { //How? Why? Just start over
+                return RedirectToAction("SignIn");
+            }
+
+            if (!string.IsNullOrEmpty(secretMatch.TheirSecretMatch)) {
+                _dataAccessor.RemoveMatch(secretMatch.Name, secretMatch.TheirSecretMatch);
+                _dataAccessor.CreateRestriction(secretMatch.Name, secretMatch.TheirSecretMatch, false, false);
+            }
+
+            SecretMatch match = new SecretMatch() {
+                Name = secretMatch.Name,
                 AllowReroll = false
             };
-            return RedirectToAction("CreateMatch", secretMatch);
+            return RedirectToAction("CreateMatch", match);
         }
 
         [HttpGet]
         public IActionResult Register() {
-            var possibleNames = _dataAccessor.GetAllPossibleNames();
+            IList<Name> possibleNames = _dataAccessor.GetAllPossibleNames();
             return View("Register", new RegisterUser { PossibleNames = possibleNames });
         }
 

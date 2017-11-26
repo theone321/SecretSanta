@@ -27,15 +27,17 @@ namespace SecretSantaTests {
             var possibleNames = new List<Name> {
                 new Name {
                     Id = 1,
-                    RegisteredName = "Test User1"
+                    RegisteredName = "Test User1",
+                    HasRegistered = true
                 },
                 new Name {
                     Id = 2,
-                    RegisteredName = "Test User2"
+                    RegisteredName = "Test User2",
+                    HasRegistered = true
                 }
             };
 
-            _dataAccessor.Setup(d => d.GetAllPossibleNames()).Returns(possibleNames);
+            _dataAccessor.Setup(d => d.GetAllRegisteredNames()).Returns(possibleNames);
             _dataAccessor.Setup(d => d.GetMatchRestrictions("Test User1")).Returns(new List<MatchRestriction>());
             _dataAccessor.Setup(d => d.GetAllExistingMatches()).Returns(new List<SecretSanta.DataAccess.Models.Match>());
             _randomWrapper.Setup(r => r.Next(It.IsAny<int>())).Returns(0);
@@ -50,24 +52,28 @@ namespace SecretSantaTests {
             var possibleNames = new List<Name> {
                 new Name {
                     Id = 1,
-                    RegisteredName = "Test User1"
+                    RegisteredName = "Test User1",
+                    HasRegistered = true
                 },
                 new Name {
                     Id = 2,
-                    RegisteredName = "Test User2"
+                    RegisteredName = "Test User2",
+                    HasRegistered = true
                 },
                 new Name {
                     Id = 3,
-                    RegisteredName = "Test User3"
+                    RegisteredName = "Test User3",
+                    HasRegistered = true
                 }
             };
 
-            _dataAccessor.Setup(d => d.GetAllPossibleNames()).Returns(possibleNames);
+            _dataAccessor.Setup(d => d.GetAllRegisteredNames()).Returns(possibleNames);
             _dataAccessor.Setup(d => d.GetMatchRestrictions("Test User1")).Returns(new List<MatchRestriction> {
                 new MatchRestriction {
                     Id = 1,
                     RequestorName = "Test User1",
-                    RestrictedName = "Test User2"
+                    RestrictedName = "Test User2",
+                    StrictRestriction = true
                 }
             });
             _dataAccessor.Setup(d => d.GetAllExistingMatches()).Returns(new List<SecretSanta.DataAccess.Models.Match>());
@@ -83,23 +89,27 @@ namespace SecretSantaTests {
             var possibleNames = new List<Name> {
                 new Name {
                     Id = 1,
-                    RegisteredName = "Test User1"
+                    RegisteredName = "Test User1",
+                    HasRegistered = true
                 },
                 new Name {
                     Id = 2,
-                    RegisteredName = "Test User2"
+                    RegisteredName = "Test User2",
+                    HasRegistered = true
                 },
                 new Name {
                     Id = 3,
-                    RegisteredName = "Test User3"
+                    RegisteredName = "Test User3",
+                    HasRegistered = true
                 },
                 new Name {
                     Id = 4,
-                    RegisteredName = "Test User4"
+                    RegisteredName = "Test User4",
+                    HasRegistered = true
                 }
             };
 
-            _dataAccessor.Setup(d => d.GetAllPossibleNames()).Returns(possibleNames);
+            _dataAccessor.Setup(d => d.GetAllRegisteredNames()).Returns(possibleNames);
             _dataAccessor.Setup(d => d.GetMatchRestrictions("Test User1")).Returns(new List<MatchRestriction>());
             _dataAccessor.Setup(d => d.GetAllExistingMatches()).Returns(new List<SecretSanta.DataAccess.Models.Match> {
                 new SecretSanta.DataAccess.Models.Match {
