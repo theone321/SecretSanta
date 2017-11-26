@@ -38,6 +38,29 @@ namespace SecretSanta.DataAccess
             _context.SaveChanges();
         }
 
+        public void CreateRestriction(string requestor, string restrictee, bool strict, bool makeReverse)
+        {
+            MatchRestriction restrict = new MatchRestriction()
+            {
+                RequestorName = requestor,
+                RestrictedName = restrictee,
+                StrictRestriction = strict
+            };
+
+            _context.MatchRestrictions.Add(restrict);
+
+            if (makeReverse)
+            {
+                MatchRestriction restrictReverse = new MatchRestriction()
+                {
+                    RequestorName = restrictee,
+                    RestrictedName = requestor,
+                    StrictRestriction = strict
+                };
+                _context.MatchRestrictions.Add(restrictReverse);
+            }
+        }
+
         public IList<Match> GetAllExistingMatches()
         {
             return _context.Matches.ToList();

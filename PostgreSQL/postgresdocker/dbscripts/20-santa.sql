@@ -121,7 +121,8 @@ ALTER TABLE ONLY "Matches"
 CREATE TABLE "MatchRestrictions" (
     "Id" int NOT NULL,
     "RequestorName" text,
-    "RestrictedName" text
+    "RestrictedName" text,
+    "StrictRestriction" bool DEFAULT TRUE
 );
 
 ALTER TABLE "MatchRestrictions" OWNER TO santa;

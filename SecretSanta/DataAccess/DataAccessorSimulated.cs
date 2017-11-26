@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using SecretSanta.DataAccess.Models;
 using System.Linq;
+using SecretSanta.Exceptions;
+using System;
 
 namespace SecretSanta.DataAccess
 {
     public class DataAccessorSimulated : IDataAccessor
     {
-        public IList<Name> GetAllPossibleNames()
-        {
-            return new List<Name> {
+        private static List<Name> _names = new List<Name> {
                 new Name {
                     Id = 1,
                     RegisteredName = "Tobias Becker"
@@ -58,132 +58,174 @@ namespace SecretSanta.DataAccess
                     RegisteredName = "Steve Rakar"
                 }
             };
-        }
 
-        public IList<Name> GetAllRegisteredNames()
-        {
-            return GetAllPossibleNames().Where(n => n.HasRegistered).ToList();
-        }
-
-        public Match GetExistingMatch(string requestor)
-        {
-            // TEMPORARY - in reality would return Matches.FirstOrDefault(m => m.RequestorName == requestor);
-            if (requestor.Equals("Tobias Becker"))
-            {
-                return new Match
-                {
-                    Id = 1,
-                    RequestorName = "Tobias Becker",
-                    MatchedName = "Michael Marvin"
-                };
-            }
-            return null;
-        }
-
-        public IList<MatchRestriction> GetMatchRestrictions(string requestor)
-        {
-            //TEMPORARY - in reality would ask database for a list of restrictions.
-            //TODO - I would also use numbers and not names, string comparisons are way less safe than int comparisons
-            var restrictions = new List<MatchRestriction> {
+        private static List<MatchRestriction> _restrictions = new List<MatchRestriction> {
                 new MatchRestriction {
                     Id = 1,
                     RequestorName = "Tobias Becker",
-                    RestrictedName = "Angelia Becker"
+                    RestrictedName = "Angelia Becker",
+                    StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 2,
                     RequestorName = "Angelia Becker",
-                    RestrictedName = "Tobias Becker"
+                    RestrictedName = "Tobias Becker",
+                    StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 3,
                     RequestorName = "Sarah Marvin-Foley",
-                    RestrictedName = "Michael Marvin"
+                    RestrictedName = "Michael Marvin",
+                    StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 4,
                     RequestorName = "Michael Marvin",
-                    RestrictedName = "Sarah Marvin-Foley"
+                    RestrictedName = "Sarah Marvin-Foley",
+                    StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 5,
                     RequestorName = "Dale Banas",
-                    RestrictedName = "Dorothy Klein"
+                    RestrictedName = "Dorothy Klein",
+                    StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 6,
                     RequestorName = "Dorothy Klein",
-                    RestrictedName = "Dale Banas"
+                    RestrictedName = "Dale Banas",
+                    StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 7,
                     RequestorName = "Amanda Robinson",
-                    RestrictedName = "Caleb Gaffney"
+                    RestrictedName = "Caleb Gaffney",
+                    StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 8,
                     RequestorName = "Caleb Gaffney",
-                    RestrictedName = "Amanda Robinson"
+                    RestrictedName = "Amanda Robinson",
+                    StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 9,
                     RequestorName = "Jonathon Minelli",
-                    RestrictedName = "Lindsay Shockling"
+                    RestrictedName = "Lindsay Shockling",
+                    StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 10,
                     RequestorName = "Lindsay Shockling",
-                    RestrictedName = "Jonathon Minelli"
+                    RestrictedName = "Jonathon Minelli",
+                    StrictRestriction = true
+                },
+                new MatchRestriction {
+                    Id = 11,
+                    RequestorName = "Andrew Sansone",
+                    RestrictedName = "Heather Sansone",
+                    StrictRestriction = true
+                },
+                new MatchRestriction {
+                    Id = 12,
+                    RequestorName = "Heather Sansone",
+                    RestrictedName = "Andrew Sansone",
+                    StrictRestriction = true
                 }
             };
 
-            return restrictions;
+        private static List<Match> _matches = new List<Match>();
+
+        public IList<Name> GetAllPossibleNames()
+        {
+            return _names;
+        }
+
+        public IList<Name> GetAllRegisteredNames()
+        {
+            return _names.Where(n => n.HasRegistered).ToList();
+        }
+
+        public Match GetExistingMatch(string requestor)
+        {
+            return _matches.Where(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase))?.FirstOrDefault();
+        }
+
+        public IList<MatchRestriction> GetMatchRestrictions(string requestor)
+        {
+            return _restrictions.Where(r => string.Equals(r.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase)).ToList();
         }
 
         public void CreateMatch(string requestor, string matchedName, bool allowReroll)
         {
-            //Temporary no-op - would actually insert into table.
+            Match match = new Match()
+            {
+                Id = _matches.Last().Id + 1,
+                RequestorName = requestor,
+                MatchedName = matchedName,
+                RerollAllowed = allowReroll
+            };
+            _matches.Add(match);
         }
 
         public IList<Match> GetAllExistingMatches()
         {
-            // TEMPORARY - would get all existing matches from the database instead.
-            var matches = new List<Match> {
-                new Match {
-                    Id = 1,
-                    RequestorName = "Tobias Becker",
-                    MatchedName = "Michael Marvin"
-                }
-            };
-
-            return matches;
+            return _matches;
         }
 
         public bool AccountAlreadyRegistered(string username)
         {
-            if (username == "Tobias Becker")
-            {
-                return true;
-            }
-            return false;
+            return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.HasRegistered == true;
         }
 
         public bool VerifyCredentials(string username, string password)
         {
-            if (username == "Tobias Becker" && password == "password1!")
+            Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            if (name != null)
             {
-                return true;
+                return string.Equals(name.Password, password, StringComparison.OrdinalIgnoreCase);
             }
-            if (username == "Michael Marvin" && password == "Hi")
-            {
-                return true;
-            }
-            return false;
+            throw new InvalidCredentialsException();
         }
 
         public void RegisterAccount(string username, string password)
         {
-            //no-op for now. Will save to Name table, and mark them as registered.
+            Name name = _names.FirstOrDefault(n => !n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            if (name != null)
+            {
+                name.Password = password;
+                name.HasRegistered = true;
+            }
+            else
+            {
+                //TODO: New Exception
+                throw new Exception("This user is already registered.");
+            }
+        }
+
+        public void CreateRestriction(string requestor, string restrictee, bool strict, bool makeReverse)
+        {
+            MatchRestriction restrict = new MatchRestriction()
+            {
+                Id = _restrictions?.LastOrDefault()?.Id + 1 ?? 1,
+                RequestorName = requestor,
+                RestrictedName = restrictee,
+                StrictRestriction = strict
+            };
+
+            _restrictions.Add(restrict);
+
+            if (makeReverse)
+            {
+                MatchRestriction restrictReverse = new MatchRestriction()
+                {
+                    Id = _restrictions?.LastOrDefault()?.Id + 1 ?? 1,
+                    RequestorName = restrictee,
+                    RestrictedName = requestor,
+                    StrictRestriction = strict
+                };
+                _restrictions.Add(restrictReverse);
+            }
         }
     }
 }
