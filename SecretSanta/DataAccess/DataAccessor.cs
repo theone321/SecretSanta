@@ -8,6 +8,7 @@ namespace SecretSanta.DataAccess {
         IList<MatchRestriction> GetMatchRestrictions(string requestor);
         void CreateMatch(string requestor, string matchedName, bool allowReroll);
         IList<Name> GetAllPossibleNames();
+        IList<Name> GetAllRegisteredNames();
         bool AccountAlreadyRegistered(string username);
         bool VerifyCredentials(string username, string password);
         void RegisterAccount(string username, string password);

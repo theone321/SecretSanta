@@ -21,39 +21,52 @@ namespace SecretSanta.DataAccess
 
         public bool AccountAlreadyRegistered(string username)
         {
-            return _context.Name.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.HasRegistered == true;
+            return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.HasRegistered == true;
         }
 
         public void CreateMatch(string requestor, string matchedName, bool allowReroll)
         {
-            //_context.SaveChanges();
-            throw new NotImplementedException();
+            Match match = new Match()
+            {
+                RequestorName = requestor,
+                MatchedName = matchedName,
+                RerollAllowed = allowReroll
+            };
+
+            _context.Matches.Add(match);
+
+            _context.SaveChanges();
         }
 
         public IList<Match> GetAllExistingMatches()
         {
-            throw new NotImplementedException();
+            return _context.Matches.ToList();
         }
 
         public IList<Name> GetAllPossibleNames()
         {
-            return _context.Name.ToList();
+            return _context.Names.ToList();
+        }
+
+        public IList<Name> GetAllRegisteredNames()
+        {
+            return _context.Names.Where(n => n.HasRegistered).ToList();
         }
 
         public Match GetExistingMatch(string requestor)
         {
-            throw new NotImplementedException();
+            return _context.Matches.Where(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase))?.FirstOrDefault();
         }
 
         public IList<MatchRestriction> GetMatchRestrictions(string requestor)
         {
-            throw new NotImplementedException();
+            return _context.MatchRestrictions.Where(mr => string.Equals(mr.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase))?.ToList();
         }
 
         public void RegisterAccount(string username, string password)
         {
             //get the account first
-            Name name = _context.Name.FirstOrDefault(n => !n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            Name name = _context.Names.FirstOrDefault(n => !n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
             if (name != null)
             {
                 //SHA256 hash the password
@@ -74,7 +87,7 @@ namespace SecretSanta.DataAccess
 
         public bool VerifyCredentials(string username, string password)
         {
-            string dbPass = _context.Name.FirstOrDefault(n => n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Password;
+            string dbPass = _context.Names.FirstOrDefault(n => n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Password;
             if (!string.IsNullOrEmpty(dbPass))
             {
                 string hashed = hashPassword(password);

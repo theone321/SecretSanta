@@ -12,7 +12,7 @@ SET row_security = off;
 
 
 -- Add some accounts
-INSERT INTO "Name"  ("RegisteredName") VALUES ('Michael Marvin');
-INSERT INTO "Name" ("RegisteredName") VALUES ('Sarah Marvin-Foley');
+INSERT INTO "Names"  ("RegisteredName") VALUES ('Michael Marvin');
+INSERT INTO "Names" ("RegisteredName") VALUES ('Sarah Marvin-Foley');
 
-SELECT * FROM "Name";
+SELECT * FROM "Names";

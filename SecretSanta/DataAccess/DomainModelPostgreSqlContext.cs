@@ -9,7 +9,11 @@ namespace SecretSanta.DataAccess
     {
         public DomainModelPostgreSqlContext(DbContextOptions<DomainModelPostgreSqlContext> options) : base(options) { }
 
-        public DbSet<Name> Name { get; set; }
+        public DbSet<Name> Names { get; set; }
+
+        public DbSet<Match> Matches { get; set; }
+
+        public DbSet<MatchRestriction> MatchRestrictions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -60,62 +60,86 @@ SET default_tablespace = '';
 
 SET default_with_oids = false;
 
---
--- TOC entry 189 (class 1259 OID 24595)
--- Name: Name; Type: TABLE; Schema: public; Owner: santa
---
+-- Create Names
 
-CREATE TABLE "Name" (
+CREATE TABLE "Names" (
     "Id" int NOT NULL,
     "RegisteredName" text,
     "Password" text,
     "HasRegistered" bool DEFAULT FALSE
 );
 
+ALTER TABLE "Names" OWNER TO santa;
 
-ALTER TABLE "Name" OWNER TO santa;
-
---
--- TOC entry 188 (class 1259 OID 24593)
--- Name: Name_Id_seq; Type: SEQUENCE; Schema: public; Owner: santa
---
-
-CREATE SEQUENCE "Name_Id_seq"
+CREATE SEQUENCE "Names_Id_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
+ALTER TABLE "Names_Id_seq" OWNER TO santa;
 
-ALTER TABLE "Name_Id_seq" OWNER TO santa;
 
---
--- TOC entry 2151 (class 0 OID 0)
--- Dependencies: 188
--- Name: Name_Id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: santa
---
+ALTER SEQUENCE "Names_Id_seq" OWNED BY "Names"."Id";
 
-ALTER SEQUENCE "Name_Id_seq" OWNED BY "Name"."Id";
+ALTER TABLE ONLY "Names" ALTER COLUMN "Id" SET DEFAULT nextval('"Names_Id_seq"'::regclass);
 
---
--- TOC entry 2018 (class 2604 OID 24598)
--- Name: Name Id; Type: DEFAULT; Schema: public; Owner: santa
---
+ALTER TABLE ONLY "Names"
+    ADD CONSTRAINT "PK_Names" PRIMARY KEY ("Id");
 
-ALTER TABLE ONLY "Name" ALTER COLUMN "Id" SET DEFAULT nextval('"Name_Id_seq"'::regclass);
+-- Create Matches
 
---\
---
--- TOC entry 2025 (class 2606 OID 24603)
--- Name: Name PK_Name; Type: CONSTRAINT; Schema: public; Owner: santa
---
+CREATE TABLE "Matches" (
+    "Id" int NOT NULL,
+    "RequestorName" text,
+    "MatchedName" text,
+    "RerollAllowed" bool DEFAULT TRUE
+);
 
-ALTER TABLE ONLY "Name"
-    ADD CONSTRAINT "PK_Name" PRIMARY KEY ("Id");
+ALTER TABLE "Matches" OWNER TO santa;
 
--- Completed on 2017-01-27 10:44:09
+CREATE SEQUENCE "Matches_Id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
 
---
--- PostgreSQL database dump complete
---
+ALTER TABLE "Matches_Id_seq" OWNER TO santa;
+
+
+ALTER SEQUENCE "Matches_Id_seq" OWNED BY "Matches"."Id";
+
+ALTER TABLE ONLY "Matches" ALTER COLUMN "Id" SET DEFAULT nextval('"Matches_Id_seq"'::regclass);
+
+ALTER TABLE ONLY "Matches"
+    ADD CONSTRAINT "PK_Matches" PRIMARY KEY ("Id");
+    
+    
+-- Create MatchRestrictions
+CREATE TABLE "MatchRestrictions" (
+    "Id" int NOT NULL,
+    "RequestorName" text,
+    "RestrictedName" text
+);
+
+ALTER TABLE "MatchRestrictions" OWNER TO santa;
+
+CREATE SEQUENCE "MatchRestrictions_Id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE "MatchRestrictions_Id_seq" OWNER TO santa;
+
+
+ALTER SEQUENCE "MatchRestrictions_Id_seq" OWNED BY "MatchRestrictions"."Id";
+
+ALTER TABLE ONLY "MatchRestrictions" ALTER COLUMN "Id" SET DEFAULT nextval('"MatchRestrictions_Id_seq"'::regclass);
+
+ALTER TABLE ONLY "MatchRestrictions"
+    ADD CONSTRAINT "PK_MatchRestrictions" PRIMARY KEY ("Id");
+    

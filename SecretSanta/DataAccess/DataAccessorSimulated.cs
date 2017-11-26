@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using SecretSanta.DataAccess.Models;
+using System.Linq;
 
 namespace SecretSanta.DataAccess
 {
@@ -57,6 +58,11 @@ namespace SecretSanta.DataAccess
                     RegisteredName = "Steve Rakar"
                 }
             };
+        }
+
+        public IList<Name> GetAllRegisteredNames()
+        {
+            return GetAllPossibleNames().Where(n => n.HasRegistered).ToList();
         }
 
         public Match GetExistingMatch(string requestor)
