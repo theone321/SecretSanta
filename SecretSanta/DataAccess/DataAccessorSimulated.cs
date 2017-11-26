@@ -10,52 +10,64 @@ namespace SecretSanta.DataAccess {
                 new Name {
                     Id = 1,
                     RegisteredName = "Tobias Becker", 
-                    IsAdmin = true
+                    IsAdmin = true,
+                    Interests = "a"
                 },
                 new Name {
                     Id = 2,
-                    RegisteredName = "Angelia Becker"
+                    RegisteredName = "Angelia Becker",
+                    Interests = "b"
                 },
                 new Name {
                     Id = 3,
                     RegisteredName = "Michael Marvin",
-                    IsAdmin = true
+                    IsAdmin = true,
+                    Interests = "c"
                 },
                 new Name {
                     Id = 4,
-                    RegisteredName = "Sarah Marvin-Foley"
+                    RegisteredName = "Sarah Marvin-Foley",
+                    Interests = "d"
                 },
                 new Name {
                     Id = 5,
-                    RegisteredName = "Jonathon Minelli"
+                    RegisteredName = "Jonathon Minelli",
+                    Interests = "e"
                 },
                 new Name {
                     Id = 6,
-                    RegisteredName = "Sarah Leahman"
+                    RegisteredName = "Sarah Leahman",
+                    Interests = "f"
                 },
                 new Name {
                     Id = 7,
-                    RegisteredName = "Amanda Robinson"
+                    RegisteredName = "Amanda Robinson",
+                    Interests = "g"
                 },
                 new Name {
                     Id = 8,
-                    RegisteredName = "Caleb Gaffney"
+                    RegisteredName = "Caleb Gaffney",
+                    Interests = "h"
                 },
                 new Name {
                     Id = 9,
-                    RegisteredName = "Dale Banas"
+                    RegisteredName = "Dale Banas",
+                    Interests = "i"
                 },
                 new Name {
                     Id = 10,
-                    RegisteredName = "Dorothy Klein"
+                    RegisteredName = "Dorothy Klein",
+                    Interests = "j"
                 },
                 new Name {
                     Id = 11,
-                    RegisteredName = "Lindsay Shockling"
+                    RegisteredName = "Lindsay Shockling",
+                    Interests = "k"
                 },
                 new Name {
                     Id = 12,
-                    RegisteredName = "Steve Rakar"
+                    RegisteredName = "Steve Rakar",
+                    Interests = "l"
                 }
             };
 
@@ -136,6 +148,17 @@ namespace SecretSanta.DataAccess {
 
         private static List<Match> _matches = new List<Match>();
 
+        private static List<Setting> _settings = new List<Setting> {
+            new Setting() {
+                Name = "AllowRegistration",
+                Value = "true"
+            },
+            new Setting() {
+                Name = "AllowMatching",
+                Value = "false"
+            },
+        };
+
         public IList<Name> GetAllPossibleNames() {
             return _names;
         }
@@ -153,7 +176,7 @@ namespace SecretSanta.DataAccess {
         }
 
         public void RemoveMatch(string requestor, string matchedName) {
-            _matches.RemoveAll(m => m.RequestorName.Equals(requestor, StringComparison.InvariantCultureIgnoreCase) && m.MatchedName.Equals(matchedName, StringComparison.InvariantCultureIgnoreCase));
+            _matches.RemoveAll(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase) && string.Equals(m.MatchedName, matchedName, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public void CreateMatch(string requestor, string matchedName, bool allowReroll) {
@@ -218,6 +241,39 @@ namespace SecretSanta.DataAccess {
         public bool UserIsAdmin(string username)
         {
             return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.IsAdmin == true;
+        }
+
+        public string GetSettingValue(string setting)
+        {
+            return _settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal))?.Value;
+        }
+
+        public void SetSettingValue(string setting, string value)
+        {
+            Setting settingObj =_settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal));
+            if (settingObj != null)
+            {
+                settingObj.Value = value;
+            }
+        }
+
+        public IList<Setting> GetAllSettings()
+        {
+            return _settings;
+        }
+
+        public string GetUserInterests(string username)
+        {
+            return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Interests;
+        }
+
+        public void SetUserInterests(string username, string interests)
+        {
+            Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            if (name != null)
+            {
+                name.Interests = interests;
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ namespace SecretSanta.DataAccess {
         }
 
         public void RemoveMatch(string requestor, string matchedName) {
-            var matchToRemove = _context.Matches.First(m => m.RequestorName.Equals(requestor, StringComparison.InvariantCultureIgnoreCase) && m.MatchedName.Equals(matchedName, StringComparison.InvariantCultureIgnoreCase));
+            var matchToRemove = _context.Matches.First(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase) && string.Equals(m.MatchedName, matchedName, StringComparison.InvariantCultureIgnoreCase));
             if (matchToRemove != null) {
                 _context.Matches.Remove(matchToRemove);
             }
@@ -123,6 +123,40 @@ namespace SecretSanta.DataAccess {
             return hashedBuilder.ToString();
         }
 
+        public string GetSettingValue(string setting)
+        {
+            return _context.Settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal))?.Value;
+        }
 
+        public void SetSettingValue(string setting, string value)
+        {
+            Setting settingObj = _context.Settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal));
+            if (settingObj != null)
+            {
+                settingObj.Value = value;
+
+                _context.SaveChanges();
+            }
+        }
+
+        public IList<Setting> GetAllSettings()
+        {
+            return _context.Settings.ToList();
+        }
+
+        public string GetUserInterests(string username)
+        {
+            return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Interests;
+        }
+
+        public void SetUserInterests(string username, string interests)
+        {
+            Name name = _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            if (name != null)
+            {
+                name.Interests = interests;
+                _context.SaveChanges();
+            }
+        }
     }
 }

@@ -20,13 +20,26 @@ namespace SecretSanta.Controllers {
 
         [HttpGet]
         public IActionResult GetMatch(SecretMatch secretMatch) {
+            secretMatch.Interests = _dataAccessor.GetUserInterests(secretMatch.Name);
+            if (!string.IsNullOrEmpty(secretMatch.TheirSecretMatch))
+            {
+                secretMatch.MatchInterests = _dataAccessor.GetUserInterests(secretMatch.TheirSecretMatch);
+            }
+
             return View("GetMatch", secretMatch);
         }
         
         public IActionResult CreateMatch(SecretMatch secretMatch) {
+            if (string.IsNullOrEmpty(secretMatch?.Name))
+            { //How? Why? Just start over
+                return RedirectToAction("SignIn");
+            }
             secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name);
 
             _dataAccessor.CreateMatch(secretMatch.Name, secretMatch.TheirSecretMatch, secretMatch.AllowReroll);
+
+            secretMatch.Interests = _dataAccessor.GetUserInterests(secretMatch.Name);
+            secretMatch.MatchInterests = _dataAccessor.GetUserInterests(secretMatch.TheirSecretMatch);
 
             return View("GetMatch", secretMatch);
         }
@@ -80,11 +93,14 @@ namespace SecretSanta.Controllers {
                 if (!_dataAccessor.VerifyCredentials(authUser.Username, authUser.Password)) {
                     throw new InvalidCredentialsException();
                 }
-                var existingMatch = _dataAccessor.GetExistingMatch(authUser.Username);
+                Match existingMatch = _dataAccessor.GetExistingMatch(authUser.Username);
                 if (existingMatch == null) {
                     return RedirectToAction("GetMatch", new SecretMatch { Name = authUser.Username, AllowReroll = true });
                 }
-                return View("ExistingMatch", new SecretMatch { Name = authUser.Username, AllowReroll = existingMatch.RerollAllowed, TheirSecretMatch = existingMatch.MatchedName });
+                string myInterests = _dataAccessor.GetUserInterests(authUser.Username);
+                string theirInterests = _dataAccessor.GetUserInterests(existingMatch.MatchedName);
+
+                return View("ExistingMatch", new SecretMatch { Name = authUser.Username, AllowReroll = existingMatch.RerollAllowed, TheirSecretMatch = existingMatch.MatchedName, Interests = myInterests, MatchInterests = theirInterests });
             }
             catch (InvalidCredentialsException) {
                 return View("InvalidCredentials");
@@ -92,6 +108,17 @@ namespace SecretSanta.Controllers {
             catch (Exception) {
                 return View("Error");
             }
+        }
+
+        [HttpPost]
+        public IActionResult UpdateInterests(SecretMatch match)
+        {
+            _dataAccessor.SetUserInterests(match.Name, match.Interests);
+            if (!string.IsNullOrEmpty(match.TheirSecretMatch))
+            {
+                return View("ExistingMatch", match);
+            }
+            return RedirectToAction("GetMatch", match);
         }
     }
 }

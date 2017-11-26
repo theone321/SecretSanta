@@ -15,5 +15,10 @@ namespace SecretSanta.DataAccess {
         bool VerifyCredentials(string username, string password);
         void RegisterAccount(string username, string password);
         bool UserIsAdmin(string username);
+        string GetUserInterests(string username);
+        void SetUserInterests(string username, string interests);
+        string GetSettingValue(string setting);
+        void SetSettingValue(string setting, string value);
+        IList<Setting> GetAllSettings();
     }
 }

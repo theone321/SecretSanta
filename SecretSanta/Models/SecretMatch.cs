@@ -6,5 +6,8 @@ namespace SecretSanta.Models {
         public string Name { get; set; }
         public string TheirSecretMatch { get; set; }
         public bool AllowReroll { get; set; }
+
+        public string Interests { get; set; }
+        public string MatchInterests { get; set; }
     }
 }

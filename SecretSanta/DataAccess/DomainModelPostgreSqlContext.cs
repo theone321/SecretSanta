@@ -11,8 +11,12 @@ namespace SecretSanta.DataAccess {
 
         public DbSet<MatchRestriction> MatchRestrictions { get; set; }
 
+        public DbSet<Setting> Settings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.Entity<Name>().HasKey(m => m.Id); //I think this makes it only save if the id was assigned?
+            modelBuilder.Entity<Match>().HasKey(m => m.Id);
+            modelBuilder.Entity<MatchRestriction>().HasKey(m => m.Id);
 
             base.OnModelCreating(modelBuilder);
         }

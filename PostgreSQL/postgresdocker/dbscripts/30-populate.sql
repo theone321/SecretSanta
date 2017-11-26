@@ -11,7 +11,7 @@ SET row_security = off;
 \connect santa
 
 
--- Add some accounts
+-- Names
 INSERT INTO "Names"  ("RegisteredName", "IsAdmin") VALUES ('Michael Marvin', TRUE);
 INSERT INTO "Names" ("RegisteredName", "IsAdmin") VALUES ('Tobias Becker', TRUE);
 INSERT INTO "Names" ("RegisteredName") VALUES ('Sarah Marvin-Foley');
@@ -28,6 +28,8 @@ INSERT INTO "Names" ("RegisteredName") VALUES ('Andrew Sansone');
 INSERT INTO "Names" ("RegisteredName") VALUES ('Heather Sansone');
 
 SELECT * FROM "Names";
+
+-- MatchRestrictions
 
 INSERT INTO "MatchRestrictions" ("RequestorName", "RestrictedName") 
     VALUES ('Tobias Becker', 'Angelia Becker');
@@ -69,3 +71,7 @@ INSERT INTO "MatchRestrictions" ("RequestorName", "RestrictedName")
 
 INSERT INTO "MatchRestrictions" ("RequestorName", "RestrictedName") 
     VALUES ('Heather Sansone', 'Andrew Sansone');
+    
+-- Settings
+INSERT INTO "Settings" VALUES ('AllowRegistration', 'true');
+INSERT INTO "Settings" VALUES ('AllowMatching', 'false');

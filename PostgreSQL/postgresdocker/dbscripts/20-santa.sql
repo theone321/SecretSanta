@@ -80,7 +80,6 @@ CREATE SEQUENCE "Names_Id_seq"
 
 ALTER TABLE "Names_Id_seq" OWNER TO santa;
 
-
 ALTER SEQUENCE "Names_Id_seq" OWNED BY "Names"."Id";
 
 ALTER TABLE ONLY "Names" ALTER COLUMN "Id" SET DEFAULT nextval('"Names_Id_seq"'::regclass);
@@ -95,7 +94,8 @@ CREATE TABLE "Matches" (
     "RequestorName" text,
     "MatchedName" text,
     "RerollAllowed" bool DEFAULT TRUE,
-    "IsAdmin" bool DEFAULT FALSE
+    "IsAdmin" bool DEFAULT FALSE,
+    "Interests" text
 );
 
 ALTER TABLE "Matches" OWNER TO santa;
@@ -108,7 +108,6 @@ CREATE SEQUENCE "Matches_Id_seq"
     CACHE 1;
 
 ALTER TABLE "Matches_Id_seq" OWNER TO santa;
-
 
 ALTER SEQUENCE "Matches_Id_seq" OWNED BY "Matches"."Id";
 
@@ -137,11 +136,18 @@ CREATE SEQUENCE "MatchRestrictions_Id_seq"
 
 ALTER TABLE "MatchRestrictions_Id_seq" OWNER TO santa;
 
-
 ALTER SEQUENCE "MatchRestrictions_Id_seq" OWNED BY "MatchRestrictions"."Id";
 
 ALTER TABLE ONLY "MatchRestrictions" ALTER COLUMN "Id" SET DEFAULT nextval('"MatchRestrictions_Id_seq"'::regclass);
 
 ALTER TABLE ONLY "MatchRestrictions"
     ADD CONSTRAINT "PK_MatchRestrictions" PRIMARY KEY ("Id");
+
     
+-- Create Settings
+CREATE TABLE "Settings" {
+    "Name" text NOT NULL,
+    "Value" text
+};
+
+ALTER TABLE "MatchRestrictions" OWNER TO santa;
