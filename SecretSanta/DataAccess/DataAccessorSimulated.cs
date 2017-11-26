@@ -9,7 +9,8 @@ namespace SecretSanta.DataAccess {
         private static List<Name> _names = new List<Name> {
                 new Name {
                     Id = 1,
-                    RegisteredName = "Tobias Becker"
+                    RegisteredName = "Tobias Becker", 
+                    IsAdmin = true
                 },
                 new Name {
                     Id = 2,
@@ -17,7 +18,8 @@ namespace SecretSanta.DataAccess {
                 },
                 new Name {
                     Id = 3,
-                    RegisteredName = "Michael Marvin"
+                    RegisteredName = "Michael Marvin",
+                    IsAdmin = true
                 },
                 new Name {
                     Id = 4,
@@ -211,6 +213,11 @@ namespace SecretSanta.DataAccess {
                 };
                 _restrictions.Add(restrictReverse);
             }
+        }
+
+        public bool UserIsAdmin(string username)
+        {
+            return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.IsAdmin == true;
         }
     }
 }

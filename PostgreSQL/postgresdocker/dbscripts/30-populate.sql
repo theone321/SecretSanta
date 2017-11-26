@@ -12,9 +12,9 @@ SET row_security = off;
 
 
 -- Add some accounts
-INSERT INTO "Names"  ("RegisteredName") VALUES ('Michael Marvin');
+INSERT INTO "Names"  ("RegisteredName", "IsAdmin") VALUES ('Michael Marvin', TRUE);
+INSERT INTO "Names" ("RegisteredName", "IsAdmin") VALUES ('Tobias Becker', TRUE);
 INSERT INTO "Names" ("RegisteredName") VALUES ('Sarah Marvin-Foley');
-INSERT INTO "Names" ("RegisteredName") VALUES ('Tobias Becker');
 INSERT INTO "Names" ("RegisteredName") VALUES ('Angelia Becker');
 INSERT INTO "Names" ("RegisteredName") VALUES ('Jonathon Minelli');
 INSERT INTO "Names" ("RegisteredName") VALUES ('Sarah Leahman');

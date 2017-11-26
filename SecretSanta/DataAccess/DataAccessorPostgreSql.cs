@@ -107,6 +107,9 @@ namespace SecretSanta.DataAccess {
             }
         }
 
+        public bool UserIsAdmin(string username) {
+            return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.IsAdmin == true;
+        }
 
         private string hashPassword(string password) {
             byte[] bytes = Encoding.UTF8.GetBytes("santaSalt" + password);
@@ -119,5 +122,7 @@ namespace SecretSanta.DataAccess {
 
             return hashedBuilder.ToString();
         }
+
+
     }
 }

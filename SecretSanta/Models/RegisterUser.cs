@@ -8,5 +8,7 @@ namespace SecretSanta.Models {
         public string NameToRegister { get; set; }
         [DataType(DataType.Password)]
         public string ChosenPassword { get; set; }
+        [DataType(DataType.Password)]
+        public string VerifyPassword { get; set; }
     }
 }

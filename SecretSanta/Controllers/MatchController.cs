@@ -57,9 +57,14 @@ namespace SecretSanta.Controllers {
 
         [HttpPost]
         public IActionResult Register(RegisterUser registration) {
+            if (!string.Equals(registration.ChosenPassword, registration.VerifyPassword, StringComparison.Ordinal))
+            {
+                return View("PasswordsNotMatch");
+            }
             if (_dataAccessor.AccountAlreadyRegistered(registration.NameToRegister)) {
                 return View("AlreadyRegistered", registration);
             }
+
             _dataAccessor.RegisterAccount(registration.NameToRegister, registration.ChosenPassword);
             return RedirectToAction("GetMatch", new SecretMatch { Name = registration.NameToRegister, AllowReroll = true });
         }

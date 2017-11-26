@@ -94,7 +94,8 @@ CREATE TABLE "Matches" (
     "Id" int NOT NULL,
     "RequestorName" text,
     "MatchedName" text,
-    "RerollAllowed" bool DEFAULT TRUE
+    "RerollAllowed" bool DEFAULT TRUE,
+    "IsAdmin" bool DEFAULT FALSE
 );
 
 ALTER TABLE "Matches" OWNER TO santa;
