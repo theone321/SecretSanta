@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SecretSanta.DataAccess.Models;
 
 namespace SecretSanta.DataAccess {
     public interface IDataAccessor {

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using SecretSanta.DataAccess;
+using SecretSanta.DataAccess.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SecretSanta.Models {

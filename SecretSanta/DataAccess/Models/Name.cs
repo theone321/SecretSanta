@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SecretSanta.DataAccess {
+namespace SecretSanta.DataAccess.Models {
     public class Name {
         [Key]
         public int Id { get; set; }

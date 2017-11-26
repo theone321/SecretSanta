@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using SecretSanta.DataAccess.Models;
 using System.Threading.Tasks;
 
 namespace SecretSanta.DataAccess

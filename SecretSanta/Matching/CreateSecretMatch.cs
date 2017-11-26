@@ -2,6 +2,7 @@
 using SecretSanta.DependencyWrappers;
 using System.Collections.Generic;
 using System.Linq;
+using SecretSanta.DataAccess.Models;
 
 namespace SecretSanta.Matching {
     public interface ICreateSecretMatch {

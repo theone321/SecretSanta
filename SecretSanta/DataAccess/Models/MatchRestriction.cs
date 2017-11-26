@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SecretSanta.DataAccess {
-    public class Match {
+namespace SecretSanta.DataAccess.Models {
+    public class MatchRestriction {
         [Key]
         public int Id { get; set; }
         public string RequestorName { get; set; }
-        public string MatchedName { get; set; }
-        public bool RerollAllowed { get; set; }
+        public string RestrictedName { get; set; }
     }
 }
