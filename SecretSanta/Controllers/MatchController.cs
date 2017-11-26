@@ -25,11 +25,6 @@ namespace SecretSanta.Controllers {
         public IActionResult CreateMatch(SecretMatch secretMatch) {
             secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name);
 
-            var restrictions = _dataAccessor.GetMatchRestrictions(secretMatch.Name);
-            while (restrictions.Any(r => r.RequestorName == secretMatch.Name && r.RestrictedName == secretMatch.TheirSecretMatch)) {
-                secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name);
-            }
-
             _dataAccessor.CreateMatch(secretMatch.Name, secretMatch.TheirSecretMatch, secretMatch.AllowReroll);
 
             return View("GetMatch", secretMatch);
