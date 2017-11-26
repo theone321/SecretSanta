@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using SecretSanta.DataAccess;
 using SecretSanta.DependencyWrappers;
 using SecretSanta.Matching;
@@ -18,8 +19,20 @@ namespace SecretSanta {
         public void ConfigureServices(IServiceCollection services) {
             services.AddMvc();
             services.AddTransient<ICreateSecretMatch, CreateSecretMatch>();
-            services.AddTransient<IDataAccessor, DataAccessor>();
             services.AddTransient<IRandomWrapper, RandomWrapper>();
+
+            //testing
+            //services.AddTransient<IDataAccessor, DataAccessorSimulated>();
+
+
+            //prod
+            string sqlConnectionString = "User ID=santa;Password=santa;Host=127.0.0.1;Port=5432;Database=santa;Pooling=true;";
+            services.AddDbContext<DomainModelPostgreSqlContext>(
+                options => options.UseNpgsql(sqlConnectionString)
+            );
+
+            services.AddTransient<IDataAccessor, DataAccessorPostgreSql>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

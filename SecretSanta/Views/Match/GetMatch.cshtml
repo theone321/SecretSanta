@@ -11,7 +11,7 @@
             <div class="form-group">
                 @Html.HiddenFor(m => m.Name, "name")
                 @Html.HiddenFor(m => m.AllowReroll, "allowReroll")
-                <input type="submit" value="Create" class="btn btn-default" />
+                <input type="submit" value="Match" class="btn btn-default" />
             </div>
         </form>
         @if (!string.IsNullOrEmpty(Model.TheirSecretMatch)) {
@@ -21,6 +21,7 @@
         }
         @if (Model.AllowReroll) {
             // This doesn't seem to work. Probably doing something wrong here because tired.
+            // I would just resubmit the form for matching and maybe pass the current match through (or get that another way) so they can't get that match again. Or add it to their blacklist
             @Html.ActionLink("Reroll Result", "RerollResult", "Match", Model)
         }
     </div>

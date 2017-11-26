@@ -43,7 +43,7 @@ namespace SecretSanta.Controllers {
 
         [HttpGet]
         public IActionResult Register() {
-            var possibleNames = _dataAccessor.GetAllRegisteredNames();
+            var possibleNames = _dataAccessor.GetAllPossibleNames();
             return View("Register", new RegisterUser { PossibleNames = possibleNames });
         }
 

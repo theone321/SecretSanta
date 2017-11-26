@@ -17,8 +17,8 @@
                 @Html.DropDownListFor(m => m.NameToRegister, new SelectList(Model.PossibleNames, "RegisteredName", "RegisteredName"))
             </div>
             <div class="form-group">
-                @Html.LabelFor(m => m.ChosenPassword)
-                @Html.PasswordFor(m => m.ChosenPassword)
+                <label asp-for="ChosenPassword">Password:</label>
+                <input asp-for="ChosenPassword" />
             </div>
             <div class="form-group">
                 <input type="submit" value="Register" class="btn btn-default" />
