@@ -7,7 +7,7 @@ namespace SecretSanta.DataAccess
 {
     public class DataAccessorSimulated : IDataAccessor
     {
-        public List<Name> GetAllRegisteredNames()
+        public IList<Name> GetAllRegisteredNames()
         {
             return new List<Name> {
                 new Name {
@@ -76,7 +76,7 @@ namespace SecretSanta.DataAccess
             return null;
         }
 
-        public List<MatchRestriction> GetMatchRestrictions(string requestor)
+        public IList<MatchRestriction> GetMatchRestrictions(string requestor)
         {
             //TEMPORARY - in reality would ask database for a list of restrictions.
             //TODO - I would also use numbers and not names, string comparisons are way less safe than int comparisons
@@ -141,7 +141,7 @@ namespace SecretSanta.DataAccess
             //Temporary no-op - would actually insert into table.
         }
 
-        public List<Match> GetAllExistingMatches()
+        public IList<Match> GetAllExistingMatches()
         {
             // TEMPORARY - would get all existing matches from the database instead.
             var matches = new List<Match> {
