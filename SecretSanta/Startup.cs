@@ -18,7 +18,7 @@ namespace SecretSanta {
         public void ConfigureServices(IServiceCollection services) {
             services.AddMvc();
             services.AddTransient<ICreateSecretMatch, CreateSecretMatch>();
-            services.AddTransient<IDataAccessor, DataAccessor>();
+            services.AddTransient<IDataAccessor, DataAccessorSimulated>();
             services.AddTransient<IRandomWrapper, RandomWrapper>();
         }
 
