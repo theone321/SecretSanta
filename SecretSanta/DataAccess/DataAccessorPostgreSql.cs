@@ -18,6 +18,13 @@ namespace SecretSanta.DataAccess {
             return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.HasRegistered == true;
         }
 
+        public void RemoveMatch(string requestor, string matchedName) {
+            var matchToRemove = _context.Matches.First(m => m.RequestorName.Equals(requestor, StringComparison.InvariantCultureIgnoreCase) && m.MatchedName.Equals(matchedName, StringComparison.InvariantCultureIgnoreCase));
+            if (matchToRemove != null) {
+                _context.Matches.Remove(matchToRemove);
+            }
+        }
+
         public void CreateMatch(string requestor, string matchedName, bool allowReroll) {
             Match match = new Match() {
                 RequestorName = requestor,

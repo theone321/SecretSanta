@@ -9,4 +9,8 @@
 <div>
     <hr />
     <p>Your match is <b>@Model.TheirSecretMatch</b>.</p>
+    <br />
+    @if (Model.AllowReroll) {
+        @Html.ActionLink("Reroll Result", "RerollResult", "Match", new { name = Model.Name, matchName = Model.TheirSecretMatch })
+    }
 </div>

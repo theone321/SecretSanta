@@ -6,7 +6,7 @@ using SecretSanta.DataAccess.Models;
 
 namespace SecretSanta.Matching {
     public interface ICreateSecretMatch {
-        string FindRandomMatch(string requestor);
+        string FindRandomMatch(string requestor, string previousMatch = null);
     }
 
     public class CreateSecretMatch : ICreateSecretMatch {
@@ -18,9 +18,12 @@ namespace SecretSanta.Matching {
             _random = randomWrapper;
         }
 
-        public string FindRandomMatch(string requestor) {
+        public string FindRandomMatch(string requestor, string previousMatch = null) {
             var allNames = _dataAccessor.GetAllPossibleNames().ToList();
             allNames.RemoveAll(n => n.RegisteredName == requestor);
+            if (!string.IsNullOrEmpty(previousMatch)) {
+                allNames.RemoveAll(n => n.RegisteredName == previousMatch);
+            }
             var removedNames = new List<Name>();
             var restrictions = _dataAccessor.GetMatchRestrictions(requestor);
             var existingMatches = _dataAccessor.GetAllExistingMatches();

@@ -7,6 +7,7 @@ namespace SecretSanta.DataAccess {
         IList<Match> GetAllExistingMatches();
         IList<MatchRestriction> GetMatchRestrictions(string requestor);
         void CreateMatch(string requestor, string matchedName, bool allowReroll);
+        void RemoveMatch(string requestor, string matchedName);
         void CreateRestriction(string requestor, string restrictee, bool strict, bool makeReverse);
         IList<Name> GetAllPossibleNames();
         IList<Name> GetAllRegisteredNames();

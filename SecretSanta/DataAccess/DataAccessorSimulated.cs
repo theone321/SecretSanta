@@ -150,9 +150,13 @@ namespace SecretSanta.DataAccess {
             return _restrictions.Where(r => string.Equals(r.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase)).ToList();
         }
 
+        public void RemoveMatch(string requestor, string matchedName) {
+            _matches.RemoveAll(m => m.RequestorName.Equals(requestor, StringComparison.InvariantCultureIgnoreCase) && m.MatchedName.Equals(matchedName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         public void CreateMatch(string requestor, string matchedName, bool allowReroll) {
             Match match = new Match() {
-                Id = _matches.Last().Id + 1,
+                Id = _matches.Any() ? _matches.Last().Id + 1 : 1,
                 RequestorName = requestor,
                 MatchedName = matchedName,
                 RerollAllowed = allowReroll
