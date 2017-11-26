@@ -20,7 +20,7 @@ namespace SecretSanta.DataAccess
 
         public bool AccountAlreadyRegistered(string username)
         {
-            return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.HasRegistered == true;
+            return _context.Name.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.HasRegistered == true;
         }
 
         public void CreateMatch(string requestor, string matchedName, bool allowReroll)
@@ -34,9 +34,9 @@ namespace SecretSanta.DataAccess
             throw new NotImplementedException();
         }
 
-        public IList<Name> GetAllRegisteredNames()
+        public IList<Name> GetAllPossibleNames()
         {
-            return _context.Names.Where(n => n.HasRegistered).ToList();
+            return _context.Name.ToList();
         }
 
         public Match GetExistingMatch(string requestor)
@@ -52,7 +52,7 @@ namespace SecretSanta.DataAccess
         public void RegisterAccount(string username, string password)
         {
             //get the account first
-            Name name = _context.Names.FirstOrDefault(n => !n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            Name name = _context.Name.FirstOrDefault(n => !n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
             if (name != null)
             {
                 //SHA256 hash the password
@@ -73,7 +73,7 @@ namespace SecretSanta.DataAccess
 
         public bool VerifyCredentials(string username, string password)
         {
-            string dbPass = _context.Names.FirstOrDefault(n => n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Password;
+            string dbPass = _context.Name.FirstOrDefault(n => n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Password;
             if (!string.IsNullOrEmpty(dbPass))
             {
                 string hashed = hashPassword(password);

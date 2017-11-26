@@ -7,7 +7,7 @@ namespace SecretSanta.DataAccess
 {
     public class DataAccessorSimulated : IDataAccessor
     {
-        public IList<Name> GetAllRegisteredNames()
+        public IList<Name> GetAllPossibleNames()
         {
             return new List<Name> {
                 new Name {

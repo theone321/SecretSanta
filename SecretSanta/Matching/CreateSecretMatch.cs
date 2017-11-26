@@ -18,7 +18,7 @@ namespace SecretSanta.Matching {
         }
 
         public string FindRandomMatch(string requestor) {
-            var allNames = _dataAccessor.GetAllRegisteredNames().ToList();
+            var allNames = _dataAccessor.GetAllPossibleNames().ToList();
             allNames.RemoveAll(n => n.RegisteredName == requestor);
             var removedNames = new List<Name>();
             var restrictions = _dataAccessor.GetMatchRestrictions(requestor);

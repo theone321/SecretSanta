@@ -22,17 +22,16 @@ namespace SecretSanta {
             services.AddTransient<IRandomWrapper, RandomWrapper>();
 
             //testing
-            services.AddTransient<IDataAccessor, DataAccessorSimulated>();
+            //services.AddTransient<IDataAccessor, DataAccessorSimulated>();
 
 
             //prod
-            //string sqlConnectionString = null;
-            //services.AddDbContext<DomainModelPostgreSqlContext>(
-            //    options => options.UseNpgsql(sqlConnectionString)
-            //);
+            string sqlConnectionString = "User ID=santa;Password=santa;Host=127.0.0.1;Port=5432;Database=santa;Pooling=true;";
+            services.AddDbContext<DomainModelPostgreSqlContext>(
+                options => options.UseNpgsql(sqlConnectionString)
+            );
 
-
-            //services.AddTransient<IDataAccessor, DataAccessorPostgreSql>();
+            services.AddTransient<IDataAccessor, DataAccessorPostgreSql>();
 
         }
 
