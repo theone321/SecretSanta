@@ -151,3 +151,10 @@ CREATE TABLE "Settings" {
 };
 
 ALTER TABLE "MatchRestrictions" OWNER TO santa;
+
+-- Create Sessions
+CREATE TABLE "Sessions" {
+    "SessionId" text NOT NULL,
+    "User" text NOT NULL,
+    "TimeStamp" datetime NOT NULL
+}

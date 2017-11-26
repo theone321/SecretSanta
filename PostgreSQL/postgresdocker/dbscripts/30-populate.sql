@@ -75,3 +75,4 @@ INSERT INTO "MatchRestrictions" ("RequestorName", "RestrictedName")
 -- Settings
 INSERT INTO "Settings" VALUES ('AllowRegistration', 'true');
 INSERT INTO "Settings" VALUES ('AllowMatching', 'false');
+INSERT INTO "Settings" VALUES ('SessionTimeout', '15');

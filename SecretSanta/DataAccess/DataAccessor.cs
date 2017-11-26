@@ -20,5 +20,9 @@ namespace SecretSanta.DataAccess {
         string GetSettingValue(string setting);
         void SetSettingValue(string setting, string value);
         IList<Setting> GetAllSettings();
+        ISession GetSession(string username, string password);
+        ISession GetSessionData(string sessionId);
+        bool VerifySession(string username, string sessionId);
+        void EndSession(string sessionId);
     }
 }

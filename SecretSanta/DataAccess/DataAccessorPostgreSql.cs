@@ -111,6 +111,101 @@ namespace SecretSanta.DataAccess {
             return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.IsAdmin == true;
         }
 
+        public string GetSettingValue(string setting) {
+            return _context.Settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal))?.Value;
+        }
+
+        public void SetSettingValue(string setting, string value) {
+            Setting settingObj = _context.Settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal));
+            if (settingObj != null) {
+                settingObj.Value = value;
+
+                _context.SaveChanges();
+            }
+        }
+
+        public IList<Setting> GetAllSettings() {
+            return _context.Settings.ToList();
+        }
+
+        public string GetUserInterests(string username) {
+            return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Interests;
+        }
+
+        public void SetUserInterests(string username, string interests) {
+            Name name = _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            if (name != null) {
+                name.Interests = interests;
+                _context.SaveChanges();
+            }
+        }
+
+        public ISession GetSession(string username, string password) {
+            if (VerifyCredentials(username, password)) {
+                //kill all previous sessions for this user
+                var toRemove = _context.Sessions.Where(s => string.Equals(s.User, username, StringComparison.InvariantCultureIgnoreCase));
+                if (toRemove.Any()) {
+                    _context.Sessions.RemoveRange(toRemove);
+                }
+                Session session = new Session(username);
+                _context.Sessions.Add(session);
+                _context.SaveChanges();
+                return session;
+            }
+            return null;
+        }
+
+        public bool VerifySession(string username, string sessionId) {
+            bool verified = false;
+            Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.User, username, StringComparison.InvariantCultureIgnoreCase) && string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+            if (session != null) {
+                //check the timestamp, if less than the timeout then good
+                DateTime rightNow = DateTime.UtcNow;
+
+                int.TryParse(GetSettingValue("SessionTimeout"), out int timeout);
+
+                if ((rightNow - session.TimeStamp) < TimeSpan.FromMinutes(timeout)) {
+                    session.TimeStamp = DateTime.UtcNow;
+                    verified = true;
+                }
+                else {
+                    _context.Sessions.Remove(session);
+                }
+                _context.SaveChanges();
+            }
+            return verified;
+        }
+
+        public ISession GetSessionData(string sessionId) {
+            Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+            if (session != null) {
+                //check the timestamp, if less than the timeout then good
+                DateTime rightNow = DateTime.UtcNow;
+
+                int.TryParse(GetSettingValue("SessionTimeout"), out int timeout);
+
+                if ((rightNow - session.TimeStamp) < TimeSpan.FromMinutes(timeout)) {
+                    session.TimeStamp = DateTime.UtcNow;
+                }
+                else {
+                    _context.Sessions.Remove(session);
+                    session = null;
+                }
+                _context.SaveChanges();
+                return session;
+            }
+            return null;
+        }
+
+        public void EndSession(string sessionId) {
+            Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+            if (session != null)
+            {
+                _context.Sessions.Remove(session);
+                _context.SaveChanges();
+            }
+        }
+
         private string hashPassword(string password) {
             byte[] bytes = Encoding.UTF8.GetBytes("santaSalt" + password);
             byte[] hashedBytes = SHA256.Create().ComputeHash(bytes);
@@ -123,40 +218,6 @@ namespace SecretSanta.DataAccess {
             return hashedBuilder.ToString();
         }
 
-        public string GetSettingValue(string setting)
-        {
-            return _context.Settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal))?.Value;
-        }
 
-        public void SetSettingValue(string setting, string value)
-        {
-            Setting settingObj = _context.Settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal));
-            if (settingObj != null)
-            {
-                settingObj.Value = value;
-
-                _context.SaveChanges();
-            }
-        }
-
-        public IList<Setting> GetAllSettings()
-        {
-            return _context.Settings.ToList();
-        }
-
-        public string GetUserInterests(string username)
-        {
-            return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Interests;
-        }
-
-        public void SetUserInterests(string username, string interests)
-        {
-            Name name = _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null)
-            {
-                name.Interests = interests;
-                _context.SaveChanges();
-            }
-        }
     }
 }

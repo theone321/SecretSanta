@@ -8,6 +8,7 @@
 <p>By registering, you are agreeing that others can get you as their secret match.</p>
 <p>If you do not want to be included in the Secret Santa gift exchange, do not register.</p>
 
+@if (Model.AllowRegister) {
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -42,6 +43,10 @@
         </form>
     </div>
 </div>
+}
+else {
+    <h2>Registration is currently closed, sorry!</h2>
+}
 
 @*<div>
     <a asp-action="Index">Back to List</a>

@@ -13,6 +13,8 @@ namespace SecretSanta.DataAccess {
 
         public DbSet<Setting> Settings { get; set; }
 
+        public DbSet<Session> Sessions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             modelBuilder.Entity<Name>().HasKey(m => m.Id); //I think this makes it only save if the id was assigned?
             modelBuilder.Entity<Match>().HasKey(m => m.Id);

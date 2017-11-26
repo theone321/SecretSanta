@@ -10,5 +10,7 @@ namespace SecretSanta.Models {
         public string ChosenPassword { get; set; }
         [DataType(DataType.Password)]
         public string VerifyPassword { get; set; }
+
+        public bool AllowRegister { get; set; }
     }
 }

@@ -1,0 +1,16 @@
+﻿@model SecretSanta.Models.AdminOptions
+@{
+    ViewData["Title"] = "Admin";
+}
+
+<h2>Welcome to the Admin Page, @Model.User</h2>
+
+<form asp-action="UpdateSettings">
+    <label asp-for="AllowRegistration">Allow Registration</label>
+    <input asp-for="AllowRegistration" />
+    <br />
+    <label asp-for="AllowMatching">Allow Matching</label>
+    <input asp-for="AllowMatching" />
+    <br />
+    <input type="submit"/>
+</form>

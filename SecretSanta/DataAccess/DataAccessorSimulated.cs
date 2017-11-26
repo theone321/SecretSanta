@@ -157,7 +157,13 @@ namespace SecretSanta.DataAccess {
                 Name = "AllowMatching",
                 Value = "false"
             },
+            new Setting() {
+                Name = "SessionTimeout",
+                Value = "15" //minutes
+            }
         };
+
+        private static List<Session> _sessions = new List<Session>();
 
         public IList<Name> GetAllPossibleNames() {
             return _names;
@@ -238,42 +244,87 @@ namespace SecretSanta.DataAccess {
             }
         }
 
-        public bool UserIsAdmin(string username)
-        {
+        public bool UserIsAdmin(string username) {
             return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.IsAdmin == true;
         }
 
-        public string GetSettingValue(string setting)
-        {
+        public string GetSettingValue(string setting) {
             return _settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal))?.Value;
         }
 
-        public void SetSettingValue(string setting, string value)
-        {
+        public void SetSettingValue(string setting, string value) {
             Setting settingObj =_settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal));
-            if (settingObj != null)
-            {
+            if (settingObj != null) {
                 settingObj.Value = value;
             }
         }
 
-        public IList<Setting> GetAllSettings()
-        {
+        public IList<Setting> GetAllSettings() {
             return _settings;
         }
 
-        public string GetUserInterests(string username)
-        {
+        public string GetUserInterests(string username) {
             return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Interests;
         }
 
-        public void SetUserInterests(string username, string interests)
-        {
+        public void SetUserInterests(string username, string interests) {
             Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null)
-            {
+            if (name != null) {
                 name.Interests = interests;
             }
+        }
+
+        public ISession GetSession(string username, string password) {
+            if (VerifyCredentials(username, password)) {
+                //kill all previous sessions for this user
+                _sessions.RemoveAll(s => string.Equals(s.User, username, StringComparison.InvariantCultureIgnoreCase));
+                Session session = new Session(username);
+                _sessions.Add(session);
+                return session;
+            }
+            return null;
+        }
+
+        public bool VerifySession(string username, string sessionId) {
+            Session session = _sessions.FirstOrDefault(s => string.Equals(s.User, username, StringComparison.InvariantCultureIgnoreCase) && string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+            if (session != null) {
+                //check the timestamp, if less than the timeout then good
+                DateTime rightNow = DateTime.UtcNow;
+
+                int.TryParse(GetSettingValue("SessionTimeout"), out int timeout);
+
+                if ((rightNow - session.TimeStamp) < TimeSpan.FromMinutes(timeout)) {
+                    session.TimeStamp = DateTime.UtcNow;
+                    return true;
+                }
+                else {
+                    _sessions.Remove(session);
+                }
+            }
+            return false;
+        }
+
+        public ISession GetSessionData(string sessionId) {
+            Session session = _sessions.FirstOrDefault(s => string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+            if (session != null) {
+                //check the timestamp, if less than the timeout then good
+                DateTime rightNow = DateTime.UtcNow;
+
+                int.TryParse(GetSettingValue("SessionTimeout"), out int timeout);
+
+                if ((rightNow - session.TimeStamp) < TimeSpan.FromMinutes(timeout)) {
+                    session.TimeStamp = DateTime.UtcNow;
+                    return session;
+                }
+                else {
+                    _sessions.Remove(session);
+                }
+            }
+            return null;
+        }
+
+        public void EndSession(string sessionId) {
+            _sessions.RemoveAll(s => string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
