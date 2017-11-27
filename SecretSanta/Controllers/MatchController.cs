@@ -132,6 +132,9 @@ namespace SecretSanta.Controllers {
             catch (InvalidCredentialsException) {
                 return View("InvalidCredentials");
             }
+            catch (UnregisteredUserException) {
+                return View("InvalidCredentials");
+            }
             catch (Exception) {
                 return View("Error");
             }
@@ -157,6 +160,9 @@ namespace SecretSanta.Controllers {
                 
             }
             catch (InvalidCredentialsException) {
+                return View("InvalidCredentials");
+            }
+            catch (UnregisteredUserException) {
                 return View("InvalidCredentials");
             }
             catch (Exception) {
