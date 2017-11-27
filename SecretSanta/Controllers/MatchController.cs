@@ -110,21 +110,31 @@ namespace SecretSanta.Controllers {
         }
 
         [HttpGet]
-        public IActionResult SignIn() {
-            if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId))
-            {
-                _session = _dataAccessor.GetSessionData(sessionId);
-                if (_session == null) {
-                    throw new InvalidCredentialsException();
-                }
+        public IActionResult SignIn()
+        {
+            try {
+                if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
+                    _session = _dataAccessor.GetSessionData(sessionId);
+                    if (_session == null) {
+                        //remove the associated cookie
+                        Response.Cookies.Delete("sessionId");
+                        throw new InvalidCredentialsException();
+                    }
 
-                SecretMatch secretMatch = buildSecretMatchFromDB(_session.User);
-                if (string.IsNullOrEmpty(secretMatch.TheirSecretMatch)) {
-                    return RedirectToAction("GetMatch");
+                    SecretMatch secretMatch = buildSecretMatchFromDB(_session.User);
+                    if (string.IsNullOrEmpty(secretMatch.TheirSecretMatch)) {
+                        return RedirectToAction("GetMatch");
+                    }
+                    return View("GetMatch", secretMatch);
                 }
-                return View("ExistingMatch", secretMatch);
+                return View("SignIn", new AuthenticatedUser());
             }
-            return View("SignIn", new AuthenticatedUser());
+            catch (InvalidCredentialsException) {
+                return View("InvalidCredentials");
+            }
+            catch (Exception) {
+                return View("Error");
+            }
         }
 
         [HttpPost]
@@ -143,7 +153,7 @@ namespace SecretSanta.Controllers {
                 if (string.IsNullOrEmpty(secretMatch.TheirSecretMatch)) {
                     return RedirectToAction("GetMatch");
                 }
-                return View("ExistingMatch", secretMatch);
+                return View("GetMatch", secretMatch);
                 
             }
             catch (InvalidCredentialsException) {
@@ -163,7 +173,7 @@ namespace SecretSanta.Controllers {
             _dataAccessor.SetUserInterests(match.Name, match.Interests);
             if (!string.IsNullOrEmpty(match.TheirSecretMatch)) {
                 match = buildSecretMatchFromDB(match.Name);
-                return View("ExistingMatch", match);
+                return View("GetMatch", match);
             }
             return RedirectToAction("GetMatch");
         }

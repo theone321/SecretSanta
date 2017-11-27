@@ -1,0 +1,38 @@
+version: '2'
+ 
+services:
+    santadocker:
+        image: santadocker
+        restart: always
+        build:
+            context: ./santadocker/
+            dockerfile: Dockerfile
+        ports:
+            - 8081:80
+        links:
+            - santapostgres
+        depends_on:
+            - "santapostgres"
+        networks:
+            - mynetwork
+    santapostgres:
+        image: santapostgres
+        restart: always
+        build:
+            context: ./postgresdocker/
+            dockerfile: Dockerfile
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_PASSWORD: santa
+        networks:
+            - mynetwork
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+ 
+#volumes:
+#  pgdata:
+
+networks:
+    mynetwork:
+        driver: bridge
