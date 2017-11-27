@@ -66,7 +66,9 @@ CREATE TABLE "Names" (
     "Id" int NOT NULL,
     "RegisteredName" text,
     "Password" text,
-    "HasRegistered" bool DEFAULT FALSE
+    "HasRegistered" bool DEFAULT FALSE,
+    "IsAdmin" bool DEFAULT FALSE,
+    "Interests" text
 );
 
 ALTER TABLE "Names" OWNER TO santa;
@@ -93,9 +95,7 @@ CREATE TABLE "Matches" (
     "Id" int NOT NULL,
     "RequestorName" text,
     "MatchedName" text,
-    "RerollAllowed" bool DEFAULT TRUE,
-    "IsAdmin" bool DEFAULT FALSE,
-    "Interests" text
+    "RerollAllowed" bool DEFAULT TRUE
 );
 
 ALTER TABLE "Matches" OWNER TO santa;
@@ -145,16 +145,16 @@ ALTER TABLE ONLY "MatchRestrictions"
 
     
 -- Create Settings
-CREATE TABLE "Settings" {
+CREATE TABLE "Settings" (
     "Name" text NOT NULL,
     "Value" text
-};
+);
 
 ALTER TABLE "MatchRestrictions" OWNER TO santa;
 
 -- Create Sessions
-CREATE TABLE "Sessions" {
+CREATE TABLE "Sessions" (
     "SessionId" text NOT NULL,
     "User" text NOT NULL,
-    "TimeStamp" datetime NOT NULL
-}
+    "TimeStamp" timestamp NOT NULL
+);

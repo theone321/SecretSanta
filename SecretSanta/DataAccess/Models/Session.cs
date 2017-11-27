@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SecretSanta.DataAccess.Models {
     public interface ISession {
@@ -10,14 +7,16 @@ namespace SecretSanta.DataAccess.Models {
         string User { get; set; }
         DateTime TimeStamp { get; set; }
     }
-    public class Session : ISession
-    {
+    public class Session : ISession {
+        protected Session() { }
+
         public Session(string user) {
             User = user;
             SessionId = Guid.NewGuid().ToString();
             TimeStamp = DateTime.UtcNow;
         }
 
+        [Key]
         public string SessionId { get; set; }
         public string User { get; set; }
         public DateTime TimeStamp { get; set; }

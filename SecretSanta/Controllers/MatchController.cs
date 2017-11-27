@@ -13,6 +13,7 @@ namespace SecretSanta.Controllers {
     public class MatchController : Controller {
         private IDataAccessor _dataAccessor;
         private ICreateSecretMatch _createSecretMatch;
+        private DataAccess.Models.ISession _session;
 
         public MatchController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch) {
             _dataAccessor = dataAccessor;
@@ -20,56 +21,44 @@ namespace SecretSanta.Controllers {
         }
 
         [HttpGet]
-        public IActionResult GetMatch(SecretMatch secretMatch) {
+        public IActionResult GetMatch() {
             //verify access
-            if (!verifySessionCookie(secretMatch.Name))
-            {
+            if (!verifySessionCookie()) {
                 return View("InvalidCredentials");
             }
-
-            secretMatch.Interests = _dataAccessor.GetUserInterests(secretMatch.Name);
-            if (!string.IsNullOrEmpty(secretMatch.TheirSecretMatch))
-            {
-                secretMatch.MatchInterests = _dataAccessor.GetUserInterests(secretMatch.TheirSecretMatch);
-            }
-            bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatch);
-            secretMatch.AllowMatching = allowMatch;
-            secretMatch.UserIsAdmin = _dataAccessor.UserIsAdmin(secretMatch.Name);
+            SecretMatch secretMatch = buildSecretMatchFromDB(_session.User);
             return View("GetMatch", secretMatch);
         }
         
         public IActionResult CreateMatch(SecretMatch secretMatch) {
             //verify access
-            if (!verifySessionCookie(secretMatch.Name))
-            {
+            if (!verifySessionCookie()) {
                 return View("InvalidCredentials");
             }
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatch);
             secretMatch.AllowMatching = allowMatch;
-            if (string.IsNullOrEmpty(secretMatch?.Name) || !secretMatch.AllowMatching)
-            { //How? Why? Just start over
+            if (string.IsNullOrEmpty(secretMatch?.Name) || !secretMatch.AllowMatching) {
+                //How? Why? Just start over
                 return RedirectToAction("SignIn");
             }
-            secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name);
 
+            secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name);
             _dataAccessor.CreateMatch(secretMatch.Name, secretMatch.TheirSecretMatch, secretMatch.AllowReroll);
 
-            secretMatch.Interests = _dataAccessor.GetUserInterests(secretMatch.Name);
-            secretMatch.MatchInterests = _dataAccessor.GetUserInterests(secretMatch.TheirSecretMatch);
+            secretMatch = buildSecretMatchFromDB(secretMatch.Name);
 
             return View("GetMatch", secretMatch);
         }
 
         public IActionResult RerollResult(SecretMatch secretMatch) {
             //verify access
-            if (!verifySessionCookie(secretMatch.Name))
-            {
+            if (!verifySessionCookie()) {
                 return View("InvalidCredentials");
             }
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatch);
             secretMatch.AllowMatching = allowMatch;
-            if (string.IsNullOrEmpty(secretMatch?.Name) || !secretMatch.AllowMatching)
-            { //How? Why? Just start over
+            if (string.IsNullOrEmpty(secretMatch?.Name) || !secretMatch.AllowMatching) { 
+                //How? Why? Just start over
                 return RedirectToAction("SignIn");
             }
 
@@ -95,13 +84,11 @@ namespace SecretSanta.Controllers {
         [HttpPost]
         public IActionResult Register(RegisterUser registration) {
             bool.TryParse(_dataAccessor.GetSettingValue("AllowRegistration"), out bool allowRegister);
-            if (!allowRegister)
-            {
+            if (!allowRegister) {
                 return View("SignIn", new AuthenticatedUser());
             }
 
-            if (!string.Equals(registration.ChosenPassword, registration.VerifyPassword, StringComparison.Ordinal))
-            {
+            if (!string.Equals(registration.ChosenPassword, registration.VerifyPassword, StringComparison.Ordinal)) {
                 return View("PasswordsNotMatch");
             }
             if (_dataAccessor.AccountAlreadyRegistered(registration.NameToRegister)) {
@@ -119,24 +106,23 @@ namespace SecretSanta.Controllers {
             //store the cookie
             Response.Cookies.Append("sessionId", session.SessionId);
 
-            return RedirectToAction("GetMatch", new SecretMatch { Name = registration.NameToRegister, AllowReroll = true });
+            return RedirectToAction("GetMatch");
         }
 
         [HttpGet]
         public IActionResult SignIn() {
             if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId))
             {
-                DataAccess.Models.ISession session = _dataAccessor.GetSessionData(sessionId);
-
-                Match existingMatch = _dataAccessor.GetExistingMatch(session.User);
-                if (existingMatch == null)
-                {
-                    return RedirectToAction("GetMatch", new SecretMatch { Name = session.User, AllowReroll = true });
+                _session = _dataAccessor.GetSessionData(sessionId);
+                if (_session == null) {
+                    throw new InvalidCredentialsException();
                 }
-                string myInterests = _dataAccessor.GetUserInterests(session.User);
-                string theirInterests = _dataAccessor.GetUserInterests(existingMatch.MatchedName);
 
-                return View("ExistingMatch", new SecretMatch { Name = session.User, AllowReroll = existingMatch.RerollAllowed, TheirSecretMatch = existingMatch.MatchedName, Interests = myInterests, MatchInterests = theirInterests });
+                SecretMatch secretMatch = buildSecretMatchFromDB(_session.User);
+                if (string.IsNullOrEmpty(secretMatch.TheirSecretMatch)) {
+                    return RedirectToAction("GetMatch");
+                }
+                return View("ExistingMatch", secretMatch);
             }
             return View("SignIn", new AuthenticatedUser());
         }
@@ -145,22 +131,20 @@ namespace SecretSanta.Controllers {
         public IActionResult SignIn(AuthenticatedUser authUser) {
             try {
                 //get a new session for this user
-                DataAccess.Models.ISession session = _dataAccessor.GetSession(authUser.Username, authUser.Password);
-                if (session == null) {
+                _session = _dataAccessor.GetSession(authUser.Username, authUser.Password);
+                if (_session == null) {
                     throw new InvalidCredentialsException();
                 }
 
                 //store the cookie
-                Response.Cookies.Append("sessionId", session.SessionId);
+                Response.Cookies.Append("sessionId", _session.SessionId);
 
-                Match existingMatch = _dataAccessor.GetExistingMatch(authUser.Username);
-                if (existingMatch == null) {
-                    return RedirectToAction("GetMatch", new SecretMatch { Name = authUser.Username, AllowReroll = true });
+                SecretMatch secretMatch = buildSecretMatchFromDB(authUser.Username);
+                if (string.IsNullOrEmpty(secretMatch.TheirSecretMatch)) {
+                    return RedirectToAction("GetMatch");
                 }
-                string myInterests = _dataAccessor.GetUserInterests(authUser.Username);
-                string theirInterests = _dataAccessor.GetUserInterests(existingMatch.MatchedName);
-
-                return View("ExistingMatch", new SecretMatch { Name = authUser.Username, AllowReroll = existingMatch.RerollAllowed, TheirSecretMatch = existingMatch.MatchedName, Interests = myInterests, MatchInterests = theirInterests });
+                return View("ExistingMatch", secretMatch);
+                
             }
             catch (InvalidCredentialsException) {
                 return View("InvalidCredentials");
@@ -173,21 +157,21 @@ namespace SecretSanta.Controllers {
         [HttpPost]
         public IActionResult UpdateInterests(SecretMatch match) {
             //verify access
-            if (!verifySessionCookie(match.Name)) {
+            if (!verifySessionCookie()) {
                 return View("InvalidCredentials");
             }
             _dataAccessor.SetUserInterests(match.Name, match.Interests);
             if (!string.IsNullOrEmpty(match.TheirSecretMatch)) {
+                match = buildSecretMatchFromDB(match.Name);
                 return View("ExistingMatch", match);
             }
-            return RedirectToAction("GetMatch", match);
+            return RedirectToAction("GetMatch");
         }
 
         [HttpGet]
         public IActionResult LogOut()
         {
-            if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId))
-            {
+            if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
                 _dataAccessor.EndSession(sessionId);
                 HttpContext.Response.Cookies.Delete("sessionId");
             }
@@ -199,11 +183,40 @@ namespace SecretSanta.Controllers {
             return RedirectToAction("Index", "Admin");
         }
 
-        private bool verifySessionCookie(string user) {
+        private bool verifySessionCookie() {
             if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
-                return _dataAccessor.VerifySession(user, sessionId);
+
+                _session = _dataAccessor.GetSessionData(sessionId);
+                return (_session != null) ;
             }
             return false;
+        }
+
+        private SecretMatch buildSecretMatchFromDB(string username)
+        {
+            Match existingMatch = _dataAccessor.GetExistingMatch(username);
+            string myInterests = _dataAccessor.GetUserInterests(username);
+            string theirInterests = null;
+            bool allowReroll = true;
+            string theirMatch = null;
+            if (existingMatch != null) {
+                theirMatch = existingMatch.MatchedName;
+                theirInterests = _dataAccessor.GetUserInterests(theirMatch);
+                allowReroll = existingMatch.RerollAllowed;
+            }
+            
+            bool isAdmin = _dataAccessor.UserIsAdmin(username);
+            bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatch);
+
+            return new SecretMatch() {
+                Name = username,
+                AllowReroll = allowReroll,
+                TheirSecretMatch = theirMatch,
+                Interests = myInterests,
+                MatchInterests = theirInterests,
+                UserIsAdmin = isAdmin,
+                AllowMatching = allowMatch
+            };
         }
     }
 }

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace SecretSanta.DataAccess.Models
-{
-    public class Setting
-    {
+namespace SecretSanta.DataAccess.Models {
+    public class Setting {
+        [Key]
         public string Name { get; set; }
         public string Value { get; set; }
     }

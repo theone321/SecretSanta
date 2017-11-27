@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SecretSanta.DataAccess.Models;
 using System;
+using SecretSanta.Exceptions;
 
 namespace SecretSanta.Matching {
     public interface ICreateSecretMatch {
@@ -36,33 +37,39 @@ namespace SecretSanta.Matching {
                 }
             }
             var finalNames = allNames.Except(removedNames).ToList();
-            if (!finalNames.Any()) //allow non-strict restrictions through if there is no match
-            {
+            //allow non-strict restrictions through if there is no match
+            if (!finalNames.Any()) {
                 removedNames.Clear();
-                foreach (var name in allNames)
-                {
-                    if (restrictions?.Any(r => r.StrictRestriction && string.Equals(r.RestrictedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase)) == true)
-                    {
+                foreach (var name in allNames) {
+                    if (restrictions?.Any(r => r.StrictRestriction && string.Equals(r.RestrictedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase)) == true) {
                         removedNames.Add(name);
                         continue;
                     }
                     //Remove any names that have already been matched to someone else.
-                    if (existingMatches?.Any(m => m.MatchedName == name.RegisteredName) == true)
-                    {
+                    if (existingMatches?.Any(m => m.MatchedName == name.RegisteredName) == true) {
+                        removedNames.Add(name);
+                    }
+                }
+                finalNames = allNames.Except(removedNames).ToList();
+            }
+            //allow even strict restrictions through if there is no match, this is a last resort
+            if (!finalNames.Any()) {
+                removedNames.Clear();
+                foreach (var name in allNames) {
+                    //Remove any names that have already been matched to someone else.
+                    if (existingMatches?.Any(m => m.MatchedName == name.RegisteredName) == true) {
                         removedNames.Add(name);
                     }
                 }
                 finalNames = allNames.Except(removedNames).ToList();
             }
 
-            if (finalNames.Any())
-            {
+            if (finalNames.Any()) {
                 var randomNumber = _random.Next(finalNames.Count);
                 return finalNames[randomNumber].RegisteredName;
             }
-            else
-            {
-                throw new Exception("No matches available.");
+            else {
+                throw new NoAvailableMatchesException();
             }
         }
     }

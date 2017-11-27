@@ -22,6 +22,7 @@ namespace SecretSanta.DataAccess {
             var matchToRemove = _context.Matches.First(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase) && string.Equals(m.MatchedName, matchedName, StringComparison.InvariantCultureIgnoreCase));
             if (matchToRemove != null) {
                 _context.Matches.Remove(matchToRemove);
+                _context.SaveChanges();
             }
         }
 
