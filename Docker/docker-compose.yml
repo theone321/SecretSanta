@@ -27,11 +27,11 @@ services:
             POSTGRES_PASSWORD: santa
         networks:
             - mynetwork
-#     volumes:
-#       - pgdata:/var/lib/postgresql/data
+        volumes:
+            - pgdata:/var/lib/postgresql/data
  
-#volumes:
-#  pgdata:
+volumes:
+    pgdata:
 
 networks:
     mynetwork:
