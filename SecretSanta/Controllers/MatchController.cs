@@ -21,6 +21,12 @@ namespace SecretSanta.Controllers {
         }
 
         [HttpGet]
+        public IActionResult Index() {
+            List<string> registered = _dataAccessor.GetAllRegisteredNames().Select(n => n.RegisteredName).ToList();
+            return View("Index", new IndexModel() { RegisteredNames = registered });
+        }
+
+        [HttpGet]
         public IActionResult GetMatch() {
             //verify access
             if (!verifySessionCookie()) {

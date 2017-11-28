@@ -1,0 +1,18 @@
+﻿@model SecretSanta.Models.IndexModel
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Who's Registered?</h2>
+
+
+<ul>
+    @for (int i = 0; i < Model.RegisteredNames.Count; i++)
+    {
+        string name = Model.RegisteredNames[i];
+
+        <li style="font-size:larger">
+            @name
+        </li>
+    }
+</ul>
