@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SecretSanta.Models
-{
-    public class IndexModel
-    {
+namespace SecretSanta.Models {
+    public class IndexModel {
         public List<string> RegisteredNames { get; set; }
         public int MatchCounts { get; set; }
     }

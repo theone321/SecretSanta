@@ -117,8 +117,7 @@ namespace SecretSanta.Controllers {
         }
 
         [HttpGet]
-        public IActionResult SignIn()
-        {
+        public IActionResult SignIn() {
             try {
                 if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
                     _session = _dataAccessor.GetSessionData(sessionId);
@@ -192,8 +191,7 @@ namespace SecretSanta.Controllers {
         }
 
         [HttpGet]
-        public IActionResult LogOut()
-        {
+        public IActionResult LogOut() {
             if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
                 _dataAccessor.EndSession(sessionId);
                 HttpContext.Response.Cookies.Delete("sessionId");
@@ -233,8 +231,7 @@ namespace SecretSanta.Controllers {
             return false;
         }
 
-        private UserPageModel buildUserPageModelFromDB(string username)
-        {
+        private UserPageModel buildUserPageModelFromDB(string username) {
             Match existingMatch = _dataAccessor.GetExistingMatch(username);
             string myInterests = _dataAccessor.GetUserInterests(username);
             string theirInterests = null;

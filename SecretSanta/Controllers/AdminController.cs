@@ -8,10 +8,8 @@ using SecretSanta.Matching;
 using SecretSanta.Models;
 using SecretSanta.DataAccess.Models;
 
-namespace SecretSanta.Controllers
-{
-    public class AdminController : Controller
-    {
+namespace SecretSanta.Controllers {
+    public class AdminController : Controller {
         private IDataAccessor _dataAccessor;
         private ICreateSecretMatch _createSecretMatch;
         private ISession _session;
@@ -76,8 +74,7 @@ namespace SecretSanta.Controllers
 
         [HttpPost]
         public IActionResult DeRegisterUser(string username) {
-            if (!verifyAccess())
-            {
+            if (!verifyAccess()) {
                 return RedirectToAction("SignIn", "Match");
             }
             _dataAccessor.DeRegisterAccount(username);

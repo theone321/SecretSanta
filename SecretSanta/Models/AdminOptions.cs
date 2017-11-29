@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SecretSanta.Models
-{
+namespace SecretSanta.Models {
     public class AdminModel {
         public string User { get; set; }
 

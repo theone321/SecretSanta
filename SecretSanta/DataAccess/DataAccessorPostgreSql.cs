@@ -95,11 +95,9 @@ namespace SecretSanta.DataAccess {
             }
         }
 
-        public void DeRegisterAccount(string username)
-        {
+        public void DeRegisterAccount(string username) {
             Name name = _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null)
-            {
+            if (name != null) {
                 //remove registration and all matches where they are the requester and the matched
                 name.HasRegistered = false;
                 var matches = _context.Matches.Where(m => string.Equals(m.RequestorName, username, StringComparison.InvariantCultureIgnoreCase) || string.Equals(m.MatchedName, username, StringComparison.InvariantCultureIgnoreCase));
@@ -113,7 +111,8 @@ namespace SecretSanta.DataAccess {
         public void UpdateUserPassword(string username, string newPassword) {
             Name name = _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
             if (name != null) {
-                name.Password = newPassword;
+                string hashed = hashPassword(newPassword);
+                name.Password = hashed;
                 _context.SaveChanges();
             }
         }
@@ -222,8 +221,7 @@ namespace SecretSanta.DataAccess {
 
         public void EndSession(string sessionId) {
             Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
-            if (session != null)
-            {
+            if (session != null) {
                 _context.Sessions.Remove(session);
                 _context.SaveChanges();
             }
