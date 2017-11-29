@@ -14,6 +14,8 @@ namespace SecretSanta.DataAccess {
         bool AccountAlreadyRegistered(string username);
         bool VerifyCredentials(string username, string password);
         void RegisterAccount(string username, string password);
+        void DeRegisterAccount(string username);
+        void UpdateUserPassword(string username, string newPassword);
         bool UserIsAdmin(string username);
         string GetUserInterests(string username);
         void SetUserInterests(string username, string interests);

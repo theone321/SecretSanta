@@ -1,6 +1,6 @@
-﻿@model SecretSanta.Models.SecretMatch
+﻿@model SecretSanta.Models.UserPageModel
 @{
-    ViewData["Title"] = "Get Match";
+    ViewData["Title"] = Model.Name+"'s Page";
 }
 <h2>@Model.Name's Secret Santa Page</h2>
 <hr />
@@ -73,6 +73,25 @@ else {
         <button class="btn btn-default" onclick="location.href='@Url.Action("OpenAdminPage")'">Go to Admin Page</button>
     </div>
 }
+
+<h4>Change your password:</h4>
+<div>
+    <form asp-action="UpdatePassword">
+        <div>
+            <label asp-for="@Model.PasswordReset.CurrentPassword" style="width:150px">Current Password:</label>
+            <input asp-for="@Model.PasswordReset.CurrentPassword" />
+        </div>
+        <div>
+            <label asp-for="@Model.PasswordReset.NewPassword" style="width:150px">New Password:</label>
+            <input asp-for="@Model.PasswordReset.NewPassword" />
+        </div>
+        <div>
+            <label asp-for="@Model.PasswordReset.VerifyPassword" style="width:150px">Confirm Password:</label>
+            <input asp-for="@Model.PasswordReset.VerifyPassword" />
+        </div>
+        <input type="submit" class="btn btn-default" value="Update Password" />
+    </form>
+</div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

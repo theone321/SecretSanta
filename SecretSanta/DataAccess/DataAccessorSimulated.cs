@@ -11,23 +11,31 @@ namespace SecretSanta.DataAccess {
                     Id = 1,
                     RegisteredName = "Tobias Becker", 
                     IsAdmin = true,
-                    Interests = "a"
+                    Interests = "a",
+                    HasRegistered = true,
+                    Password = "pass"
                 },
                 new Name {
                     Id = 2,
                     RegisteredName = "Angelia Becker",
-                    Interests = "b"
+                    Interests = "b",
+                    HasRegistered = true,
+                    Password = "pass"
                 },
                 new Name {
                     Id = 3,
                     RegisteredName = "Michael Marvin",
                     IsAdmin = true,
-                    Interests = "c"
+                    Interests = "c",
+                    HasRegistered = true,
+                    Password = "pass"
                 },
                 new Name {
                     Id = 4,
                     RegisteredName = "Sarah Marvin-Foley",
-                    Interests = "d"
+                    Interests = "d",
+                    HasRegistered = true,
+                    Password = "pass"
                 },
                 new Name {
                     Id = 5,
@@ -220,6 +228,22 @@ namespace SecretSanta.DataAccess {
             else {
                 //TODO: New Exception
                 throw new Exception("This user is already registered.");
+            }
+        }
+
+        public void DeRegisterAccount(string username) {
+            Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            if (name != null) {
+                //remove registration and all matches where they are the requester and the matched
+                name.HasRegistered = false;
+                _matches.RemoveAll(m => string.Equals(m.RequestorName, username, StringComparison.InvariantCultureIgnoreCase) || string.Equals(m.MatchedName, username, StringComparison.InvariantCultureIgnoreCase));
+            }
+        }
+
+        public void UpdateUserPassword(string username, string newPassword) {
+            Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            if (name != null) {
+                name.Password = newPassword;
             }
         }
 

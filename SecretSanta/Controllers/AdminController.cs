@@ -30,17 +30,31 @@ namespace SecretSanta.Controllers
             bool.TryParse(_dataAccessor.GetSettingValue("AllowRegistration"), out bool allowRegistration);
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatching);
 
-            AdminOptions options = new AdminOptions {
+            List<UserAdminSettings> users = new List<UserAdminSettings>();
+            var names = _dataAccessor.GetAllPossibleNames();
+            var matches = _dataAccessor.GetAllExistingMatches();
+            foreach (Name name in names) {
+                UserAdminSettings user = new UserAdminSettings();
+                user.Name = name.RegisteredName;
+                user.HasRegistered = name.HasRegistered;
+                user.HasMatched = matches.Any(m => string.Equals(m.RequestorName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase));
+                user.IsMatched = matches.Any(m => string.Equals(m.MatchedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase));
+
+                users.Add(user);
+            }
+            
+            AdminModel options = new AdminModel {
                 User = _session.User,
                 AllowRegistration = allowRegistration,
-                AllowMatching = allowMatching
+                AllowMatching = allowMatching,
+                UserList = users.OrderByDescending(u => u.HasRegistered).ToList()
             };
 
             return View(options);
         }
 
         [HttpPost]
-        public IActionResult UpdateSettings(AdminOptions options) {
+        public IActionResult UpdateSettings(AdminModel options) {
             if (!verifyAccess()) {
                 return RedirectToAction("SignIn", "Match");
             }
@@ -48,6 +62,25 @@ namespace SecretSanta.Controllers
             _dataAccessor.SetSettingValue(nameof(options.AllowRegistration), options.AllowRegistration.ToString());
             _dataAccessor.SetSettingValue(nameof(options.AllowMatching), options.AllowMatching.ToString());
 
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult ResetUserPassword(string username) {
+            if (!verifyAccess()) {
+                return RedirectToAction("SignIn", "Match");
+            }
+            _dataAccessor.UpdateUserPassword(username, "password");
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult DeRegisterUser(string username) {
+            if (!verifyAccess())
+            {
+                return RedirectToAction("SignIn", "Match");
+            }
+            _dataAccessor.DeRegisterAccount(username);
             return RedirectToAction("Index");
         }
 

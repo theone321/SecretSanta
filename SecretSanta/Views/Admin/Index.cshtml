@@ -1,4 +1,4 @@
-﻿@model SecretSanta.Models.AdminOptions
+﻿@model SecretSanta.Models.AdminModel
 @{
     ViewData["Title"] = "Admin";
 }
@@ -13,4 +13,38 @@
     <input asp-for="AllowMatching" />
     <br />
     <input type="submit"/>
+</form>
+
+<form method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Has Registered?</th>
+                <th>Has Match?</th>
+                <th>Is a Match?</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i=0; i<Model.UserList.Count; i++)
+            {
+                UserAdminSettings user = Model.UserList[i];
+
+                <tr>
+                    <td>@user.Name</td>
+                    <td>@user.HasRegistered</td>
+                    <td>@user.HasMatched</td>
+                    <td>@user.IsMatched</td>
+                    <td align="justify">
+                        @if (user.HasRegistered) {
+                            <button type="submit" asp-action="ResetUserPassword" asp-route-username="@user.Name">Reset Password</button>
+                        }
+                        @if (user.HasRegistered) {
+                            <button type="submit" asp-action="DeRegisterUser" asp-route-username="@user.Name">De-Register</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </form>

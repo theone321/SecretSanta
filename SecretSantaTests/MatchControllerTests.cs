@@ -54,7 +54,7 @@ namespace SecretSantaTests {
                 }
             };
 
-            var secretMatch = new SecretMatch {
+            var secretMatch = new UserPageModel {
                 AllowReroll = true,
                 Name = "Test Person1",
                 TheirSecretMatch = null
@@ -70,7 +70,7 @@ namespace SecretSantaTests {
             var viewResult = result as ViewResult;
             Assert.NotNull(viewResult);
             Assert.AreEqual("GetMatch", viewResult.ViewName);
-            var model = viewResult.Model as SecretMatch;
+            var model = viewResult.Model as UserPageModel;
             Assert.NotNull(model);
             Assert.AreEqual("Test Person2", model.TheirSecretMatch);
 
@@ -134,7 +134,7 @@ namespace SecretSantaTests {
                 }
             };
 
-            var secretMatch = new SecretMatch {
+            var secretMatch = new UserPageModel {
                 AllowReroll = true,
                 Name = "Test Person1",
                 TheirSecretMatch = "Test Person2"
@@ -201,7 +201,7 @@ namespace SecretSantaTests {
             var viewResult = result as ViewResult;
             Assert.NotNull(viewResult);
             Assert.AreEqual("ExistingMatch", viewResult.ViewName);
-            var model = viewResult.Model as SecretMatch;
+            var model = viewResult.Model as UserPageModel;
             Assert.NotNull(model);
             Assert.AreEqual("Test User", model.Name);
             Assert.AreEqual("Test User1", model.TheirSecretMatch);
