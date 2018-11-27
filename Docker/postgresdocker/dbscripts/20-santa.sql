@@ -60,41 +60,41 @@ SET default_tablespace = '';
 
 SET default_with_oids = false;
 
--- Create Names
+-- Create Users
 
-CREATE TABLE "Names" (
+CREATE TABLE "Users" (
     "Id" int NOT NULL,
+	"UserName" text NOT NULL,
     "RegisteredName" text,
     "Password" text,
-    "HasRegistered" bool DEFAULT FALSE,
     "IsAdmin" bool DEFAULT FALSE,
     "Interests" text
 );
 
-ALTER TABLE "Names" OWNER TO santa;
+ALTER TABLE "Users" OWNER TO santa;
 
-CREATE SEQUENCE "Names_Id_seq"
+CREATE SEQUENCE "Users_Id_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER TABLE "Names_Id_seq" OWNER TO santa;
+ALTER TABLE "Users_Id_seq" OWNER TO santa;
 
-ALTER SEQUENCE "Names_Id_seq" OWNED BY "Names"."Id";
+ALTER SEQUENCE "Users_Id_seq" OWNED BY "Users"."Id";
 
-ALTER TABLE ONLY "Names" ALTER COLUMN "Id" SET DEFAULT nextval('"Names_Id_seq"'::regclass);
+ALTER TABLE ONLY "Users" ALTER COLUMN "Id" SET DEFAULT nextval('"Users_Id_seq"'::regclass);
 
-ALTER TABLE ONLY "Names"
-    ADD CONSTRAINT "PK_Names" PRIMARY KEY ("Id");
+ALTER TABLE ONLY "Users"
+    ADD CONSTRAINT "PK_Users" PRIMARY KEY ("Id");
 
 -- Create Matches
 
 CREATE TABLE "Matches" (
     "Id" int NOT NULL,
-    "RequestorName" text,
-    "MatchedName" text,
+    "RequestorId" int,
+    "MatchedId" int,
     "RerollAllowed" bool DEFAULT TRUE
 );
 
@@ -120,8 +120,8 @@ ALTER TABLE ONLY "Matches"
 -- Create MatchRestrictions
 CREATE TABLE "MatchRestrictions" (
     "Id" int NOT NULL,
-    "RequestorName" text,
-    "RestrictedName" text,
+    "RequestorId" int,
+    "RestrictedId" int,
     "StrictRestriction" bool DEFAULT TRUE
 );
 

@@ -5,7 +5,7 @@ namespace SecretSanta.DataAccess {
     public class DomainModelPostgreSqlContext : DbContext {
         public DomainModelPostgreSqlContext(DbContextOptions<DomainModelPostgreSqlContext> options) : base(options) { }
 
-        public DbSet<Name> Names { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public DbSet<Match> Matches { get; set; }
 
@@ -16,7 +16,7 @@ namespace SecretSanta.DataAccess {
         public DbSet<Session> Sessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            modelBuilder.Entity<Name>().HasKey(m => m.Id); //I think this makes it only save if the id was assigned?
+            modelBuilder.Entity<User>().HasKey(m => m.Id); //I think this makes it only save if the id was assigned?
             modelBuilder.Entity<Match>().HasKey(m => m.Id);
             modelBuilder.Entity<MatchRestriction>().HasKey(m => m.Id);
 

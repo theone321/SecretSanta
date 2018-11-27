@@ -6,75 +6,83 @@ using System;
 
 namespace SecretSanta.DataAccess {
     public class DataAccessorSimulated : IDataAccessor {
-        private static List<Name> _names = new List<Name> {
-                new Name {
+        private static List<User> _users = new List<User> {
+                new User {
                     Id = 1,
-                    RegisteredName = "Tobias Becker", 
+                    UserName = "userA",
+                    RegisteredName = "User A", 
                     IsAdmin = true,
                     Interests = "a",
-                    HasRegistered = true,
                     Password = "pass"
                 },
-                new Name {
+                new User {
                     Id = 2,
-                    RegisteredName = "Angelia Becker",
+                    UserName = "userB",
+                    RegisteredName = "User B",
                     Interests = "b",
-                    HasRegistered = true,
                     Password = "pass"
                 },
-                new Name {
+                new User {
                     Id = 3,
-                    RegisteredName = "Michael Marvin",
+                    UserName = "userC",
+                    RegisteredName = "User C",
                     IsAdmin = true,
                     Interests = "c",
-                    HasRegistered = true,
                     Password = "pass"
                 },
-                new Name {
+                new User {
                     Id = 4,
-                    RegisteredName = "Sarah Marvin-Foley",
+                    UserName = "userD",
+                    RegisteredName = "User D",
                     Interests = "d",
-                    HasRegistered = true,
                     Password = "pass"
                 },
-                new Name {
+                new User {
                     Id = 5,
-                    RegisteredName = "Jonathon Minelli",
+                    UserName = "userE",
+                    RegisteredName = "User E",
                     Interests = "e"
                 },
-                new Name {
+                new User {
                     Id = 6,
-                    RegisteredName = "Sarah Leahman",
+                    UserName = "userF",
+                    RegisteredName = "User F",
                     Interests = "f"
                 },
-                new Name {
+                new User {
                     Id = 7,
-                    RegisteredName = "Amanda Robinson",
+                    UserName = "userG",
+                    RegisteredName = "User G",
                     Interests = "g"
                 },
-                new Name {
+                new User {
                     Id = 8,
-                    RegisteredName = "Caleb Gaffney",
+                    UserName = "userH",
+                    RegisteredName = "User H",
                     Interests = "h"
                 },
-                new Name {
+                new User {
                     Id = 9,
-                    RegisteredName = "Dale Banas",
+                    UserName = "userI",
+                    RegisteredName = "User I",
                     Interests = "i"
                 },
-                new Name {
+                new User {
                     Id = 10,
-                    RegisteredName = "Dorothy Klein",
+                    UserName = "userJ",
+                    RegisteredName = "User J",
                     Interests = "j"
                 },
-                new Name {
+                new User {
                     Id = 11,
-                    RegisteredName = "Lindsay Shockling",
+                    UserName = "userK",
+                    RegisteredName = "User K",
                     Interests = "k"
                 },
-                new Name {
+                new User {
                     Id = 12,
-                    RegisteredName = "Steve Rakar",
+                    UserName = "userL",
+                    RegisteredName = "User L",
                     Interests = "l"
                 }
             };
@@ -82,74 +90,62 @@ namespace SecretSanta.DataAccess {
         private static List<MatchRestriction> _restrictions = new List<MatchRestriction> {
                 new MatchRestriction {
                     Id = 1,
-                    RequestorName = "Tobias Becker",
-                    RestrictedName = "Angelia Becker",
+                    RequestorId = 1,
+                    RestrictedId = 2,
                     StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 2,
-                    RequestorName = "Angelia Becker",
-                    RestrictedName = "Tobias Becker",
+                    RequestorId = 2,
+                    RestrictedId = 1,
                     StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 3,
-                    RequestorName = "Sarah Marvin-Foley",
-                    RestrictedName = "Michael Marvin",
+                    RequestorId = 3,
+                    RestrictedId = 4,
                     StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 4,
-                    RequestorName = "Michael Marvin",
-                    RestrictedName = "Sarah Marvin-Foley",
+                    RequestorId = 4,
+                    RestrictedId = 3,
                     StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 5,
-                    RequestorName = "Dale Banas",
-                    RestrictedName = "Dorothy Klein",
+                    RequestorId = 5,
+                    RestrictedId = 6,
                     StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 6,
-                    RequestorName = "Dorothy Klein",
-                    RestrictedName = "Dale Banas",
+                    RequestorId = 6,
+                    RestrictedId = 5,
                     StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 7,
-                    RequestorName = "Amanda Robinson",
-                    RestrictedName = "Caleb Gaffney",
+                    RequestorId = 7,
+                    RestrictedId = 8,
                     StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 8,
-                    RequestorName = "Caleb Gaffney",
-                    RestrictedName = "Amanda Robinson",
+                    RequestorId = 8,
+                    RestrictedId = 7,
                     StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 9,
-                    RequestorName = "Jonathon Minelli",
-                    RestrictedName = "Lindsay Shockling",
+                    RequestorId = 9,
+                    RestrictedId = 10,
                     StrictRestriction = true
                 },
                 new MatchRestriction {
                     Id = 10,
-                    RequestorName = "Lindsay Shockling",
-                    RestrictedName = "Jonathon Minelli",
-                    StrictRestriction = true
-                },
-                new MatchRestriction {
-                    Id = 11,
-                    RequestorName = "Andrew Sansone",
-                    RestrictedName = "Heather Sansone",
-                    StrictRestriction = true
-                },
-                new MatchRestriction {
-                    Id = 12,
-                    RequestorName = "Heather Sansone",
-                    RestrictedName = "Andrew Sansone",
+                    RequestorId = 10,
+                    RestrictedId = 9,
                     StrictRestriction = true
                 }
             };
@@ -163,7 +159,7 @@ namespace SecretSanta.DataAccess {
             },
             new Setting() {
                 Name = "AllowMatching",
-                Value = "false"
+                Value = "true"
             },
             new Setting() {
                 Name = "SessionTimeout",
@@ -173,31 +169,35 @@ namespace SecretSanta.DataAccess {
 
         private static List<Session> _sessions = new List<Session>();
 
-        public IList<Name> GetAllPossibleNames() {
-            return _names;
+        public IList<User> GetAllUsers() {
+            return _users;
         }
 
-        public IList<Name> GetAllRegisteredNames() {
-            return _names.Where(n => n.HasRegistered).ToList();
+        public User GetUserById(int id) {
+            return _users.Find(u => u.Id == id);
         }
 
-        public Match GetExistingMatch(string requestor) {
-            return _matches.Where(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase))?.FirstOrDefault();
+        public User GetUserByUserName(string username) {
+            return _users.Find(u => string.Equals(u.UserName, username, StringComparison.Ordinal));
         }
 
-        public IList<MatchRestriction> GetMatchRestrictions(string requestor) {
-            return _restrictions.Where(r => string.Equals(r.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase)).ToList();
+        public Match GetExistingMatch(int requestor) {
+            return _matches.Where(m => m.RequestorId == requestor)?.FirstOrDefault();
         }
 
-        public void RemoveMatch(string requestor, string matchedName) {
-            _matches.RemoveAll(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase) && string.Equals(m.MatchedName, matchedName, StringComparison.InvariantCultureIgnoreCase));
+        public IList<MatchRestriction> GetMatchRestrictions(int requestor) {
+            return _restrictions.Where(r => r.RequestorId == requestor).ToList();
         }
 
-        public void CreateMatch(string requestor, string matchedName, bool allowReroll) {
+        public void RemoveMatch(int requestor, int matchedId) {
+            _matches.RemoveAll(m => m.RequestorId == requestor && m.MatchedId == matchedId);
+        }
+
+        public void CreateMatch(int requestor, int matchedId, bool allowReroll) {
             Match match = new Match() {
                 Id = _matches.LastOrDefault()?.Id + 1 ?? 1,
-                RequestorName = requestor,
-                MatchedName = matchedName,
+                RequestorId = requestor,
+                MatchedId = matchedId,
                 RerollAllowed = allowReroll
             };
             _matches.Add(match);
@@ -208,50 +208,54 @@ namespace SecretSanta.DataAccess {
         }
 
         public bool AccountAlreadyRegistered(string username) {
-            return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.HasRegistered == true;
+            return _users.Any(n => string.Equals(n.UserName, username, StringComparison.Ordinal));
         }
 
         public bool VerifyCredentials(string username, string password) {
-            Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+            User name = _users.FirstOrDefault(n => string.Equals(n.UserName, username, StringComparison.Ordinal));
             if (name != null) {
-                return string.Equals(name.Password, password, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(name.Password, password, StringComparison.Ordinal);
             }
             throw new InvalidCredentialsException();
         }
 
-        public void RegisterAccount(string username, string password) {
-            Name name = _names.FirstOrDefault(n => !n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null) {
-                name.Password = password;
-                name.HasRegistered = true;
-            }
-            else {
+        public int RegisterAccount(string username, string password) {
+            User user = _users.FirstOrDefault(n => string.Equals(n.UserName, username, StringComparison.Ordinal));
+            if (user != null) {
                 //TODO: New Exception
                 throw new Exception("This user is already registered.");
             }
-        }
+            else {
+                user = new User()
+                {
+                    UserName = username,
+                    Password = password
+                };
+                _users.Add(user);
 
-        public void DeRegisterAccount(string username) {
-            Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null) {
-                //remove registration and all matches where they are the requester and the matched
-                name.HasRegistered = false;
-                _matches.RemoveAll(m => string.Equals(m.RequestorName, username, StringComparison.InvariantCultureIgnoreCase) || string.Equals(m.MatchedName, username, StringComparison.InvariantCultureIgnoreCase));
+                return GetUserByUserName(username).Id;
             }
         }
 
-        public void UpdateUserPassword(string username, string newPassword) {
-            Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null) {
-                name.Password = newPassword;
+        public void DeRegisterAccount(int id) {
+            User user = GetUserById(id);
+            _users.Remove(user);
+            //remove all matches where they are the requester or the matched
+            _matches.RemoveAll(m => m.RequestorId == id || m.MatchedId == id);
+        }
+
+        public void UpdateUserPassword(int id, string newPassword) {
+            User user = GetUserById(id);
+            if (user != null) {
+                user.Password = newPassword;
             }
         }
 
-        public void CreateRestriction(string requestor, string restrictee, bool strict, bool makeReverse) {
+        public void CreateRestriction(int requestor, int restrictee, bool strict, bool makeReverse) {
             MatchRestriction restrict = new MatchRestriction() {
                 Id = _restrictions?.LastOrDefault()?.Id + 1 ?? 1,
-                RequestorName = requestor,
-                RestrictedName = restrictee,
+                RequestorId = requestor,
+                RestrictedId = restrictee,
                 StrictRestriction = strict
             };
 
@@ -260,16 +264,23 @@ namespace SecretSanta.DataAccess {
             if (makeReverse) {
                 MatchRestriction restrictReverse = new MatchRestriction() {
                     Id = _restrictions?.LastOrDefault()?.Id + 1 ?? 1,
-                    RequestorName = restrictee,
-                    RestrictedName = requestor,
+                    RequestorId = restrictee,
+                    RestrictedId = requestor,
                     StrictRestriction = strict
                 };
                 _restrictions.Add(restrictReverse);
             }
         }
 
-        public bool UserIsAdmin(string username) {
-            return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.IsAdmin == true;
+        public bool UserIsAdmin(int id) {
+            return GetUserById(id)?.IsAdmin == true;
+        }
+
+        public void SetUserAdmin(int id, bool admin) {
+            User user = GetUserById(id);
+            if (user != null) {
+                user.IsAdmin = admin;
+            }
         }
 
         public string GetSettingValue(string setting) {
@@ -287,14 +298,21 @@ namespace SecretSanta.DataAccess {
             return _settings;
         }
 
-        public string GetUserInterests(string username) {
-            return _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Interests;
+        public string GetUserInterests(int id) {
+            return GetUserById(id)?.Interests;
         }
 
-        public void SetUserInterests(string username, string interests) {
-            Name name = _names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null) {
-                name.Interests = interests;
+        public void SetUserInterests(int id, string interests) {
+            User user = GetUserById(id);
+            if (user != null) {
+                user.Interests = interests;
+            }
+        }
+
+        public void SetUserRealName(int id, string name) {
+            User user = GetUserById(id);
+            if (user != null) {
+                user.RegisteredName = name;
             }
         }
 

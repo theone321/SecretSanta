@@ -8,7 +8,7 @@ using SecretSanta.Exceptions;
 
 namespace SecretSanta.Matching {
     public interface ICreateSecretMatch {
-        string FindRandomMatch(string requestor);
+        int FindRandomMatch(int requestor);
     }
 
     public class CreateSecretMatch : ICreateSecretMatch {
@@ -20,53 +20,53 @@ namespace SecretSanta.Matching {
             _random = randomWrapper;
         }
 
-        public string FindRandomMatch(string requestor) {
-            var allNames = _dataAccessor.GetAllRegisteredNames().ToList();
-            allNames.RemoveAll(n => string.Equals(n.RegisteredName, requestor, StringComparison.InvariantCultureIgnoreCase));
-            var removedNames = new List<Name>();
-            var restrictions = _dataAccessor.GetMatchRestrictions(requestor);
-            var existingMatches = _dataAccessor.GetAllExistingMatches();
-            foreach (var name in allNames) {
-                if (restrictions?.Any(r => string.Equals(r.RestrictedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase)) == true) {
-                    removedNames.Add(name);
+        public int FindRandomMatch(int requestor) {
+            List<User> allUsers = _dataAccessor.GetAllUsers().ToList();
+            allUsers.RemoveAll(n => n.Id == requestor);
+            List<User> removedNames = new List<User>();
+            IList<MatchRestriction> restrictions = _dataAccessor.GetMatchRestrictions(requestor);
+            IList<Match> existingMatches = _dataAccessor.GetAllExistingMatches();
+            foreach (User user in allUsers) {
+                if (restrictions?.Any(r => r.RestrictedId == user.Id) == true) {
+                    removedNames.Add(user);
                     continue;
                 }
                 //Remove any names that have already been matched to someone else.
-                if (existingMatches?.Any(m => string.Equals(m.MatchedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase)) == true) {
-                    removedNames.Add(name);
+                if (existingMatches?.Any(m => m.MatchedId == user.Id) == true) {
+                    removedNames.Add(user);
                 }
             }
-            var finalNames = allNames.Except(removedNames).ToList();
+            List<User> finalNames = allUsers.Except(removedNames).ToList();
             //allow non-strict restrictions through if there is no match
             if (!finalNames.Any()) {
                 removedNames.Clear();
-                foreach (var name in allNames) {
-                    if (restrictions?.Any(r => r.StrictRestriction && string.Equals(r.RestrictedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase)) == true) {
-                        removedNames.Add(name);
+                foreach (User user in allUsers) {
+                    if (restrictions?.Any(r => r.StrictRestriction && r.RestrictedId == user.Id) == true) {
+                        removedNames.Add(user);
                         continue;
                     }
                     //Remove any names that have already been matched to someone else.
-                    if (existingMatches?.Any(m => m.MatchedName == name.RegisteredName) == true) {
-                        removedNames.Add(name);
+                    if (existingMatches?.Any(m => m.MatchedId == user.Id) == true) {
+                        removedNames.Add(user);
                     }
                 }
-                finalNames = allNames.Except(removedNames).ToList();
+                finalNames = allUsers.Except(removedNames).ToList();
             }
             //allow even strict restrictions through if there is no match, this is a last resort
             if (!finalNames.Any()) {
                 removedNames.Clear();
-                foreach (var name in allNames) {
+                foreach (User user in allUsers) {
                     //Remove any names that have already been matched to someone else.
-                    if (existingMatches?.Any(m => m.MatchedName == name.RegisteredName) == true) {
-                        removedNames.Add(name);
+                    if (existingMatches?.Any(m => m.MatchedId == user.Id) == true) {
+                        removedNames.Add(user);
                     }
                 }
-                finalNames = allNames.Except(removedNames).ToList();
+                finalNames = allUsers.Except(removedNames).ToList();
             }
 
             if (finalNames.Any()) {
-                var randomNumber = _random.Next(finalNames.Count);
-                return finalNames[randomNumber].RegisteredName;
+                int randomNumber = _random.Next(finalNames.Count);
+                return finalNames[randomNumber].Id;
             }
             else {
                 throw new NoAvailableMatchesException();

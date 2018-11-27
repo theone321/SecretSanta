@@ -12,7 +12,7 @@
     <label asp-for="AllowMatching">Allow Matching</label>
     <input asp-for="AllowMatching" />
     <br />
-    <input type="submit"/>
+    <input type="submit" value="Update"/>
 </form>
 
 <form method="post">
@@ -20,7 +20,6 @@
         <thead>
             <tr>
                 <th>User</th>
-                <th>Has Registered?</th>
                 <th>Has Match?</th>
                 <th>Is a Match?</th>
             </tr>
@@ -31,15 +30,15 @@
 
                 <tr>
                     <td>@user.Name</td>
-                    <td>@user.HasRegistered</td>
                     <td>@user.HasMatched</td>
                     <td>@user.IsMatched</td>
                     <td align="justify">
-                        @if (user.HasRegistered) {
-                            <button type="submit" asp-action="ResetUserPassword" asp-route-username="@user.Name">Reset Password</button>
-                        }
-                        @if (user.HasRegistered) {
-                            <button type="submit" asp-action="DeRegisterUser" asp-route-username="@user.Name">De-Register</button>
+                        <button type="submit" asp-action="ResetUserPassword" asp-route-userId="@user.UserId">Reset Password</button>
+                        @if (Model.UserId != user.UserId) { @*Sorry, you can't delete yourself*@
+                            <button type="submit" asp-action="DeRegisterUser" asp-route-userId="@user.UserId">Delete User</button>
+                            var adminText = user.IsAdmin ? "Revoke Admin" : "Make Admin";
+
+                            <button type="submit" asp-action="ToggleAdminAccess" asp-route-userId="@user.UserId">@adminText</button>
                         }
                     </td>
                 </tr>

@@ -28,24 +28,32 @@ namespace SecretSanta.Controllers {
             bool.TryParse(_dataAccessor.GetSettingValue("AllowRegistration"), out bool allowRegistration);
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatching);
 
-            List<UserAdminSettings> users = new List<UserAdminSettings>();
-            var names = _dataAccessor.GetAllPossibleNames();
-            var matches = _dataAccessor.GetAllExistingMatches();
-            foreach (Name name in names) {
-                UserAdminSettings user = new UserAdminSettings();
-                user.Name = name.RegisteredName;
-                user.HasRegistered = name.HasRegistered;
-                user.HasMatched = matches.Any(m => string.Equals(m.RequestorName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase));
-                user.IsMatched = matches.Any(m => string.Equals(m.MatchedName, name.RegisteredName, StringComparison.InvariantCultureIgnoreCase));
+            List<UserAdminSettings> displayList = new List<UserAdminSettings>();
+            IList<User> users = _dataAccessor.GetAllUsers();
+            IList<Match> matches = _dataAccessor.GetAllExistingMatches();
+            User currentUser = null;
+            foreach (User user in users) {
+                UserAdminSettings display = new UserAdminSettings {
+                    UserId = user.Id,
+                    Name = user.RegisteredName,
+                    HasMatched = matches.Any(m => m.RequestorId == user.Id),
+                    IsMatched = matches.Any(m => m.MatchedId == user.Id),
+                    IsAdmin = user.IsAdmin
+                };
 
-                users.Add(user);
+                displayList.Add(display);
+
+                if (string.Equals(user.UserName, _session.User, StringComparison.Ordinal)) {
+                    currentUser = user;
+                }
             }
-            
+
             AdminModel options = new AdminModel {
                 User = _session.User,
+                UserId = currentUser?.Id ?? 0,
                 AllowRegistration = allowRegistration,
                 AllowMatching = allowMatching,
-                UserList = users.OrderByDescending(u => u.HasRegistered).ToList()
+                UserList = displayList
             };
 
             return View(options);
@@ -64,20 +72,31 @@ namespace SecretSanta.Controllers {
         }
 
         [HttpPost]
-        public IActionResult ResetUserPassword(string username) {
+        public IActionResult ToggleAdminAccess(int userId)
+        {
             if (!verifyAccess()) {
                 return RedirectToAction("SignIn", "Match");
             }
-            _dataAccessor.UpdateUserPassword(username, "password");
+            User user = _dataAccessor.GetUserById(userId);
+            _dataAccessor.SetUserAdmin(userId, !user.IsAdmin);
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult DeRegisterUser(string username) {
+        public IActionResult ResetUserPassword(int userId) {
             if (!verifyAccess()) {
                 return RedirectToAction("SignIn", "Match");
             }
-            _dataAccessor.DeRegisterAccount(username);
+            _dataAccessor.UpdateUserPassword(userId, "password");
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult DeRegisterUser(int userId) {
+            if (!verifyAccess()) {
+                return RedirectToAction("SignIn", "Match");
+            }
+            _dataAccessor.DeRegisterAccount(userId);
             return RedirectToAction("Index");
         }
 
@@ -87,7 +106,8 @@ namespace SecretSanta.Controllers {
                 //verify user has session
                 if ((_session = _dataAccessor.GetSessionData(sessionId)) != null) {
                     //verify that user is admin
-                    return _dataAccessor.UserIsAdmin(_session.User);
+                    User user = _dataAccessor.GetUserByUserName(_session.User);
+                    return _dataAccessor.UserIsAdmin(user.Id);
                 }
             }
             return false;

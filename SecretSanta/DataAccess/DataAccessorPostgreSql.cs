@@ -15,21 +15,21 @@ namespace SecretSanta.DataAccess {
         }
 
         public bool AccountAlreadyRegistered(string username) {
-            return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.HasRegistered == true;
+            return _context.Users.Any(n => string.Equals(n.UserName, username, StringComparison.Ordinal));
         }
 
-        public void RemoveMatch(string requestor, string matchedName) {
-            var matchToRemove = _context.Matches.First(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase) && string.Equals(m.MatchedName, matchedName, StringComparison.InvariantCultureIgnoreCase));
+        public void RemoveMatch(int requestor, int matchedId) {
+            var matchToRemove = _context.Matches.FirstOrDefault(m => m.RequestorId == requestor && m.MatchedId == matchedId);
             if (matchToRemove != null) {
                 _context.Matches.Remove(matchToRemove);
                 _context.SaveChanges();
             }
         }
 
-        public void CreateMatch(string requestor, string matchedName, bool allowReroll) {
+        public void CreateMatch(int requestor, int matchedId, bool allowReroll) {
             Match match = new Match() {
-                RequestorName = requestor,
-                MatchedName = matchedName,
+                RequestorId = requestor,
+                MatchedId = matchedId,
                 RerollAllowed = allowReroll
             };
 
@@ -38,10 +38,10 @@ namespace SecretSanta.DataAccess {
             _context.SaveChanges();
         }
 
-        public void CreateRestriction(string requestor, string restrictee, bool strict, bool makeReverse) {
+        public void CreateRestriction(int requestor, int restrictee, bool strict, bool makeReverse) {
             MatchRestriction restrict = new MatchRestriction() {
-                RequestorName = requestor,
-                RestrictedName = restrictee,
+                RequestorId = requestor,
+                RestrictedId = restrictee,
                 StrictRestriction = strict
             };
 
@@ -49,8 +49,8 @@ namespace SecretSanta.DataAccess {
 
             if (makeReverse) {
                 MatchRestriction restrictReverse = new MatchRestriction() {
-                    RequestorName = restrictee,
-                    RestrictedName = requestor,
+                    RequestorId = restrictee,
+                    RestrictedId = requestor,
                     StrictRestriction = strict
                 };
                 _context.MatchRestrictions.Add(restrictReverse);
@@ -61,76 +61,87 @@ namespace SecretSanta.DataAccess {
             return _context.Matches.ToList();
         }
 
-        public IList<Name> GetAllPossibleNames() {
-            return _context.Names.ToList();
+        public IList<User> GetAllUsers() {
+            return _context.Users.ToList();
         }
 
-        public IList<Name> GetAllRegisteredNames() {
-            return _context.Names.Where(n => n.HasRegistered).ToList();
+        public User GetUserById(int id) {
+            return _context.Users.Find(id);
         }
 
-        public Match GetExistingMatch(string requestor) {
-            return _context.Matches.Where(m => string.Equals(m.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase))?.FirstOrDefault();
+        public User GetUserByUserName(string userName) {
+            return _context.Users.FirstOrDefault(u => string.Equals(u.UserName, userName, StringComparison.Ordinal));
         }
 
-        public IList<MatchRestriction> GetMatchRestrictions(string requestor) {
-            return _context.MatchRestrictions.Where(mr => string.Equals(mr.RequestorName, requestor, StringComparison.InvariantCultureIgnoreCase))?.ToList();
+        public Match GetExistingMatch(int requestor) {
+            return _context.Matches.Where(m => m.RequestorId == requestor).FirstOrDefault();
         }
 
-        public void RegisterAccount(string username, string password) {
+        public IList<MatchRestriction> GetMatchRestrictions(int requestor) {
+            return _context.MatchRestrictions.Where(mr => mr.RequestorId  == requestor).ToList();
+        }
+
+        public int RegisterAccount(string username, string password) {
             //get the account first
-            Name name = _context.Names.FirstOrDefault(n => !n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null) {
-                //SHA256 hash the password
-                string hashed = hashPassword(password);
-
-                name.Password = hashed;
-                name.HasRegistered = true;
-
-                _context.SaveChanges();
-            }
-            else {
+            User user = _context.Users.FirstOrDefault(n => string.Equals(n.UserName, username, StringComparison.Ordinal));
+            if (user != null) {
                 //TODO: New Exception
                 throw new Exception("This user is already registered.");
             }
-        }
+            else {
+                //SHA256 hash the password
+                string hashed = hashPassword(password);
+                user = new User() {
+                    UserName = username,
+                    Password = hashed
+                };
 
-        public void DeRegisterAccount(string username) {
-            Name name = _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null) {
-                //remove registration and all matches where they are the requester and the matched
-                name.HasRegistered = false;
-                var matches = _context.Matches.Where(m => string.Equals(m.RequestorName, username, StringComparison.InvariantCultureIgnoreCase) || string.Equals(m.MatchedName, username, StringComparison.InvariantCultureIgnoreCase));
-                if (matches.Any()) {
-                    _context.Matches.RemoveRange(matches);
-                }
                 _context.SaveChanges();
+
+                return GetUserByUserName(username).Id;
             }
         }
 
-        public void UpdateUserPassword(string username, string newPassword) {
-            Name name = _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
-            if (name != null) {
+        public void DeRegisterAccount(int id) {
+            //remove all matches where they are the requester or the matched
+            IQueryable<Match> matches = _context.Matches.Where(m => m.RequestorId == id || m.MatchedId == id);
+            if (matches.Any()) {
+                _context.Matches.RemoveRange(matches);
+            }
+            _context.SaveChanges();
+        }
+
+        public void UpdateUserPassword(int id, string newPassword) {
+            User user = GetUserById(id);
+            if (user != null) {
                 string hashed = hashPassword(newPassword);
-                name.Password = hashed;
+                user.Password = hashed;
                 _context.SaveChanges();
             }
         }
 
         public bool VerifyCredentials(string username, string password) {
-            string dbPass = _context.Names.FirstOrDefault(n => n.HasRegistered && string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Password;
+            string dbPass = GetUserByUserName(username)?.Password;
             if (!string.IsNullOrEmpty(dbPass)) {
                 string hashed = hashPassword(password);
                 //compare the passwords
-                return string.Equals(dbPass, hashed, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(dbPass, hashed, StringComparison.Ordinal);
             }
             else {
                 throw new UnregisteredUserException();
             }
         }
 
-        public bool UserIsAdmin(string username) {
-            return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.IsAdmin == true;
+        public bool UserIsAdmin(int id) {
+            return GetUserById(id)?.IsAdmin == true;
+        }
+
+        public void SetUserAdmin(int id, bool admin) {
+            User user = GetUserById(id);
+            if (user != null) {
+                user.IsAdmin = admin;
+                _context.SaveChanges();
+            }
         }
 
         public string GetSettingValue(string setting) {
@@ -150,14 +161,22 @@ namespace SecretSanta.DataAccess {
             return _context.Settings.ToList();
         }
 
-        public string GetUserInterests(string username) {
-            return _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase))?.Interests;
+        public string GetUserInterests(int id) {
+            return GetUserById(id)?.Interests;
         }
 
-        public void SetUserInterests(string username, string interests) {
-            Name name = _context.Names.FirstOrDefault(n => string.Equals(n.RegisteredName, username, StringComparison.InvariantCultureIgnoreCase));
+        public void SetUserInterests(int id, string interests) {
+            User name = GetUserById(id);
             if (name != null) {
                 name.Interests = interests;
+                _context.SaveChanges();
+            }
+        }
+
+        public void SetUserRealName(int id, string name) {
+            User user = GetUserById(id);
+            if (user != null) {
+                user.RegisteredName = name;
                 _context.SaveChanges();
             }
         }
@@ -165,7 +184,7 @@ namespace SecretSanta.DataAccess {
         public ISession GetSession(string username, string password) {
             if (VerifyCredentials(username, password)) {
                 //kill all previous sessions for this user
-                var toRemove = _context.Sessions.Where(s => string.Equals(s.User, username, StringComparison.InvariantCultureIgnoreCase));
+                IQueryable<Session> toRemove = _context.Sessions.Where(s => string.Equals(s.User, username, StringComparison.Ordinal));
                 if (toRemove.Any()) {
                     _context.Sessions.RemoveRange(toRemove);
                 }
@@ -179,7 +198,7 @@ namespace SecretSanta.DataAccess {
 
         public bool VerifySession(string username, string sessionId) {
             bool verified = false;
-            Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.User, username, StringComparison.InvariantCultureIgnoreCase) && string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+            Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.User, username, StringComparison.Ordinal) && string.Equals(s.SessionId, sessionId, StringComparison.Ordinal));
             if (session != null) {
                 //check the timestamp, if less than the timeout then good
                 DateTime rightNow = DateTime.UtcNow;
@@ -199,7 +218,7 @@ namespace SecretSanta.DataAccess {
         }
 
         public ISession GetSessionData(string sessionId) {
-            Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+            Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.SessionId, sessionId, StringComparison.Ordinal));
             if (session != null) {
                 //check the timestamp, if less than the timeout then good
                 DateTime rightNow = DateTime.UtcNow;
@@ -220,7 +239,7 @@ namespace SecretSanta.DataAccess {
         }
 
         public void EndSession(string sessionId) {
-            Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+            Session session = _context.Sessions.FirstOrDefault(s => string.Equals(s.SessionId, sessionId, StringComparison.Ordinal));
             if (session != null) {
                 _context.Sessions.Remove(session);
                 _context.SaveChanges();

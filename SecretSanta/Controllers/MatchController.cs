@@ -22,7 +22,7 @@ namespace SecretSanta.Controllers {
 
         [HttpGet]
         public IActionResult Index() {
-            List<string> registered = _dataAccessor.GetAllRegisteredNames().Select(n => n.RegisteredName).ToList();
+            List<string> registered = _dataAccessor.GetAllUsers().Select(n => n.RegisteredName).ToList();
             int matchCount = _dataAccessor.GetAllExistingMatches().Count;
             return View("Index", new IndexModel() { RegisteredNames = registered, MatchCounts = matchCount });
         }
@@ -33,59 +33,71 @@ namespace SecretSanta.Controllers {
             if (!verifySessionCookie()) {
                 return View("InvalidCredentials");
             }
-            UserPageModel secretMatch = buildUserPageModelFromDB(_session.User);
-            return View("UserPage", secretMatch);
+            UserPageModel userModel = buildUserPageModelFromDB(_session.User);
+            return View("UserPage", userModel);
         }
         
-        public IActionResult CreateMatch(UserPageModel secretMatch) {
+        public IActionResult CreateMatch(UserPageModel userModel) {
             //verify access
             if (!verifySessionCookie()) {
                 return View("InvalidCredentials");
             }
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatch);
-            secretMatch.AllowMatching = allowMatch;
-            if (string.IsNullOrEmpty(secretMatch?.Name) || !secretMatch.AllowMatching) {
+            userModel.AllowMatching = allowMatch;
+            if (userModel.UserId <= 0 || !userModel.AllowMatching) {
                 //How? Why? Just start over
                 return RedirectToAction("SignIn");
             }
 
-            secretMatch.TheirSecretMatch = _createSecretMatch.FindRandomMatch(secretMatch.Name);
-            _dataAccessor.CreateMatch(secretMatch.Name, secretMatch.TheirSecretMatch, secretMatch.AllowReroll);
+            userModel.TheirSecretMatchId = _createSecretMatch.FindRandomMatch(userModel.UserId);
+            userModel.TheirSecretMatchName = _dataAccessor.GetUserById(userModel.TheirSecretMatchId).RegisteredName;
+            _dataAccessor.CreateMatch(userModel.UserId, userModel.TheirSecretMatchId, userModel.AllowReroll);
 
-            secretMatch = buildUserPageModelFromDB(secretMatch.Name);
+            userModel = buildUserPageModelFromDB(userModel.UserId);
 
-            return View("UserPage", secretMatch);
+            return View("UserPage", userModel);
         }
 
-        public IActionResult RerollResult(UserPageModel secretMatch) {
+        public IActionResult RerollResult(UserPageModel userModel) {
             //verify access
             if (!verifySessionCookie()) {
                 return View("InvalidCredentials");
             }
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatch);
-            secretMatch.AllowMatching = allowMatch;
-            if (string.IsNullOrEmpty(secretMatch?.Name) || !secretMatch.AllowMatching) { 
+            userModel.AllowMatching = allowMatch;
+            if (userModel.UserId <= 0 || !userModel.AllowMatching) { 
                 //How? Why? Just start over
                 return RedirectToAction("SignIn");
             }
 
-            if (!string.IsNullOrEmpty(secretMatch.TheirSecretMatch)) {
-                _dataAccessor.RemoveMatch(secretMatch.Name, secretMatch.TheirSecretMatch);
-                _dataAccessor.CreateRestriction(secretMatch.Name, secretMatch.TheirSecretMatch, false, false);
+            if (userModel.TheirSecretMatchId > 0) {
+                _dataAccessor.RemoveMatch(userModel.UserId, userModel.TheirSecretMatchId);
+                _dataAccessor.CreateRestriction(userModel.UserId, userModel.TheirSecretMatchId, false, false);
+            }
+            userModel.AllowReroll = false;
+            return RedirectToAction("CreateMatch", userModel);
+        }
+
+        [HttpPost]
+        public IActionResult MakeHardRestriction(UserPageModel userModel) {
+            //verify access
+            if (!verifySessionCookie()) {
+                return View("InvalidCredentials");
             }
 
-            UserPageModel match = new UserPageModel() {
-                Name = secretMatch.Name,
-                AllowReroll = false
-            };
-            return RedirectToAction("CreateMatch", match);
+            if (userModel.SignificantOther?.UserId > 0) { 
+                _dataAccessor.CreateRestriction(userModel.UserId, userModel.SignificantOther.UserId, true, false);
+            }
+
+            userModel = buildUserPageModelFromDB(userModel.UserId);
+
+            return View("UserPage", userModel);
         }
 
         [HttpGet]
         public IActionResult Register() {
-            IList<Name> possibleNames = _dataAccessor.GetAllPossibleNames();
             bool.TryParse(_dataAccessor.GetSettingValue("AllowRegistration"), out bool allowRegister);
-            return View("Register", new RegisterUser { PossibleNames = possibleNames, AllowRegister=allowRegister });
+            return View("Register", new RegisterUser { AllowRegister=allowRegister });
         }
 
         [HttpPost]
@@ -98,14 +110,14 @@ namespace SecretSanta.Controllers {
             if (!string.Equals(registration.ChosenPassword, registration.VerifyPassword, StringComparison.Ordinal)) {
                 return View("PasswordsNotMatch");
             }
-            if (_dataAccessor.AccountAlreadyRegistered(registration.NameToRegister)) {
+            if (_dataAccessor.AccountAlreadyRegistered(registration.UserNameToRegister)) {
                 return View("AlreadyRegistered", registration);
             }
 
-            _dataAccessor.RegisterAccount(registration.NameToRegister, registration.ChosenPassword);
-
+            int id = _dataAccessor.RegisterAccount(registration.UserNameToRegister, registration.ChosenPassword);
+            _dataAccessor.SetUserRealName(id, registration.RealName);
             //get a new session for this user
-            DataAccess.Models.ISession session = _dataAccessor.GetSession(registration.NameToRegister, registration.ChosenPassword);
+            DataAccess.Models.ISession session = _dataAccessor.GetSession(registration.UserNameToRegister, registration.ChosenPassword);
             if (session == null) {
                 throw new InvalidCredentialsException();
             }
@@ -128,7 +140,7 @@ namespace SecretSanta.Controllers {
                     }
 
                     UserPageModel secretMatch = buildUserPageModelFromDB(_session.User);
-                    if (string.IsNullOrEmpty(secretMatch.TheirSecretMatch)) {
+                    if (secretMatch.TheirSecretMatchId <= 0) {
                         return RedirectToAction("GetMatch");
                     }
                     return View("UserPage", secretMatch);
@@ -159,7 +171,7 @@ namespace SecretSanta.Controllers {
                 Response.Cookies.Append("sessionId", _session.SessionId);
 
                 UserPageModel secretMatch = buildUserPageModelFromDB(authUser.Username);
-                if (string.IsNullOrEmpty(secretMatch.TheirSecretMatch)) {
+                if (secretMatch.TheirSecretMatchId <= 0) {
                     return RedirectToAction("GetMatch");
                 }
                 return View("UserPage", secretMatch);
@@ -177,15 +189,15 @@ namespace SecretSanta.Controllers {
         }
 
         [HttpPost]
-        public IActionResult UpdateInterests(UserPageModel match) {
+        public IActionResult UpdateInterests(UserPageModel user) {
             //verify access
             if (!verifySessionCookie()) {
                 return View("InvalidCredentials");
             }
-            _dataAccessor.SetUserInterests(match.Name, match.Interests);
-            if (!string.IsNullOrEmpty(match.TheirSecretMatch)) {
-                match = buildUserPageModelFromDB(match.Name);
-                return View("UserPage", match);
+            _dataAccessor.SetUserInterests(user.UserId, user.Interests);
+            if (user.TheirSecretMatchId > 0) {
+                user = buildUserPageModelFromDB(user.UserId);
+                return View("UserPage", user);
             }
             return RedirectToAction("GetMatch");
         }
@@ -218,7 +230,8 @@ namespace SecretSanta.Controllers {
                 return View("InvalidCredentials");
             }
             //update password
-            _dataAccessor.UpdateUserPassword(_session.User, pageModel.PasswordReset.NewPassword);
+            User user = _dataAccessor.GetUserByUserName(_session.User);
+            _dataAccessor.UpdateUserPassword(user.Id, pageModel.PasswordReset.NewPassword);
             return RedirectToAction("GetMatch");
         }
 
@@ -231,29 +244,61 @@ namespace SecretSanta.Controllers {
             return false;
         }
 
-        private UserPageModel buildUserPageModelFromDB(string username) {
-            Match existingMatch = _dataAccessor.GetExistingMatch(username);
-            string myInterests = _dataAccessor.GetUserInterests(username);
-            string theirInterests = null;
+        private UserPageModel buildUserPageModelFromDB(string userName) {
+            User user = _dataAccessor.GetUserByUserName(userName);
+            return buildUserPageModelFromDB(user);
+        }
+
+        private UserPageModel buildUserPageModelFromDB(int userId) {
+            User user = _dataAccessor.GetUserById(userId);
+            return buildUserPageModelFromDB(user);
+        }
+
+        private UserPageModel buildUserPageModelFromDB(User user) {
+            Match existingMatch = _dataAccessor.GetExistingMatch(user.Id);
+            string myInterests = user.Interests;
             bool allowReroll = true;
-            string theirMatch = null;
+            User theirMatch = null;
             if (existingMatch != null) {
-                theirMatch = existingMatch.MatchedName;
-                theirInterests = _dataAccessor.GetUserInterests(theirMatch);
+                theirMatch = _dataAccessor.GetUserById(existingMatch.MatchedId);
                 allowReroll = existingMatch.RerollAllowed;
             }
             
-            bool isAdmin = _dataAccessor.UserIsAdmin(username);
+            bool isAdmin = _dataAccessor.UserIsAdmin(user.Id);
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatch);
 
+            MatchRestriction restriction = _dataAccessor.GetMatchRestrictions(user.Id).FirstOrDefault(r => r.StrictRestriction);
+            List<UserPageModel.LimitedUser> others = new List<UserPageModel.LimitedUser>();
+            UserPageModel.LimitedUser sigOther = new UserPageModel.LimitedUser();
+            if (restriction != null) {
+                User sigOtherUser = _dataAccessor.GetUserById(restriction.RestrictedId);
+                if (sigOtherUser != null) {  
+                    sigOther = new UserPageModel.LimitedUser() { UserId = sigOtherUser.Id, UserRealName = sigOtherUser.RegisteredName };
+                }
+            }
+            if (sigOther.UserId <= 0) {
+                //we only need this list if their significant other isn't set
+                foreach (User other in _dataAccessor.GetAllUsers())
+                {
+                    if (other.Id == user.Id) { continue; }
+                    others.Add(new UserPageModel.LimitedUser() { UserId = other.Id, UserRealName = other.RegisteredName });
+                }
+            }
+
+
             return new UserPageModel() {
-                Name = username,
+                UserId = user.Id,
+                UserName = user.UserName,
+                Name = user.RegisteredName,
                 AllowReroll = allowReroll,
-                TheirSecretMatch = theirMatch,
+                TheirSecretMatchId = theirMatch?.Id ?? -1,
+                TheirSecretMatchName = theirMatch?.RegisteredName,
                 Interests = myInterests,
-                MatchInterests = theirInterests,
+                MatchInterests = theirMatch?.Interests,
                 UserIsAdmin = isAdmin,
-                AllowMatching = allowMatch
+                AllowMatching = allowMatch,
+                SignificantOther = sigOther,
+                OtherUsers = others
             };
         }
     }
