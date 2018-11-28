@@ -96,6 +96,11 @@ namespace SecretSanta.DataAccess {
                     Password = hashed
                 };
 
+                if (!_context.Users.Any()) {
+                    //If there are no existing users, the first user is made an admin
+                    user.IsAdmin = true;
+                }
+                _context.Users.Add(user);
                 _context.SaveChanges();
 
                 return GetUserByUserName(username).Id;
@@ -103,6 +108,7 @@ namespace SecretSanta.DataAccess {
         }
 
         public void DeRegisterAccount(int id) {
+            _context.Users.Remove(_context.Users.Find(id));
             //remove all matches where they are the requester or the matched
             IQueryable<Match> matches = _context.Matches.Where(m => m.RequestorId == id || m.MatchedId == id);
             if (matches.Any()) {

@@ -3,7 +3,7 @@ version: '2'
 services:
     santadocker:
         image: santadocker
-        restart: always
+        restart: unless-stopped
         build:
             context: ./santadocker/
             dockerfile: Dockerfile
@@ -17,7 +17,7 @@ services:
             - mynetwork
     santapostgres:
         image: santapostgres
-        restart: always
+        restart: unless-stopped
         build:
             context: ./postgresdocker/
             dockerfile: Dockerfile

@@ -11,11 +11,6 @@ SET row_security = off;
 \connect santa
 
 
--- Users
-INSERT INTO "Users"  ("UserName", "RegisteredName", "Password", "IsAdmin") VALUES ('magico13', 'Michael Marvin', 'password', TRUE);
-
-SELECT * FROM "Users";
-    
 -- Settings
 INSERT INTO "Settings" VALUES ('AllowRegistration', 'true');
 INSERT INTO "Settings" VALUES ('AllowMatching', 'false');

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿//#define SIMULATE
+
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,17 +24,18 @@ namespace SecretSanta {
             services.AddTransient<IRandomWrapper, RandomWrapper>();
 
             //testing
+#if SIMULATE
             services.AddTransient<IDataAccessor, DataAccessorSimulated>();
 
-
+#else
             //prod
-            //string sqlConnectionString = "User ID=santa;Password=santa;Host=santapostgres;Port=5432;Database=santa;Pooling=true;";
-            //services.AddDbContext<DomainModelPostgreSqlContext>(
-            //    options => options.UseNpgsql(sqlConnectionString)
-            //);
+            string sqlConnectionString = "User ID=santa;Password=santa;Host=santapostgres;Port=5432;Database=santa;Pooling=true;";
+            services.AddDbContext<DomainModelPostgreSqlContext>(
+                options => options.UseNpgsql(sqlConnectionString)
+            );
 
-            //services.AddTransient<IDataAccessor, DataAccessorPostgreSql>();
-
+            services.AddTransient<IDataAccessor, DataAccessorPostgreSql>();
+#endif
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
