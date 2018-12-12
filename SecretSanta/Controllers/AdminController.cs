@@ -36,6 +36,7 @@ namespace SecretSanta.Controllers {
                 UserAdminSettings display = new UserAdminSettings {
                     UserId = user.Id,
                     Name = user.RegisteredName,
+                    UserName = user.UserName,
                     HasMatched = matches.Any(m => m.RequestorId == user.Id),
                     IsMatched = matches.Any(m => m.MatchedId == user.Id),
                     IsAdmin = user.IsAdmin

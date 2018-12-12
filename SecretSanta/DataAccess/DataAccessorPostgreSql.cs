@@ -55,6 +55,8 @@ namespace SecretSanta.DataAccess {
                 };
                 _context.MatchRestrictions.Add(restrictReverse);
             }
+
+            _context.SaveChanges();
         }
 
         public IList<Match> GetAllExistingMatches() {

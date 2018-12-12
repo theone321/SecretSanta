@@ -23,6 +23,10 @@ namespace SecretSanta.Models {
         /// </summary>
         public string Name { get; set; }
         /// <summary>
+        /// The User's user name
+        /// </summary>
+        public string UserName { get; set; }
+        /// <summary>
         /// Does this user have a match of their own?
         /// </summary>
         public bool HasMatched { get; set; }
