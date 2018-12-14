@@ -1,29 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SecretSanta.DataAccess;
+using SecretSanta.DataAccess.Models;
 using SecretSanta.Matching;
 using SecretSanta.Models;
-using SecretSanta.DataAccess.Models;
+using SecretSanta.Users;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SecretSanta.Controllers {
     public class AdminController : Controller {
-        private IDataAccessor _dataAccessor;
-        private ICreateSecretMatch _createSecretMatch;
-        private ISession _session;
+        private readonly IDataAccessor _dataAccessor;
+        private readonly ICreateSecretMatch _createSecretMatch;
+        private readonly ISessionManager _sessionManager;
 
-        public AdminController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch) {
+        public AdminController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch, ISessionManager sessionManager) {
             _dataAccessor = dataAccessor;
             _createSecretMatch = createSecretMatch;
+            _sessionManager = sessionManager;
         }
 
         [HttpGet]
         public IActionResult Index() {
-            if (!verifyAccess()) {
-                return RedirectToAction("LogIn", "Match");
+            if (!VerifyAccess()) {
+                return RedirectToAction("LogIn", "User");
             }
+
+            var session = _sessionManager.GetSession();
 
             bool.TryParse(_dataAccessor.GetSettingValue("AllowRegistration"), out bool allowRegistration);
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatching);
@@ -44,13 +47,13 @@ namespace SecretSanta.Controllers {
 
                 displayList.Add(display);
 
-                if (string.Equals(user.UserName, _session.User, StringComparison.Ordinal)) {
+                if (string.Equals(user.UserName, session.User, StringComparison.Ordinal)) {
                     currentUser = user;
                 }
             }
 
             AdminModel options = new AdminModel {
-                User = _session.User,
+                User = session.User,
                 UserId = currentUser?.Id ?? 0,
                 AllowRegistration = allowRegistration,
                 AllowMatching = allowMatching,
@@ -62,8 +65,8 @@ namespace SecretSanta.Controllers {
 
         [HttpPost]
         public IActionResult UpdateSettings(AdminModel options) {
-            if (!verifyAccess()) {
-                return RedirectToAction("SignIn", "Match");
+            if (!VerifyAccess()) {
+                return RedirectToAction("SignIn", "User");
             }
 
             _dataAccessor.SetSettingValue(nameof(options.AllowRegistration), options.AllowRegistration.ToString());
@@ -73,10 +76,9 @@ namespace SecretSanta.Controllers {
         }
 
         [HttpPost]
-        public IActionResult ToggleAdminAccess(int userId)
-        {
-            if (!verifyAccess()) {
-                return RedirectToAction("SignIn", "Match");
+        public IActionResult ToggleAdminAccess(int userId) {
+            if (!VerifyAccess()) {
+                return RedirectToAction("SignIn", "User");
             }
             User user = _dataAccessor.GetUserById(userId);
             _dataAccessor.SetUserAdmin(userId, !user.IsAdmin);
@@ -85,8 +87,8 @@ namespace SecretSanta.Controllers {
 
         [HttpPost]
         public IActionResult ResetUserPassword(int userId) {
-            if (!verifyAccess()) {
-                return RedirectToAction("SignIn", "Match");
+            if (!VerifyAccess()) {
+                return RedirectToAction("SignIn", "User");
             }
             _dataAccessor.UpdateUserPassword(userId, "password");
             return RedirectToAction("Index");
@@ -94,22 +96,19 @@ namespace SecretSanta.Controllers {
 
         [HttpPost]
         public IActionResult DeRegisterUser(int userId) {
-            if (!verifyAccess()) {
-                return RedirectToAction("SignIn", "Match");
+            if (!VerifyAccess()) {
+                return RedirectToAction("SignIn", "User");
             }
             _dataAccessor.DeRegisterAccount(userId);
             return RedirectToAction("Index");
         }
 
-        private bool verifyAccess() {
-            if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
-                
-                //verify user has session
-                if ((_session = _dataAccessor.GetSessionData(sessionId)) != null) {
-                    //verify that user is admin
-                    User user = _dataAccessor.GetUserByUserName(_session.User);
-                    return _dataAccessor.UserIsAdmin(user.Id);
-                }
+        private bool VerifyAccess() {
+            var sessionExists = _sessionManager.VerifySessionCookie(HttpContext.Request.Cookies);
+            if (sessionExists) {
+                var session = _sessionManager.GetSession();
+                var user = _dataAccessor.GetUserByUserName(session.User);
+                return _dataAccessor.UserIsAdmin(user.Id);
             }
             return false;
         }

@@ -29,8 +29,13 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a asp-area="" asp-controller="Match" asp-action="Index">Who's Registered?</a></li>
-                    <li><a asp-area="" asp-controller="Match" asp-action="SignIn">My Page</a></li>
-                    <li><a asp-area="" asp-controller="Match" asp-action="Register">Register</a></li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" role="button" aria-expanded="false" href="#" data-toggle="dropdown">SignIn <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li>@Html.ActionLink("My Page", "SignIn", "User", null, new { id = "item 1" })</li>
+                            <li>@Html.ActionLink("Register", "Register", "User", null, new { id = "item 2" })</li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>

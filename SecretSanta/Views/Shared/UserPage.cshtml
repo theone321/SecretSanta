@@ -70,13 +70,13 @@ else {
         <br />
         <input type="submit" value="Update My Interests" class="btn btn-default" />
     </form>
-    <button class="btn btn-default" onclick="location.href='@Url.Action("LogOut")'">Log Out</button>
+    <button class="btn btn-default" onclick="location.href='@Url.Action("LogOut", "User")'">Log Out</button>
 </div>
 
 
 @if (Model.UserIsAdmin) {
     <div>
-        <button class="btn btn-default" onclick="location.href='@Url.Action("OpenAdminPage")'">Go to Admin Page</button>
+        <button class="btn btn-default" onclick="location.href='@Url.Action("OpenAdminPage", "User")'">Go to Admin Page</button>
     </div>
 }
 

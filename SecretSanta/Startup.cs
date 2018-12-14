@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using SecretSanta.DataAccess;
 using SecretSanta.DependencyWrappers;
 using SecretSanta.Matching;
+using SecretSanta.Users;
 
 namespace SecretSanta {
     public class Startup {
@@ -22,6 +23,8 @@ namespace SecretSanta {
             services.AddMvc();
             services.AddTransient<ICreateSecretMatch, CreateSecretMatch>();
             services.AddTransient<IRandomWrapper, RandomWrapper>();
+            services.AddTransient<ISessionManager, SessionManager>();
+            services.AddTransient<IPageModelBuilder, PageModelBuilder>();
 
             //testing
 #if SIMULATE
