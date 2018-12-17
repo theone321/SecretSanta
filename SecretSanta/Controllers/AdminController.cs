@@ -22,11 +22,9 @@ namespace SecretSanta.Controllers {
 
         [HttpGet]
         public IActionResult Index() {
-            if (!VerifyAccess()) {
+            if (!VerifyAccess(out var session)) {
                 return RedirectToAction("LogIn", "User");
             }
-
-            var session = _sessionManager.GetSession();
 
             bool.TryParse(_dataAccessor.GetSettingValue("AllowRegistration"), out bool allowRegistration);
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatching);
@@ -65,7 +63,7 @@ namespace SecretSanta.Controllers {
 
         [HttpPost]
         public IActionResult UpdateSettings(AdminModel options) {
-            if (!VerifyAccess()) {
+            if (!VerifyAccess(out var session)) {
                 return RedirectToAction("SignIn", "User");
             }
 
@@ -77,7 +75,7 @@ namespace SecretSanta.Controllers {
 
         [HttpPost]
         public IActionResult ToggleAdminAccess(int userId) {
-            if (!VerifyAccess()) {
+            if (!VerifyAccess(out var session)) {
                 return RedirectToAction("SignIn", "User");
             }
             User user = _dataAccessor.GetUserById(userId);
@@ -87,7 +85,7 @@ namespace SecretSanta.Controllers {
 
         [HttpPost]
         public IActionResult ResetUserPassword(int userId) {
-            if (!VerifyAccess()) {
+            if (!VerifyAccess(out var session)) {
                 return RedirectToAction("SignIn", "User");
             }
             _dataAccessor.UpdateUserPassword(userId, "password");
@@ -96,17 +94,16 @@ namespace SecretSanta.Controllers {
 
         [HttpPost]
         public IActionResult DeRegisterUser(int userId) {
-            if (!VerifyAccess()) {
+            if (!VerifyAccess(out var session)) {
                 return RedirectToAction("SignIn", "User");
             }
             _dataAccessor.DeRegisterAccount(userId);
             return RedirectToAction("Index");
         }
 
-        private bool VerifyAccess() {
-            var sessionExists = _sessionManager.VerifySessionCookie(HttpContext.Request.Cookies);
+        private bool VerifyAccess(out ISession session) {
+            var sessionExists = _sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out session);
             if (sessionExists) {
-                var session = _sessionManager.GetSession();
                 var user = _dataAccessor.GetUserByUserName(session.User);
                 return _dataAccessor.UserIsAdmin(user.Id);
             }

@@ -32,19 +32,19 @@ namespace SecretSanta.Controllers {
         [HttpGet]
         public IActionResult GetMatch() {
             //verify access
-            if (!VerifySessionCookie()) {
+            if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
                 return View("InvalidCredentials");
             }
-            UserPageModel userModel = _pageModelBuilder.BuildUserPageModelFromDB(_sessionManager.GetSession().User);
+            UserPageModel userModel = _pageModelBuilder.BuildUserPageModelFromDB(session.User);
             return View("UserPage", userModel);
         }
         
         public IActionResult CreateMatch(UserPageModel userModel) {
             //verify access
-            if (!VerifySessionCookie()) {
+            if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
                 return View("InvalidCredentials");
             }
-            bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatch);
+            bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out var allowMatch);
             userModel.AllowMatching = allowMatch;
             if (userModel.UserId <= 0 || !userModel.AllowMatching) {
                 //How? Why? Just start over
@@ -62,10 +62,10 @@ namespace SecretSanta.Controllers {
 
         public IActionResult RerollResult(UserPageModel userModel) {
             //verify access
-            if (!VerifySessionCookie()) {
+            if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
                 return View("InvalidCredentials");
             }
-            bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out bool allowMatch);
+            bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out var allowMatch);
             userModel.AllowMatching = allowMatch;
             if (userModel.UserId <= 0 || !userModel.AllowMatching) { 
                 //How? Why? Just start over
@@ -83,7 +83,7 @@ namespace SecretSanta.Controllers {
         [HttpPost]
         public IActionResult MakeHardRestriction(UserPageModel userModel) {
             //verify access
-            if (!VerifySessionCookie()) {
+            if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
                 return View("InvalidCredentials");
             }
 
@@ -94,10 +94,6 @@ namespace SecretSanta.Controllers {
             userModel = _pageModelBuilder.BuildUserPageModelFromDB(userModel.UserId);
 
             return View("UserPage", userModel);
-        }
-
-        private bool VerifySessionCookie() {
-            return _sessionManager.VerifySessionCookie(HttpContext.Request.Cookies);
         }
     }
 }

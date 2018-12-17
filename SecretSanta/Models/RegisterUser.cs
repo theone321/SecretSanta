@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using SecretSanta.DataAccess.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SecretSanta.Models {
     public class RegisterUser {

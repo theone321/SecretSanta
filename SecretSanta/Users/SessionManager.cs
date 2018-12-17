@@ -10,16 +10,14 @@ namespace SecretSanta.Users {
             _dataAccessor = dataAccessor;
         }
 
-        public bool VerifySessionCookie(IRequestCookieCollection cookies) {
+        public bool TryGetSessionCookie(IRequestCookieCollection cookies, out DataAccess.Models.ISession session) {
             if (cookies.TryGetValue("sessionId", out string sessionId)) {
                 _session = _dataAccessor.GetSessionData(sessionId);
+                session = _session;
                 return _session != null;
             }
+            session = null;
             return false;
-        }
-
-        public DataAccess.Models.ISession GetSession() {
-            return _session;
         }
 
         public void EndSession() {

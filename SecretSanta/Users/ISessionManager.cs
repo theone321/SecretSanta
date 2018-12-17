@@ -2,8 +2,7 @@
 
 namespace SecretSanta.Users {
     public interface ISessionManager {
-        bool VerifySessionCookie(IRequestCookieCollection cookies);
-        DataAccess.Models.ISession GetSession();
+        bool TryGetSessionCookie(IRequestCookieCollection cookies, out DataAccess.Models.ISession session);
         void EndSession();
     }
 }

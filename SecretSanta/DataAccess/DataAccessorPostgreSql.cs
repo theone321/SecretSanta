@@ -87,8 +87,7 @@ namespace SecretSanta.DataAccess {
             //get the account first
             User user = _context.Users.FirstOrDefault(n => string.Equals(n.UserName, username, StringComparison.Ordinal));
             if (user != null) {
-                //TODO: New Exception
-                throw new Exception("This user is already registered.");
+                throw new AlreadyRegisteredException();
             }
             else {
                 //SHA256 hash the password

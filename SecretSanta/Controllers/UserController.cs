@@ -115,7 +115,7 @@ namespace SecretSanta.Controllers {
         [HttpPost]
         public IActionResult UpdateInterests(UserPageModel user) {
             //verify access
-            if (!VerifySessionCookie()) {
+            if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
                 return View("InvalidCredentials");
             }
             _dataAccessor.SetUserInterests(user.UserId, user.Interests);
@@ -143,27 +143,24 @@ namespace SecretSanta.Controllers {
 
         [HttpPost]
         public IActionResult UpdatePassword(UserPageModel pageModel) {
-            if (!VerifySessionCookie()) {
+            if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
                 return View("InvalidCredentials");
             }
+
             //verify the passwords match, then verify the current password, then update
             if (!string.Equals(pageModel.PasswordReset.NewPassword, pageModel.PasswordReset.VerifyPassword, StringComparison.InvariantCulture)) {
                 return View("PasswordsNotMatch");
             }
 
-            var session = _sessionManager.GetSession();
             //verify user
             if (!_dataAccessor.VerifyCredentials(session.User, pageModel.PasswordReset.CurrentPassword)) {
                 return View("InvalidCredentials");
             }
+
             //update password
             User user = _dataAccessor.GetUserByUserName(session.User);
             _dataAccessor.UpdateUserPassword(user.Id, pageModel.PasswordReset.NewPassword);
             return RedirectToAction("GetMatch", "Match");
-        }
-
-        private bool VerifySessionCookie() {
-            return _sessionManager.VerifySessionCookie(HttpContext.Request.Cookies);
         }
     }
 }
