@@ -9,15 +9,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace SecretSanta.Controllers {
-    public class AdminController : Controller {
-        private readonly IDataAccessor _dataAccessor;
+    public class AdminController : BaseController {
         private readonly ICreateSecretMatch _createSecretMatch;
-        private readonly ISessionManager _sessionManager;
 
-        public AdminController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch, ISessionManager sessionManager) {
-            _dataAccessor = dataAccessor;
+        public AdminController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch, ISessionManager sessionManager)
+            : base(sessionManager, dataAccessor) {
             _createSecretMatch = createSecretMatch;
-            _sessionManager = sessionManager;
         }
 
         [HttpGet]

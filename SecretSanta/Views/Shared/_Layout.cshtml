@@ -30,10 +30,20 @@
                 <ul class="nav navbar-nav">
                     <li><a asp-area="" asp-controller="Match" asp-action="Index">Who's Registered?</a></li>
                     <li class="dropdown">
-                        <a class="dropdown-toggle" role="button" aria-expanded="false" href="#" data-toggle="dropdown">SignIn <span class="caret"></span></a>
+                        <a class="dropdown-toggle" role="button" aria-expanded="false" href="#" data-toggle="dropdown">My Page<span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
-                            <li>@Html.ActionLink("My Page", "SignIn", "User")</li>
-                            <li>@Html.ActionLink("Register", "Register", "User")</li>
+                            @if (TempData["IsUserSignedIn"] == null || !(bool)TempData.Peek("IsUserSignedIn")) {
+                                <li>@Html.ActionLink("Sign In", "SignIn", "User")</li>
+                                <li>@Html.ActionLink("Register", "Register", "User")</li>
+                            }
+                            else {
+                                <li>@Html.ActionLink("My Page", "GetMatch", "Match")</li>
+                                <li>@Html.ActionLink("Change Password", "UpdatePassword", "User")</li>
+                                @if (TempData["IsUserAdmin"] != null && (bool)TempData.Peek("IsUserAdmin")) {
+                                    <li>@Html.ActionLink("Admin Options", "Index", "Admin")</li>
+                                }
+                                <li>@Html.ActionLink("Sign Out", "SignOut", "User")</li>
+                            }
                         </ul>
                     </li>
                 </ul>

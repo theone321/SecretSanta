@@ -7,14 +7,11 @@ using SecretSanta.Users;
 using System;
 
 namespace SecretSanta.Controllers {
-    public class UserController : Controller {
-        private readonly IDataAccessor _dataAccessor;
-        private readonly ISessionManager _sessionManager;
+    public class UserController : BaseController {
         private readonly IPageModelBuilder _pageModelBuilder;
 
-        public UserController(IDataAccessor dataAccessor, ISessionManager sessionManager, IPageModelBuilder pageModelBuilder) {
-            _dataAccessor = dataAccessor;
-            _sessionManager = sessionManager;
+        public UserController(IDataAccessor dataAccessor, ISessionManager sessionManager, IPageModelBuilder pageModelBuilder)
+            : base(sessionManager, dataAccessor) {
             _pageModelBuilder = pageModelBuilder;
         }
 
@@ -62,12 +59,8 @@ namespace SecretSanta.Controllers {
                         Response.Cookies.Delete("sessionId");
                         throw new InvalidCredentialsException();
                     }
-
-                    UserPageModel secretMatch = _pageModelBuilder.BuildUserPageModelFromDB(session.User);
-                    if (secretMatch.TheirSecretMatchId <= 0) {
-                        return RedirectToAction("GetMatch", "Match");
-                    }
-                    return View("UserPage", secretMatch);
+                    
+                    return RedirectToAction("GetMatch", "Match");
                 }
                 return View("SignIn", new AuthenticatedUser());
             }
@@ -93,13 +86,7 @@ namespace SecretSanta.Controllers {
 
                 //store the cookie
                 Response.Cookies.Append("sessionId", session.SessionId);
-
-                UserPageModel secretMatch = _pageModelBuilder.BuildUserPageModelFromDB(authUser.Username);
-                if (secretMatch.TheirSecretMatchId <= 0) {
-                    return RedirectToAction("GetMatch", "Match");
-                }
-                return View("UserPage", secretMatch);
-
+                return RedirectToAction("GetMatch", "Match");
             }
             catch (InvalidCredentialsException) {
                 return View("InvalidCredentials");
@@ -127,7 +114,7 @@ namespace SecretSanta.Controllers {
         }
 
         [HttpGet]
-        public IActionResult LogOut() {
+        public IActionResult SignOut() {
             if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
                 _dataAccessor.EndSession(sessionId);
                 HttpContext.Response.Cookies.Delete("sessionId");
@@ -139,6 +126,14 @@ namespace SecretSanta.Controllers {
         [HttpGet]
         public IActionResult OpenAdminPage() {
             return RedirectToAction("Index", "Admin");
+        }
+
+        public IActionResult UpdatePassword() {
+            if (!_sessionManager.TryGetSessionCookie(Request.Cookies, out var session)) {
+                return View("InvalidCredentials");
+            }
+            var user = _pageModelBuilder.BuildUserPageModelFromDB(session.User);
+            return View("UpdatePassword", user);
         }
 
         [HttpPost]

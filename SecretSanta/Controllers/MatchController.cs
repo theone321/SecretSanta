@@ -1,32 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SecretSanta.Models;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using SecretSanta.DataAccess;
-using System.Linq;
 using SecretSanta.Matching;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
+using SecretSanta.Models;
 using SecretSanta.Users;
+using System.Linq;
 
 namespace SecretSanta.Controllers {
-    public class MatchController : Controller {
-        private readonly IDataAccessor _dataAccessor;
+    public class MatchController : BaseController {
         private readonly ICreateSecretMatch _createSecretMatch;
-        private readonly ISessionManager _sessionManager;
         private readonly IPageModelBuilder _pageModelBuilder;
 
-        public MatchController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch, 
-            ISessionManager sessionManager, IPageModelBuilder pageModelBuilder) {
-            _dataAccessor = dataAccessor;
+        public MatchController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch,
+            ISessionManager sessionManager, IPageModelBuilder pageModelBuilder)
+            : base(sessionManager, dataAccessor) {
             _createSecretMatch = createSecretMatch;
-            _sessionManager = sessionManager;
             _pageModelBuilder = pageModelBuilder;
         }
 
         [HttpGet]
         public IActionResult Index() {
-            List<string> registered = _dataAccessor.GetAllUsers().Select(n => n.RegisteredName).ToList();
+            var registeredUsernames = _dataAccessor.GetAllUsers().Select(n => n.RegisteredName).ToList();
             int matchCount = _dataAccessor.GetAllExistingMatches().Count;
-            return View("Index", new IndexModel() { RegisteredNames = registered, MatchCounts = matchCount });
+            return View("Index", new IndexModel() { RegisteredNames = registeredUsernames, MatchCounts = matchCount });
         }
 
         [HttpGet]
@@ -35,10 +31,10 @@ namespace SecretSanta.Controllers {
             if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
                 return View("InvalidCredentials");
             }
-            UserPageModel userModel = _pageModelBuilder.BuildUserPageModelFromDB(session.User);
+            var userModel = _pageModelBuilder.BuildUserPageModelFromDB(session.User);
             return View("UserPage", userModel);
         }
-        
+
         public IActionResult CreateMatch(UserPageModel userModel) {
             //verify access
             if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
@@ -67,7 +63,7 @@ namespace SecretSanta.Controllers {
             }
             bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching"), out var allowMatch);
             userModel.AllowMatching = allowMatch;
-            if (userModel.UserId <= 0 || !userModel.AllowMatching) { 
+            if (userModel.UserId <= 0 || !userModel.AllowMatching) {
                 //How? Why? Just start over
                 return RedirectToAction("SignIn", "User");
             }
@@ -87,7 +83,7 @@ namespace SecretSanta.Controllers {
                 return View("InvalidCredentials");
             }
 
-            if (userModel.SignificantOther?.UserId > 0) { 
+            if (userModel.SignificantOther?.UserId > 0) {
                 _dataAccessor.CreateRestriction(userModel.UserId, userModel.SignificantOther.UserId, true, false);
             }
 
