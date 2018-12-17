@@ -1,4 +1,4 @@
-﻿#define SIMULATE
+﻿//#define SIMULATE
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
