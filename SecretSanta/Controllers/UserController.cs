@@ -128,6 +128,7 @@ namespace SecretSanta.Controllers {
             return RedirectToAction("Index", "Admin");
         }
 
+        [HttpGet]
         public IActionResult UpdatePassword() {
             if (!_sessionManager.TryGetSessionCookie(Request.Cookies, out var session)) {
                 return View("InvalidCredentials");
