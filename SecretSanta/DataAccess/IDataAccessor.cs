@@ -1,4 +1,5 @@
 ﻿using SecretSanta.DataAccess.Models;
+using System;
 using System.Collections.Generic;
 
 namespace SecretSanta.DataAccess {
@@ -29,5 +30,11 @@ namespace SecretSanta.DataAccess {
     ISession GetSessionData(string sessionId);
     bool VerifySession(string username, string sessionId);
     void EndSession(string sessionId);
+    Event GetEvent(int id);
+    List<User> GetEventAdmins(int eventId);
+    int CreateEvent(Event newEvent, int eventOwnerUserId);
+    void SetUserAdmin(int eventId, int userId, bool admin);
+    List<Event> GetEventsForUser(int userId);
+    void AddUserToEvent(int userId, Guid sharedEventGuid);
   }
 }

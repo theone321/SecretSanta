@@ -36,8 +36,8 @@
                         <button type="submit" asp-action="ResetUserPassword" asp-route-userId="@user.UserId">Reset Password</button>
                         @if (Model.UserId != user.UserId) { @*Sorry, you can't delete yourself*@
                             <button type="submit" asp-action="DeRegisterUser" asp-route-userId="@user.UserId">Delete User</button>
-                            var adminText = user.IsAdmin ? "Revoke Admin" : "Make Admin";
 
+                            var adminText = user.IsAdmin ? "Revoke Admin" : "Make Admin";
                             <button type="submit" asp-action="ToggleAdminAccess" asp-route-userId="@user.UserId">@adminText</button>
                         }
                     </td>

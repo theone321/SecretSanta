@@ -1,12 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace SecretSanta.DataAccess.Models {
-  public class Match {
+  public class UserEvent {
     [Key]
     public int Id { get; set; }
+    public int UserId { get; set; }
     public int EventId { get; set; }
-    public int RequestorId { get; set; }
-    public int MatchedId { get; set; }
-    public bool RerollAllowed { get; set; }
   }
 }

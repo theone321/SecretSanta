@@ -1,0 +1,14 @@
+﻿@model SecretSanta.Models.JoinEventModel
+@{
+    ViewData["Title"] = "Join Event";
+}
+
+<h2>Join Event</h2>
+
+
+<p>Enter an event ID you've obtained from the event owner to join the event.</p>
+<form asp-action="ConnectWithEvent">
+    <label asp-for="SharedEventGuid">Shared Event ID</label>
+    <input asp-for="SharedEventGuid" />
+    <input type="submit" value="Enter" />
+</form>

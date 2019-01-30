@@ -1,0 +1,31 @@
+﻿@model SecretSanta.Models.ChooseEventModel
+@{
+    ViewData["Title"] = "Choose Event";
+}
+
+<h2>Choose Event</h2>
+
+<form method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Event</th>
+                <th>Description</th>
+                <th>Date</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var eventt in Model.Events) {
+                <tr>
+                    <td><button id="chooseEventLink" asp-action="ChooseEvent" asp-route-chosenEventId="@eventt.Id" />Choose</td>
+                    <td>@eventt.Name</td>
+                    <td>@eventt.Description</td>
+                    <td>@eventt.StartDate</td>
+                    <td>@eventt.Location</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>

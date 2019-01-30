@@ -1,0 +1,54 @@
+﻿@model SecretSanta.Models.Event
+@{
+    ViewData["Title"] = "New Event";
+}
+
+<h2>New Event</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="NewEvent">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <table>
+                    <tr>
+                        <td>
+                            <label asp-for="EventName">Event Name:</label>
+                        </td>
+                        <td>
+                            <input asp-for="EventName" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="EventDescription">Description:</label>
+                        </td>
+                        <td>
+                            <input asp-for="EventDescription" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="EventDate">Event Date:</label>
+                        </td>
+                        <td>
+                            <input asp-for="EventDate" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="Location">Location:</label>
+                        </td>
+                        <td>
+                            <input asp-for="Location" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create Event" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+

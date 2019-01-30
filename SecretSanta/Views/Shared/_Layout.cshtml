@@ -37,11 +37,20 @@
                                 <li>@Html.ActionLink("Register", "Register", "User")</li>
                             }
                             else {
-                                <li>@Html.ActionLink("My Page", "GetMatch", "Match")</li>
-                                <li>@Html.ActionLink("Change Password", "UpdatePassword", "User")</li>
+                                @if (TempData["EventId"] != null && (int)TempData.Peek("EventId") > 0) {
+                                    <li>@Html.ActionLink("My Page", "GetMatch", "Match", new { eventId = (int)TempData.Peek("EventId") })</li>
+                                }
+                                else {
+                                    <li>@Html.ActionLink("My Page", "ChooseEvent", "Event")</li>
+                                }
+                                @if (TempData["UserHasMultipleEvents"] != null && (bool)TempData.Peek("UserHasMultipleEvents")) {
+                                    <li>@Html.ActionLink("Choose Event", "ChooseEvent", "Event")</li>
+                                }
+                                <li>@Html.ActionLink("Join Event", "ConnectWithEvent", "Event")</li>
                                 @if (TempData["IsUserAdmin"] != null && (bool)TempData.Peek("IsUserAdmin")) {
                                     <li>@Html.ActionLink("Admin Options", "Index", "Admin")</li>
                                 }
+                                <li>@Html.ActionLink("Change Password", "UpdatePassword", "User")</li>
                                 <li>@Html.ActionLink("Sign Out", "SignOut", "User")</li>
                             }
                         </ul>
@@ -54,7 +63,7 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; 2017-2018 - Tobias Becker, Michael Marvin</p>
+            <p>&copy; 2017-2019 - Tobias Becker, Michael Marvin</p>
         </footer>
     </div>
 
