@@ -1,4 +1,5 @@
-﻿using SecretSanta.DataAccess.Models;
+﻿using SecretSanta.Constants;
+using SecretSanta.DataAccess.Models;
 using SecretSanta.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -7,9 +8,9 @@ using System.Linq;
 namespace SecretSanta.DataAccess {
   public class DataAccessorSimulated : IDataAccessor {
     private static List<User> _users = new List<User> {
-      new User { Id = 1, UserName = "userA", RegisteredName = "User A", IsAdmin = true, Interests = "a", Password = "pass" },
+      new User { Id = 1, UserName = "userA", RegisteredName = "User A", /*IsAdmin = true, */Interests = "a", Password = "pass" },
       new User { Id = 2, UserName = "userB", RegisteredName = "User B", Interests = "b", Password = "pass" },
-      new User { Id = 3, UserName = "userC", RegisteredName = "User C", IsAdmin = true, Interests = "c", Password = "pass" },
+      new User { Id = 3, UserName = "userC", RegisteredName = "User C", /*IsAdmin = true, */Interests = "c", Password = "pass" },
       new User { Id = 4, UserName = "userD", RegisteredName = "User D", Interests = "d", Password = "pass" },
       new User { Id = 5, UserName = "userE", RegisteredName = "User E", Interests = "e" },
       new User { Id = 6, UserName = "userF", RegisteredName = "User F", Interests = "f" },
@@ -37,9 +38,11 @@ namespace SecretSanta.DataAccess {
     private static List<Match> _matches = new List<Match>();
 
     private static List<Setting> _settings = new List<Setting> {
-      new Setting() { Name = "AllowRegistration", Value = "true" },
-      new Setting() { Name = "AllowMatching", Value = "true" },
-      new Setting() { Name = "SessionTimeout", Value = "15" } //value is in minutes
+      new Setting() { Name = AdminSettings.AllowRegistration, Value = "false", EventId = 1 },
+      new Setting() { Name = AdminSettings.AllowMatching, Value = "true", EventId = 1 },
+      new Setting() { Name = AdminSettings.AllowRegistration, Value = "true", EventId = 2 },
+      new Setting() { Name = AdminSettings.AllowMatching, Value = "false", EventId = 2 },
+      new Setting() { Name = AdminSettings.SessionTimeout, Value = "15" }, //value is in minutes
     };
 
     private static List<Event> _events = new List<Event> {
@@ -98,30 +101,31 @@ namespace SecretSanta.DataAccess {
       return _users.Find(u => string.Equals(u.UserName, username, StringComparison.Ordinal));
     }
 
-    public Match GetExistingMatch(int requestor) {
-      return _matches.Where(m => m.RequestorId == requestor)?.FirstOrDefault();
+    public Match GetExistingMatch(int requestor, int eventId) {
+      return _matches.Where(m => m.RequestorId == requestor && m.EventId == eventId)?.FirstOrDefault();
     }
 
-    public IList<MatchRestriction> GetMatchRestrictions(int requestor) {
-      return _restrictions.Where(r => r.RequestorId == requestor).ToList();
+    public IList<MatchRestriction> GetMatchRestrictions(int requestor, int eventId) {
+      return _restrictions.Where(r => r.RequestorId == requestor && r.EventId == eventId).ToList();
     }
 
-    public void RemoveMatch(int requestor, int matchedId) {
-      _matches.RemoveAll(m => m.RequestorId == requestor && m.MatchedId == matchedId);
+    public void RemoveMatch(int requestor, int matchedId, int eventId) {
+      _matches.RemoveAll(m => m.RequestorId == requestor && m.MatchedId == matchedId && m.EventId == eventId);
     }
 
-    public void CreateMatch(int requestor, int matchedId, bool allowReroll) {
+    public void CreateMatch(int requestor, int matchedId, bool allowReroll, int eventId) {
       Match match = new Match() {
         Id = _matches.LastOrDefault()?.Id + 1 ?? 1,
         RequestorId = requestor,
         MatchedId = matchedId,
-        RerollAllowed = allowReroll
+        RerollAllowed = allowReroll,
+        EventId = eventId
       };
       _matches.Add(match);
     }
 
-    public IList<Match> GetAllExistingMatches() {
-      return _matches;
+    public IList<Match> GetAllExistingMatchesForEvent(int eventId) {
+      return _matches.Where(m => m.EventId == eventId).ToList();
     }
 
     public bool AccountAlreadyRegistered(string username) {
@@ -167,12 +171,13 @@ namespace SecretSanta.DataAccess {
       }
     }
 
-    public void CreateRestriction(int requestor, int restrictee, bool strict, bool makeReverse) {
+    public void CreateRestriction(int requestor, int restrictee, bool strict, bool makeReverse, int eventId) {
       MatchRestriction restrict = new MatchRestriction() {
         Id = _restrictions?.LastOrDefault()?.Id + 1 ?? 1,
         RequestorId = requestor,
         RestrictedId = restrictee,
-        StrictRestriction = strict
+        StrictRestriction = strict,
+        EventId = eventId
       };
 
       _restrictions.Add(restrict);
@@ -182,36 +187,49 @@ namespace SecretSanta.DataAccess {
           Id = _restrictions?.LastOrDefault()?.Id + 1 ?? 1,
           RequestorId = restrictee,
           RestrictedId = requestor,
-          StrictRestriction = strict
+          StrictRestriction = strict,
+          EventId = eventId
         };
         _restrictions.Add(restrictReverse);
       }
     }
 
-    public bool UserIsAdmin(int id) {
-      return GetUserById(id)?.IsAdmin == true;
+    //public bool UserIsAdmin(int id) {
+    //  return GetUserById(id)?.IsAdmin == true;
+    //}
+    //
+    //public void SetUserAdmin(int id, bool admin) {
+    //  User user = GetUserById(id);
+    //  if (user != null) {
+    //    user.IsAdmin = admin;
+    //  }
+    //}
+
+    public string GetSettingValue(string setting, int eventId = 0) {
+      return _settings.FirstOrDefault(s => s.EventId == eventId && string.Equals(s.Name, setting, StringComparison.Ordinal))?.Value;
     }
 
-    public void SetUserAdmin(int id, bool admin) {
-      User user = GetUserById(id);
-      if (user != null) {
-        user.IsAdmin = admin;
-      }
-    }
-
-    public string GetSettingValue(string setting) {
-      return _settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal))?.Value;
-    }
-
-    public void SetSettingValue(string setting, string value) {
-      Setting settingObj = _settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal));
+    public void SetSettingValue(string setting, string value, int eventId) {
+      var settingObj = _settings.FirstOrDefault(s => s.EventId == eventId && string.Equals(s.Name, setting, StringComparison.Ordinal));
       if (settingObj != null) {
         settingObj.Value = value;
       }
     }
 
-    public IList<Setting> GetAllSettings() {
-      return _settings;
+    public Setting AddSetting(string settingName, string value, int eventId) {
+      var setting = new Setting {
+        Name = settingName,
+        Value = value,
+        EventId = eventId
+      };
+
+      _settings.Add(setting);
+
+      return setting;
+    }
+
+    public IList<Setting> GetAllSettingsForEvent(int eventId) {
+      return _settings.Where(s => s.EventId == eventId).ToList();
     }
 
     public string GetUserInterests(int id) {
@@ -249,7 +267,7 @@ namespace SecretSanta.DataAccess {
         //check the timestamp, if less than the timeout then good
         DateTime rightNow = DateTime.UtcNow;
 
-        int.TryParse(GetSettingValue("SessionTimeout"), out int timeout);
+        int.TryParse(GetSettingValue(AdminSettings.SessionTimeout), out int timeout);
 
         if ((rightNow - session.TimeStamp) < TimeSpan.FromMinutes(timeout)) {
           session.TimeStamp = DateTime.UtcNow;
@@ -268,7 +286,7 @@ namespace SecretSanta.DataAccess {
         //check the timestamp, if less than the timeout then good
         DateTime rightNow = DateTime.UtcNow;
 
-        int.TryParse(GetSettingValue("SessionTimeout"), out int timeout);
+        int.TryParse(GetSettingValue(AdminSettings.SessionTimeout), out int timeout);
 
         if ((rightNow - session.TimeStamp) < TimeSpan.FromMinutes(timeout)) {
           session.TimeStamp = DateTime.UtcNow;
@@ -287,6 +305,10 @@ namespace SecretSanta.DataAccess {
 
     public Event GetEvent(int id) {
       return _events.FirstOrDefault(e => e.Id == id);
+    }
+
+    public Event GetEvent(Guid sharedEventId) {
+      return _events.FirstOrDefault(e => e.SharedId.Equals(sharedEventId));
     }
 
     public List<User> GetEventAdmins(int eventId) {

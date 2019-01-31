@@ -24,21 +24,18 @@
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
                 </button>
-                <a asp-area="" asp-controller="Match" asp-action="Index" class="navbar-brand">Secret Santa</a>
+                <a asp-area="" asp-controller="User" asp-action="SignIn" class="navbar-brand">Secret Santa</a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Match" asp-action="Index">Who's Registered?</a></li>
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" role="button" aria-expanded="false" href="#" data-toggle="dropdown">My Page<span class="caret"></span></a>
-                        <ul class="dropdown-menu" role="menu">
-                            @if (TempData["IsUserSignedIn"] == null || !(bool)TempData.Peek("IsUserSignedIn")) {
-                                <li>@Html.ActionLink("Sign In", "SignIn", "User")</li>
-                                <li>@Html.ActionLink("Register", "Register", "User")</li>
-                            }
-                            else {
+                    @*<li><a asp-area="" asp-controller="Match" asp-action="Index">Who's Registered?</a></li>*@
+                    @if (TempData["IsUserSignedIn"] != null && (bool)TempData.Peek("IsUserSignedIn")) {
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" role="button" aria-expanded="false" href="#" data-toggle="dropdown">Event<span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
                                 @if (TempData["EventId"] != null && (int)TempData.Peek("EventId") > 0) {
                                     <li>@Html.ActionLink("My Page", "GetMatch", "Match", new { eventId = (int)TempData.Peek("EventId") })</li>
+                                    <li>@Html.ActionLink("Who's Registered?", "Index", "Match", new { eventId = (int)TempData.Peek("EventId") })</li>
                                 }
                                 else {
                                     <li>@Html.ActionLink("My Page", "ChooseEvent", "Event")</li>
@@ -46,10 +43,22 @@
                                 @if (TempData["UserHasMultipleEvents"] != null && (bool)TempData.Peek("UserHasMultipleEvents")) {
                                     <li>@Html.ActionLink("Choose Event", "ChooseEvent", "Event")</li>
                                 }
+                                <li>@Html.ActionLink("New Event", "NewEvent", "Event")</li>
                                 <li>@Html.ActionLink("Join Event", "ConnectWithEvent", "Event")</li>
                                 @if (TempData["IsUserAdmin"] != null && (bool)TempData.Peek("IsUserAdmin")) {
                                     <li>@Html.ActionLink("Admin Options", "Index", "Admin")</li>
                                 }
+                            </ul>
+                        </li>
+                    }
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" role="button" aria-expanded="false" href="#" data-toggle="dropdown">User<span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            @if (TempData["IsUserSignedIn"] == null || !(bool)TempData.Peek("IsUserSignedIn")) {
+                                <li>@Html.ActionLink("Sign In", "SignIn", "User")</li>
+                                <li>@Html.ActionLink("Register", "Register", "User")</li>
+                            }
+                            else {
                                 <li>@Html.ActionLink("Change Password", "UpdatePassword", "User")</li>
                                 <li>@Html.ActionLink("Sign Out", "SignOut", "User")</li>
                             }

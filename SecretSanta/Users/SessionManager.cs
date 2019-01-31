@@ -25,7 +25,16 @@ namespace SecretSanta.Users {
     }
 
     public void SetCurrentEventId(int eventId) {
-      _session.EventId = eventId;
+      if (_session != null) {
+        _session.EventId = eventId;
+      }
+    }
+
+    public int GetCurrentEventId() {
+      if (_session != null) {
+        return _session.EventId;
+      }
+      return 0;
     }
   }
 }

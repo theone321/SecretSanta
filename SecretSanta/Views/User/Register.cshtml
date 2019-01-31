@@ -4,59 +4,52 @@
     ViewData["Title"] = "Register";
 }
 
-<h2>Register for Secret Santa</h2>
-<p>By registering, you are agreeing that others can get you as their secret match.</p>
-<p>If you do not want to be included in the Secret Santa gift exchange, do not register.</p>
+<h2>Register</h2>
 
-@if (Model.AllowRegister) {
-    <hr />
-    <div class="row">
-        <div class="col-md-4">
-            <form asp-action="Register">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="form-group">
-                    <table>
-                        <tr>
-                            <td>
-                                <label asp-for="UserNameToRegister">Username:</label>
-                            </td>
-                            <td>
-                                <input asp-for="UserNameToRegister" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label asp-for="RealName">Real Name:</label>
-                            </td>
-                            <td>
-                                <input asp-for="RealName" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label asp-for="ChosenPassword">Password:</label>
-                            </td>
-                            <td>
-                                <input asp-for="ChosenPassword" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label asp-for="VerifyPassword" style="width:150px">Verify Password:</label>
-                            </td>
-                            <td>
-                                <input asp-for="VerifyPassword" />
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Register" class="btn btn-default" />
-                </div>
-            </form>
-        </div>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Register">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <table>
+                    <tr>
+                        <td>
+                            <label asp-for="UserNameToRegister">Username:</label>
+                        </td>
+                        <td>
+                            <input asp-for="UserNameToRegister" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="RealName">Real Name:</label>
+                        </td>
+                        <td>
+                            <input asp-for="RealName" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="ChosenPassword">Password:</label>
+                        </td>
+                        <td>
+                            <input asp-for="ChosenPassword" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="VerifyPassword" style="width:150px">Verify Password:</label>
+                        </td>
+                        <td>
+                            <input asp-for="VerifyPassword" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Register" class="btn btn-default" />
+            </div>
+        </form>
     </div>
-}
-else {
-    <h2>Registration is currently closed, sorry!</h2>
-}
+</div>

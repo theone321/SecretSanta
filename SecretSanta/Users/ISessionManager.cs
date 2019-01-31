@@ -5,5 +5,6 @@ namespace SecretSanta.Users {
     bool TryGetSessionCookie(IRequestCookieCollection cookies, out DataAccess.Models.ISession session);
     void EndSession();
     void SetCurrentEventId(int eventId);
+    int GetCurrentEventId();
   }
 }

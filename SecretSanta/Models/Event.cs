@@ -7,5 +7,7 @@ namespace SecretSanta.Models {
     public string Location { get; set; }
     public DateTime EventDate { get; set; }
     public Guid SharedId { get; set; }
+    public bool AllowMatching { get; set; }
+    public bool AllowRegistration { get; set; }
   }
 }

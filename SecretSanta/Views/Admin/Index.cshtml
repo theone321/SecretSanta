@@ -3,7 +3,12 @@
     ViewData["Title"] = "Admin";
 }
 
-<h2>Welcome to the Admin Page, @Model.User</h2>
+<h2>Welcome to the Admin Page for @Model.EventName, @Model.User</h2>
+
+<p>This events Shared ID: @Model.SharedEventId.ToString()</p>
+<p>Share this ID with people you'd like to invite to this event.</p>
+
+<br/>
 
 <form asp-action="UpdateSettings">
     <label asp-for="AllowRegistration">Allow Registration</label>

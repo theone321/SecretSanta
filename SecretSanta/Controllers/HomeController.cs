@@ -6,7 +6,7 @@ namespace SecretSanta.Controllers {
     public class HomeController : Controller {
         [HttpGet]
         public IActionResult Index() {
-            return new RedirectToActionResult("Index", "Match", null);
+            return RedirectToAction("SignIn", "User");
         }
 
         [HttpGet]

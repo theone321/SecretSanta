@@ -7,7 +7,7 @@ using SecretSanta.Exceptions;
 
 namespace SecretSanta.Matching {
     public interface ICreateSecretMatch {
-        int FindRandomMatch(int requestor);
+        int FindRandomMatch(int requestor, int eventId);
     }
 
     public class CreateSecretMatch : ICreateSecretMatch {
@@ -19,12 +19,12 @@ namespace SecretSanta.Matching {
             _random = randomWrapper;
         }
 
-        public int FindRandomMatch(int requestor) {
+        public int FindRandomMatch(int requestor, int eventId) {
             var allUsers = _dataAccessor.GetAllUsers().ToList();
             allUsers.RemoveAll(n => n.Id == requestor);
             var usersThatCannotBeMatched = new List<User>();
-            var restrictions = _dataAccessor.GetMatchRestrictions(requestor);
-            var existingMatches = _dataAccessor.GetAllExistingMatches();
+            var restrictions = _dataAccessor.GetMatchRestrictions(requestor, eventId);
+            var existingMatches = _dataAccessor.GetAllExistingMatchesForEvent(eventId);
             foreach (var user in allUsers) {
                 if (restrictions?.Any(r => r.RestrictedId == user.Id) == true) {
                     usersThatCannotBeMatched.Add(user);

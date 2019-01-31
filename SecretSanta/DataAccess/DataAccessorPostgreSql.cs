@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using SecretSanta.DataAccess.Models;
+using SecretSanta.Constants;
 
 namespace SecretSanta.DataAccess {
   public class DataAccessorPostgreSql : IDataAccessor {
@@ -18,19 +19,20 @@ namespace SecretSanta.DataAccess {
       return _context.Users.Any(n => string.Equals(n.UserName, username, StringComparison.Ordinal));
     }
 
-    public void RemoveMatch(int requestor, int matchedId) {
-      var matchToRemove = _context.Matches.FirstOrDefault(m => m.RequestorId == requestor && m.MatchedId == matchedId);
+    public void RemoveMatch(int requestor, int matchedId, int eventId) {
+      var matchToRemove = _context.Matches.FirstOrDefault(m => m.RequestorId == requestor && m.MatchedId == matchedId && m.EventId == eventId);
       if (matchToRemove != null) {
         _context.Matches.Remove(matchToRemove);
         _context.SaveChanges();
       }
     }
 
-    public void CreateMatch(int requestor, int matchedId, bool allowReroll) {
+    public void CreateMatch(int requestor, int matchedId, bool allowReroll, int eventId) {
       Match match = new Match() {
         RequestorId = requestor,
         MatchedId = matchedId,
-        RerollAllowed = allowReroll
+        RerollAllowed = allowReroll,
+        EventId = eventId
       };
 
       _context.Matches.Add(match);
@@ -38,11 +40,12 @@ namespace SecretSanta.DataAccess {
       _context.SaveChanges();
     }
 
-    public void CreateRestriction(int requestor, int restrictee, bool strict, bool makeReverse) {
+    public void CreateRestriction(int requestor, int restrictee, bool strict, bool makeReverse, int eventId) {
       MatchRestriction restrict = new MatchRestriction() {
         RequestorId = requestor,
         RestrictedId = restrictee,
-        StrictRestriction = strict
+        StrictRestriction = strict,
+        EventId = eventId
       };
 
       _context.MatchRestrictions.Add(restrict);
@@ -51,7 +54,8 @@ namespace SecretSanta.DataAccess {
         MatchRestriction restrictReverse = new MatchRestriction() {
           RequestorId = restrictee,
           RestrictedId = requestor,
-          StrictRestriction = strict
+          StrictRestriction = strict,
+          EventId = eventId
         };
         _context.MatchRestrictions.Add(restrictReverse);
       }
@@ -59,8 +63,8 @@ namespace SecretSanta.DataAccess {
       _context.SaveChanges();
     }
 
-    public IList<Match> GetAllExistingMatches() {
-      return _context.Matches.ToList();
+    public IList<Match> GetAllExistingMatchesForEvent(int eventId) {
+      return _context.Matches.Where(m => m.EventId == eventId).ToList();
     }
 
     public IList<User> GetAllUsers() {
@@ -75,12 +79,12 @@ namespace SecretSanta.DataAccess {
       return _context.Users.FirstOrDefault(u => string.Equals(u.UserName, userName, StringComparison.Ordinal));
     }
 
-    public Match GetExistingMatch(int requestor) {
-      return _context.Matches.Where(m => m.RequestorId == requestor).FirstOrDefault();
+    public Match GetExistingMatch(int requestor, int eventId) {
+      return _context.Matches.Where(m => m.RequestorId == requestor && m.EventId == eventId).FirstOrDefault();
     }
 
-    public IList<MatchRestriction> GetMatchRestrictions(int requestor) {
-      return _context.MatchRestrictions.Where(mr => mr.RequestorId == requestor).ToList();
+    public IList<MatchRestriction> GetMatchRestrictions(int requestor, int eventId) {
+      return _context.MatchRestrictions.Where(mr => mr.RequestorId == requestor && mr.EventId == eventId).ToList();
     }
 
     public int RegisterAccount(string username, string password) {
@@ -97,10 +101,10 @@ namespace SecretSanta.DataAccess {
           Password = hashed
         };
 
-        if (!_context.Users.Any()) {
+        //if (!_context.Users.Any()) {
           //If there are no existing users, the first user is made an admin
-          user.IsAdmin = true;
-        }
+        //  user.IsAdmin = true;
+        //}
         _context.Users.Add(user);
         _context.SaveChanges();
 
@@ -139,24 +143,24 @@ namespace SecretSanta.DataAccess {
       }
     }
 
-    public bool UserIsAdmin(int id) {
-      return GetUserById(id)?.IsAdmin == true;
+    //public bool UserIsAdmin(int userId, int eventId) {
+    //  return GetUserById(userId)?.IsAdmin == true;
+    //}
+    //
+    //public void SetUserAdmin(int id, bool admin) {
+    //  User user = GetUserById(id);
+    //  if (user != null) {
+    //    user.IsAdmin = admin;
+    //    _context.SaveChanges();
+    //  }
+    //}
+
+    public string GetSettingValue(string setting, int eventId = 0) {
+      return _context.Settings.FirstOrDefault(s => s.EventId == eventId && string.Equals(s.Name, setting, StringComparison.Ordinal))?.Value;
     }
 
-    public void SetUserAdmin(int id, bool admin) {
-      User user = GetUserById(id);
-      if (user != null) {
-        user.IsAdmin = admin;
-        _context.SaveChanges();
-      }
-    }
-
-    public string GetSettingValue(string setting) {
-      return _context.Settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal))?.Value;
-    }
-
-    public void SetSettingValue(string setting, string value) {
-      Setting settingObj = _context.Settings.FirstOrDefault(s => string.Equals(s.Name, setting, StringComparison.Ordinal));
+    public void SetSettingValue(string setting, string value, int eventId) {
+      var settingObj = _context.Settings.FirstOrDefault(s => s.EventId == eventId && string.Equals(s.Name, setting, StringComparison.Ordinal));
       if (settingObj != null) {
         settingObj.Value = value;
 
@@ -164,8 +168,22 @@ namespace SecretSanta.DataAccess {
       }
     }
 
-    public IList<Setting> GetAllSettings() {
-      return _context.Settings.ToList();
+    public Setting AddSetting(string settingName, string value, int eventId) {
+      var setting = new Setting {
+        Name = settingName,
+        Value = value,
+        EventId = eventId
+      };
+
+      _context.Settings.Add(setting);
+
+      _context.SaveChanges();
+
+      return setting;
+    }
+
+    public IList<Setting> GetAllSettingsForEvent(int eventId) {
+      return _context.Settings.Where(s => s.EventId == eventId).ToList();
     }
 
     public string GetUserInterests(int id) {
@@ -210,7 +228,7 @@ namespace SecretSanta.DataAccess {
         //check the timestamp, if less than the timeout then good
         DateTime rightNow = DateTime.UtcNow;
 
-        int.TryParse(GetSettingValue("SessionTimeout"), out int timeout);
+        int.TryParse(GetSettingValue(AdminSettings.SessionTimeout), out int timeout);
 
         if ((rightNow - session.TimeStamp) < TimeSpan.FromMinutes(timeout)) {
           session.TimeStamp = DateTime.UtcNow;
@@ -230,7 +248,7 @@ namespace SecretSanta.DataAccess {
         //check the timestamp, if less than the timeout then good
         DateTime rightNow = DateTime.UtcNow;
 
-        int.TryParse(GetSettingValue("SessionTimeout"), out int timeout);
+        int.TryParse(GetSettingValue(AdminSettings.SessionTimeout), out int timeout);
 
         if ((rightNow - session.TimeStamp) < TimeSpan.FromMinutes(timeout)) {
           session.TimeStamp = DateTime.UtcNow;
@@ -267,6 +285,10 @@ namespace SecretSanta.DataAccess {
 
     public Event GetEvent(int id) {
       return _context.Events.FirstOrDefault(e => e.Id == id);
+    }
+
+    public Event GetEvent(Guid sharedEventId) {
+      return _context.Events.FirstOrDefault(e => e.SharedId.Equals(sharedEventId));
     }
 
     public List<User> GetEventAdmins(int eventId) {

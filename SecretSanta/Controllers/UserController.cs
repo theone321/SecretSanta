@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SecretSanta.Constants;
 using SecretSanta.DataAccess;
 using SecretSanta.DataAccess.Models;
 using SecretSanta.Exceptions;
@@ -18,17 +19,11 @@ namespace SecretSanta.Controllers {
 
     [HttpGet]
     public IActionResult Register() {
-      bool.TryParse(_dataAccessor.GetSettingValue("AllowRegistration"), out bool allowRegister);
-      return View("Register", new RegisterUser { AllowRegister = allowRegister });
+      return View("Register", new RegisterUser());
     }
 
     [HttpPost]
     public IActionResult Register(RegisterUser registration) {
-      bool.TryParse(_dataAccessor.GetSettingValue("AllowRegistration"), out bool allowRegister);
-      if (!allowRegister) {
-        return View("SignIn", new AuthenticatedUser());
-      }
-
       if (!string.Equals(registration.ChosenPassword, registration.VerifyPassword, StringComparison.Ordinal)) {
         return View("PasswordsNotMatch");
       }
@@ -47,7 +42,7 @@ namespace SecretSanta.Controllers {
       //store the cookie
       Response.Cookies.Append("sessionId", session.SessionId);
 
-      return RedirectToAction("GetMatch", "Match");
+      return RedirectToAction("NewEvent", "Event");
     }
 
     [HttpGet]
@@ -106,7 +101,9 @@ namespace SecretSanta.Controllers {
           return RedirectToAction("NewEvent", "Event");
         }
         else if (userEvents.Count == 1) {
-          return RedirectToAction("GetMatch", "Match", new { eventId = userEvents.First().Id });
+          var eventId = userEvents.First().Id;
+          _sessionManager.SetCurrentEventId(eventId);
+          return RedirectToAction("GetMatch", "Match", new { eventId = eventId });
         }
         else {
           return RedirectToAction("ChooseEvent", "Event");
@@ -130,11 +127,12 @@ namespace SecretSanta.Controllers {
         return View("InvalidCredentials");
       }
       _dataAccessor.SetUserInterests(user.UserId, user.Interests);
+      var eventId = _sessionManager.GetCurrentEventId();
       if (user.TheirSecretMatchId > 0) {
-        user = _pageModelBuilder.BuildUserPageModelFromDB(user.UserId);
+        user = _pageModelBuilder.BuildUserPageModelFromDB(user.UserId, eventId);
         return View("UserPage", user);
       }
-      return RedirectToAction("GetMatch", "Match");
+      return RedirectToAction("GetMatch", "Match", new { eventId = _sessionManager.GetCurrentEventId() });
     }
 
     [HttpGet]
@@ -149,7 +147,7 @@ namespace SecretSanta.Controllers {
 
     [HttpGet]
     public IActionResult OpenAdminPage() {
-      return RedirectToAction("Index", "Admin");
+      return RedirectToAction("Index", "Admin", new { eventId = _sessionManager.GetCurrentEventId() });
     }
 
     [HttpGet]
@@ -157,7 +155,7 @@ namespace SecretSanta.Controllers {
       if (!_sessionManager.TryGetSessionCookie(Request.Cookies, out var session)) {
         return View("InvalidCredentials");
       }
-      var user = _pageModelBuilder.BuildUserPageModelFromDB(session.User);
+      var user = _pageModelBuilder.BuildUserPageModelFromDB(session.User, _sessionManager.GetCurrentEventId());
       return View("UpdatePassword", user);
     }
 
@@ -180,7 +178,7 @@ namespace SecretSanta.Controllers {
       //update password
       User user = _dataAccessor.GetUserByUserName(session.User);
       _dataAccessor.UpdateUserPassword(user.Id, pageModel.PasswordReset.NewPassword);
-      return RedirectToAction("GetMatch", "Match");
+      return RedirectToAction("GetMatch", "Match", new { eventId = _sessionManager.GetCurrentEventId() });
     }
   }
 }
