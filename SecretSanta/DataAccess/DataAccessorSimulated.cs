@@ -89,8 +89,8 @@ namespace SecretSanta.DataAccess {
 
     private static List<Session> _sessions = new List<Session>();
 
-    public IList<User> GetAllUsers() {
-      return _users;
+    public IList<User> GetAllUsersForEvent(int eventId) {
+      return _users.Where(u => _userEvents.Where(ue => ue.EventId == eventId).Any(ue => ue.UserId == u.Id)).ToList();
     }
 
     public User GetUserById(int id) {

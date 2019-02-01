@@ -1,8 +1,16 @@
-﻿@model SecretSanta.Models.UserPageModel
+﻿@model SecretSanta.Models.EventPageModel
 @{
-    ViewData["Title"] = Model.Name+"'s Page";
+    ViewData["Title"] = Model.Event.EventName;
 }
-<h2>@Model.Name's Secret Santa Page</h2>
+<h2>@Model.Event.EventName</h2>
+<h3>Welcome, @Model.Name</h3>
+<hr />
+<h4>Event Details</h4>
+<label asp-for="Event.EventDescription">What: @Model.Event.EventDescription</label>
+<br />
+<label asp-for="Event.Location">Where: @Model.Event.Location</label>
+<br />
+<label asp-for="Event.EventDate">When: @Model.Event.EventDate</label>
 <hr />
 @if (!string.IsNullOrEmpty(Model.TheirSecretMatchName)) {
     <div class="alert-info">
@@ -10,44 +18,43 @@
     </div>
 }
 
-@if (Model.AllowMatching) {
+@if (Model.Event.AllowMatching) {
     <form asp-action="CreateMatch">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
             @Html.HiddenFor(m => m.UserId, "userId")
             @Html.HiddenFor(m => m.AllowReroll, "allowReroll")
-            @if (Model.TheirSecretMatchId <= 0)
-            {
+            @if (Model.TheirSecretMatchId <= 0) {
                 <input type="submit" value="Match" class="btn btn-default" />
             }
         </div>
     </form>
     @if (Model.TheirSecretMatchId > 0) {
-    <form asp-action="RerollResult">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="form-group">
-            @Html.HiddenFor(m => m.UserId, "userId")
-            @Html.HiddenFor(m => m.AllowReroll, "allowReroll")
-            @Html.HiddenFor(m => m.TheirSecretMatchId, "theirSecretMatchId")
-            @Html.HiddenFor(m => m.TheirSecretMatchName, "theirSecretMatchName")
+        <form asp-action="RerollResult">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                @Html.HiddenFor(m => m.UserId, "userId")
+                @Html.HiddenFor(m => m.AllowReroll, "allowReroll")
+                @Html.HiddenFor(m => m.TheirSecretMatchId, "theirSecretMatchId")
+                @Html.HiddenFor(m => m.TheirSecretMatchName, "theirSecretMatchName")
 
-            @if (Model.AllowReroll)
-            {
-                <input type="submit" value="Re-Match" class="btn btn-default" />
-                <label>You may only do this once!</label>
-            }
-            else
-            {
-                <input type="submit" value="Re-Match" class="btn btn-default" disabled="disabled" />
-                <label>You have used all of your re-matches.</label>
-            }
-        </div>
-    </form>
+                @if (Model.AllowReroll) {
+                    <input type="submit" value="Re-Match" class="btn btn-default" />
+                    <label>You may only do this once!</label>
+                }
+                else {
+                    <input type="submit" value="Re-Match" class="btn btn-default" disabled="disabled" />
+                    <label>You have used all of your re-matches.</label>
+                }
+            </div>
+        </form>
     }
 }
 else {
     <h3>Matching is currently disabled, sorry!</h3>
 }
+
+<a asp-controller="Match" asp-action="Index" asp-route-eventId="@Model.EventId">Who's Registered?</a>
 
 
 @if (Model.TheirSecretMatchId > 0) {
@@ -74,9 +81,8 @@ else {
 
 <hr />
 
-@if (Model.SignificantOther.UserId <= 0)
-{
-    var others = Model.OtherUsers ?? new List<UserPageModel.LimitedUser>();
+@if (Model.SignificantOther.UserId <= 0) {
+    var others = Model.OtherUsers ?? new List<EventPageModel.LimitedUser>();
 
     <h4>Set Significant Other</h4>
     <p>You can one-time set a restriction on another person so you will not get them as a match. This cannot be changed later and it cannot be undone and is intended so you will not get your significant other as a match.</p>

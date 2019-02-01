@@ -24,7 +24,7 @@ namespace SecretSanta {
       services.AddTransient<ICreateSecretMatch, CreateSecretMatch>();
       services.AddTransient<IRandomWrapper, RandomWrapper>();
       services.AddTransient<ISessionManager, SessionManager>();
-      services.AddTransient<IPageModelBuilder, PageModelBuilder>();
+      services.AddTransient<IEventPageModelBuilder, PageModelBuilder>();
 
       //testing
 #if SIMULATE

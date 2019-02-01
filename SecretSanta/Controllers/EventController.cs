@@ -55,9 +55,9 @@ namespace SecretSanta.Controllers {
           Events = _dataAccessor.GetEventsForUser(user.Id),
         };
 
-        if (model.Events.Count == 1) {
-          return RedirectToAction("GetMatch", "Match", new { eventId = model.Events.First().Id });
-        }
+        //if (model.Events.Count == 1) {
+        //  return RedirectToAction("GetMatch", "Match", new { eventId = model.Events.First().Id });
+        //}
 
         return View("Choose", model);
       }

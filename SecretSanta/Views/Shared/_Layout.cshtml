@@ -33,16 +33,17 @@
                         <li class="dropdown">
                             <a class="dropdown-toggle" role="button" aria-expanded="false" href="#" data-toggle="dropdown">Event<span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
-                                @if (TempData["EventId"] != null && (int)TempData.Peek("EventId") > 0) {
+                                @*@if (TempData["EventId"] != null && (int)TempData.Peek("EventId") > 0) {
                                     <li>@Html.ActionLink("My Page", "GetMatch", "Match", new { eventId = (int)TempData.Peek("EventId") })</li>
                                     <li>@Html.ActionLink("Who's Registered?", "Index", "Match", new { eventId = (int)TempData.Peek("EventId") })</li>
                                 }
                                 else {
                                     <li>@Html.ActionLink("My Page", "ChooseEvent", "Event")</li>
-                                }
-                                @if (TempData["UserHasMultipleEvents"] != null && (bool)TempData.Peek("UserHasMultipleEvents")) {
+                                }*@
+                                <li>@Html.ActionLink("Choose Event", "ChooseEvent", "Event")</li>
+                                @*@if (TempData["UserHasMultipleEvents"] != null && (bool)TempData.Peek("UserHasMultipleEvents")) {
                                     <li>@Html.ActionLink("Choose Event", "ChooseEvent", "Event")</li>
-                                }
+                                }*@
                                 <li>@Html.ActionLink("New Event", "NewEvent", "Event")</li>
                                 <li>@Html.ActionLink("Join Event", "ConnectWithEvent", "Event")</li>
                                 @if (TempData["IsUserAdmin"] != null && (bool)TempData.Peek("IsUserAdmin")) {

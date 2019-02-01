@@ -1,12 +1,9 @@
-﻿using SecretSanta.DataAccess.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace SecretSanta.Models {
-    public class IndexModel {
-        public List<string> RegisteredNames { get; set; }
-        public int MatchCounts { get; set; }
-    }
+  public class IndexModel {
+    public List<string> RegisteredNames { get; set; }
+    public int MatchCounts { get; set; }
+    public int EventId { get; set; }
+  }
 }

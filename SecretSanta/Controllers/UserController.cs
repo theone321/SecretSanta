@@ -10,9 +10,9 @@ using System.Linq;
 
 namespace SecretSanta.Controllers {
   public class UserController : BaseController {
-    private readonly IPageModelBuilder _pageModelBuilder;
+    private readonly IEventPageModelBuilder _pageModelBuilder;
 
-    public UserController(IDataAccessor dataAccessor, ISessionManager sessionManager, IPageModelBuilder pageModelBuilder)
+    public UserController(IDataAccessor dataAccessor, ISessionManager sessionManager, IEventPageModelBuilder pageModelBuilder)
         : base(sessionManager, dataAccessor) {
       _pageModelBuilder = pageModelBuilder;
     }
@@ -62,9 +62,6 @@ namespace SecretSanta.Controllers {
           if (userEvents.Count < 1) {
             return RedirectToAction("NewEvent", "Event");
           }
-          else if (userEvents.Count == 1) {
-            return RedirectToAction("GetMatch", "Match", new { eventId = userEvents.First().Id });
-          }
           else {
             return RedirectToAction("ChooseEvent", "Event");
           }
@@ -100,11 +97,6 @@ namespace SecretSanta.Controllers {
         if (userEvents.Count < 1) {
           return RedirectToAction("NewEvent", "Event");
         }
-        else if (userEvents.Count == 1) {
-          var eventId = userEvents.First().Id;
-          _sessionManager.SetCurrentEventId(eventId);
-          return RedirectToAction("GetMatch", "Match", new { eventId = eventId });
-        }
         else {
           return RedirectToAction("ChooseEvent", "Event");
         }
@@ -121,7 +113,7 @@ namespace SecretSanta.Controllers {
     }
 
     [HttpPost]
-    public IActionResult UpdateInterests(UserPageModel user) {
+    public IActionResult UpdateInterests(EventPageModel user) {
       //verify access
       if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
         return View("InvalidCredentials");
@@ -129,7 +121,7 @@ namespace SecretSanta.Controllers {
       _dataAccessor.SetUserInterests(user.UserId, user.Interests);
       var eventId = _sessionManager.GetCurrentEventId();
       if (user.TheirSecretMatchId > 0) {
-        user = _pageModelBuilder.BuildUserPageModelFromDB(user.UserId, eventId);
+        user = _pageModelBuilder.BuildEventPageModelFromDB(user.UserId, eventId);
         return View("UserPage", user);
       }
       return RedirectToAction("GetMatch", "Match", new { eventId = _sessionManager.GetCurrentEventId() });
@@ -155,30 +147,38 @@ namespace SecretSanta.Controllers {
       if (!_sessionManager.TryGetSessionCookie(Request.Cookies, out var session)) {
         return View("InvalidCredentials");
       }
-      var user = _pageModelBuilder.BuildUserPageModelFromDB(session.User, _sessionManager.GetCurrentEventId());
-      return View("UpdatePassword", user);
+      var changePasswordModel = new ChangePasswordModel {
+        EventId = session.EventId
+      };
+      return View("UpdatePassword", changePasswordModel);
     }
 
     [HttpPost]
-    public IActionResult UpdatePassword(UserPageModel pageModel) {
+    public IActionResult UpdatePassword(ChangePasswordModel changePasswordModel) {
       if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
         return View("InvalidCredentials");
       }
 
       //verify the passwords match, then verify the current password, then update
-      if (!string.Equals(pageModel.PasswordReset.NewPassword, pageModel.PasswordReset.VerifyPassword, StringComparison.InvariantCulture)) {
+      if (!string.Equals(changePasswordModel.NewPassword, changePasswordModel.VerifyPassword, StringComparison.InvariantCulture)) {
         return View("PasswordsNotMatch");
       }
 
       //verify user
-      if (!_dataAccessor.VerifyCredentials(session.User, pageModel.PasswordReset.CurrentPassword)) {
+      if (!_dataAccessor.VerifyCredentials(session.User, changePasswordModel.CurrentPassword)) {
         return View("InvalidCredentials");
       }
 
       //update password
       User user = _dataAccessor.GetUserByUserName(session.User);
-      _dataAccessor.UpdateUserPassword(user.Id, pageModel.PasswordReset.NewPassword);
-      return RedirectToAction("GetMatch", "Match", new { eventId = _sessionManager.GetCurrentEventId() });
+      _dataAccessor.UpdateUserPassword(user.Id, changePasswordModel.NewPassword);
+
+      if (changePasswordModel.EventId > 0) {
+        return RedirectToAction("GetMatch", "Match", new { eventId = changePasswordModel.EventId });
+      }
+      else {
+        return RedirectToAction("ChooseEvent", "Event");
+      }
     }
   }
 }

@@ -20,7 +20,7 @@ namespace SecretSanta.Matching {
         }
 
         public int FindRandomMatch(int requestor, int eventId) {
-            var allUsers = _dataAccessor.GetAllUsers().ToList();
+            var allUsers = _dataAccessor.GetAllUsersForEvent(eventId).ToList();
             allUsers.RemoveAll(n => n.Id == requestor);
             var usersThatCannotBeMatched = new List<User>();
             var restrictions = _dataAccessor.GetMatchRestrictions(requestor, eventId);

@@ -67,8 +67,9 @@ namespace SecretSanta.DataAccess {
       return _context.Matches.Where(m => m.EventId == eventId).ToList();
     }
 
-    public IList<User> GetAllUsers() {
-      return _context.Users.ToList();
+    public IList<User> GetAllUsersForEvent(int eventId) {
+      var userEvents = _context.UserEvents.Where(ue => ue.EventId == eventId).ToList();
+      return _context.Users.Where(u => userEvents.Any(ue => ue.UserId == u.Id)).ToList();
     }
 
     public User GetUserById(int id) {

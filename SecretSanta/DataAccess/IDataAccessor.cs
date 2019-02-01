@@ -10,7 +10,7 @@ namespace SecretSanta.DataAccess {
     void CreateMatch(int requestor, int matchedId, bool allowReroll, int eventId);
     void RemoveMatch(int requestor, int matchedId, int eventId);
     void CreateRestriction(int requestor, int restrictee, bool strict, bool makeReverse, int eventId);
-    IList<User> GetAllUsers();
+    IList<User> GetAllUsersForEvent(int eventId);
     User GetUserById(int id);
     User GetUserByUserName(string userName);
     bool AccountAlreadyRegistered(string username);

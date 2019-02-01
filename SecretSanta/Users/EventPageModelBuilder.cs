@@ -6,24 +6,24 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace SecretSanta.Users {
-  public class PageModelBuilder : IPageModelBuilder {
+  public class PageModelBuilder : IEventPageModelBuilder {
     private readonly IDataAccessor _dataAccessor;
 
     public PageModelBuilder(IDataAccessor dataAccessor) {
       _dataAccessor = dataAccessor;
     }
 
-    public UserPageModel BuildUserPageModelFromDB(string userName, int eventId) {
+    public EventPageModel BuildEventPageModelFromDB(string userName, int eventId) {
       User user = _dataAccessor.GetUserByUserName(userName);
       return Build(user, eventId);
     }
 
-    public UserPageModel BuildUserPageModelFromDB(int userId, int eventId) {
+    public EventPageModel BuildEventPageModelFromDB(int userId, int eventId) {
       User user = _dataAccessor.GetUserById(userId);
       return Build(user, eventId);
     }
 
-    private UserPageModel Build(User user, int eventId) {
+    private EventPageModel Build(User user, int eventId) {
       Match existingMatch = _dataAccessor.GetExistingMatch(user.Id, eventId);
       string myInterests = user.Interests;
       bool allowReroll = true;
@@ -37,24 +37,34 @@ namespace SecretSanta.Users {
       bool.TryParse(_dataAccessor.GetSettingValue(AdminSettings.AllowMatching, eventId), out bool allowMatch);
 
       MatchRestriction restriction = _dataAccessor.GetMatchRestrictions(user.Id, eventId).FirstOrDefault(r => r.StrictRestriction);
-      List<UserPageModel.LimitedUser> others = new List<UserPageModel.LimitedUser>();
-      UserPageModel.LimitedUser sigOther = new UserPageModel.LimitedUser();
+      List<EventPageModel.LimitedUser> others = new List<EventPageModel.LimitedUser>();
+      EventPageModel.LimitedUser sigOther = new EventPageModel.LimitedUser();
       if (restriction != null) {
         User sigOtherUser = _dataAccessor.GetUserById(restriction.RestrictedId);
         if (sigOtherUser != null) {
-          sigOther = new UserPageModel.LimitedUser() { UserId = sigOtherUser.Id, UserRealName = sigOtherUser.RegisteredName };
+          sigOther = new EventPageModel.LimitedUser() { UserId = sigOtherUser.Id, UserRealName = sigOtherUser.RegisteredName };
         }
       }
       if (sigOther.UserId <= 0) {
         //we only need this list if their significant other isn't set
-        foreach (User other in _dataAccessor.GetAllUsers()) {
+        foreach (User other in _dataAccessor.GetAllUsersForEvent(eventId)) {
           if (other.Id == user.Id) { continue; }
-          others.Add(new UserPageModel.LimitedUser() { UserId = other.Id, UserRealName = other.RegisteredName });
+          others.Add(new EventPageModel.LimitedUser() { UserId = other.Id, UserRealName = other.RegisteredName });
         }
       }
 
+      var dbEvent = _dataAccessor.GetEvent(eventId);
 
-      return new UserPageModel() {
+      var userEvent = new Models.Event {
+        AllowMatching = allowMatch,
+        EventDate = dbEvent.StartDate,
+        EventName = dbEvent.Name,
+        Location = dbEvent.Location,
+        EventDescription = dbEvent.Description,
+        SharedId = dbEvent.SharedId
+      };
+
+      return new EventPageModel() {
         UserId = user.Id,
         UserName = user.UserName,
         Name = user.RegisteredName,
@@ -65,7 +75,7 @@ namespace SecretSanta.Users {
         MatchInterests = theirMatch?.Interests,
         //UserIsAdmin = isAdmin,
         EventId = eventId,
-        AllowMatching = allowMatch,
+        Event = userEvent,
         SignificantOther = sigOther,
         OtherUsers = others
       };

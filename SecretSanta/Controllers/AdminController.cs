@@ -30,8 +30,8 @@ namespace SecretSanta.Controllers {
       var theEvent = _dataAccessor.GetEvent(session.EventId);
 
       List<UserAdminSettings> displayList = new List<UserAdminSettings>();
-      IList<User> users = _dataAccessor.GetAllUsers();
-      IList<Match> matches = _dataAccessor.GetAllExistingMatchesForEvent(_sessionManager.GetCurrentEventId());
+      IList<User> users = _dataAccessor.GetAllUsersForEvent(theEvent.Id);
+      IList<Match> matches = _dataAccessor.GetAllExistingMatchesForEvent(theEvent.Id);
       User currentUser = null;
       foreach (User user in users) {
         UserAdminSettings display = new UserAdminSettings {
@@ -57,6 +57,7 @@ namespace SecretSanta.Controllers {
         AllowMatching = allowMatching,
         SharedEventId = theEvent.SharedId,
         EventName = theEvent.Name,
+        EventId = theEvent.Id,
         UserList = displayList
       };
 

@@ -6,6 +6,7 @@ namespace SecretSanta.Models {
     public int UserId { get; set; }
     public string User { get; set; }
     public Guid SharedEventId { get; set; }
+    public int EventId { get; set; }
     public string EventName { get; set; }
 
     public bool AllowRegistration { get; set; }
