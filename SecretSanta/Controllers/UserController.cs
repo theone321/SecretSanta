@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SecretSanta.Constants;
 using SecretSanta.DataAccess;
 using SecretSanta.DataAccess.Models;
 using SecretSanta.Exceptions;
-using SecretSanta.Models;
+using SecretSanta.Models.User;
+using SecretSanta.Models.Event;
 using SecretSanta.Users;
 using System;
-using System.Linq;
 
 namespace SecretSanta.Controllers {
   public class UserController : BaseController {
@@ -19,11 +18,11 @@ namespace SecretSanta.Controllers {
 
     [HttpGet]
     public IActionResult Register() {
-      return View("Register", new RegisterUser());
+      return View("Register", new RegisterUserModel());
     }
 
     [HttpPost]
-    public IActionResult Register(RegisterUser registration) {
+    public IActionResult Register(RegisterUserModel registration) {
       if (!string.Equals(registration.ChosenPassword, registration.VerifyPassword, StringComparison.Ordinal)) {
         return View("PasswordsNotMatch");
       }
@@ -124,7 +123,7 @@ namespace SecretSanta.Controllers {
         user = _pageModelBuilder.BuildEventPageModelFromDB(user.UserId, eventId);
         return View("UserPage", user);
       }
-      return RedirectToAction("GetMatch", "Match", new { eventId = _sessionManager.GetCurrentEventId() });
+      return RedirectToAction("GetMatchEvent", "Match", new { eventId = _sessionManager.GetCurrentEventId() });
     }
 
     [HttpGet]
@@ -174,7 +173,7 @@ namespace SecretSanta.Controllers {
       _dataAccessor.UpdateUserPassword(user.Id, changePasswordModel.NewPassword);
 
       if (changePasswordModel.EventId > 0) {
-        return RedirectToAction("GetMatch", "Match", new { eventId = changePasswordModel.EventId });
+        return RedirectToAction("GetMatchEvent", "Match", new { eventId = changePasswordModel.EventId });
       }
       else {
         return RedirectToAction("ChooseEvent", "Event");

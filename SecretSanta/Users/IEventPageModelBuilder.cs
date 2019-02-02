@@ -1,4 +1,4 @@
-﻿using SecretSanta.Models;
+﻿using SecretSanta.Models.Event;
 
 namespace SecretSanta.Users {
     public interface IEventPageModelBuilder {

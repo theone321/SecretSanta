@@ -2,21 +2,16 @@
 using SecretSanta.Constants;
 using SecretSanta.DataAccess;
 using SecretSanta.DataAccess.Models;
-using SecretSanta.Matching;
-using SecretSanta.Models;
+using SecretSanta.Models.EventAdmin;
 using SecretSanta.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SecretSanta.Controllers {
-  public class AdminController : BaseController {
-    private readonly ICreateSecretMatch _createSecretMatch;
-
-    public AdminController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch, ISessionManager sessionManager)
-        : base(sessionManager, dataAccessor) {
-      _createSecretMatch = createSecretMatch;
-    }
+  public class EventAdminController : BaseController {
+    public EventAdminController(IDataAccessor dataAccessor, ISessionManager sessionManager)
+        : base(sessionManager, dataAccessor) { }
 
     [HttpGet]
     public IActionResult Index() {
@@ -29,18 +24,19 @@ namespace SecretSanta.Controllers {
 
       var theEvent = _dataAccessor.GetEvent(session.EventId);
 
-      List<UserAdminSettings> displayList = new List<UserAdminSettings>();
-      IList<User> users = _dataAccessor.GetAllUsersForEvent(theEvent.Id);
-      IList<Match> matches = _dataAccessor.GetAllExistingMatchesForEvent(theEvent.Id);
+      var displayList = new List<EventAdminUserSettings>();
+      var users = _dataAccessor.GetAllUsersForEvent(theEvent.Id);
+      var matches = _dataAccessor.GetAllExistingMatchesForEvent(theEvent.Id);
       User currentUser = null;
-      foreach (User user in users) {
-        UserAdminSettings display = new UserAdminSettings {
+      foreach (var user in users) {
+        var isAdmin = _dataAccessor.GetEventAdmins(theEvent.Id).Any(ea => ea.Id == user.Id);
+        var display = new EventAdminUserSettings {
           UserId = user.Id,
           Name = user.RegisteredName,
           UserName = user.UserName,
           HasMatched = matches.Any(m => m.RequestorId == user.Id),
           IsMatched = matches.Any(m => m.MatchedId == user.Id),
-          //IsAdmin = user.IsAdmin
+          IsAdmin = isAdmin
         };
 
         displayList.Add(display);
@@ -50,8 +46,8 @@ namespace SecretSanta.Controllers {
         }
       }
 
-      AdminModel options = new AdminModel {
-        User = session.User,
+      var options = new EventAdminPageModel {
+        UserName = session.User,
         UserId = currentUser?.Id ?? 0,
         AllowRegistration = allowRegistration,
         AllowMatching = allowMatching,
@@ -65,13 +61,15 @@ namespace SecretSanta.Controllers {
     }
 
     [HttpPost]
-    public IActionResult UpdateSettings(AdminModel options) {
+    public IActionResult UpdateSettings(EventAdminPageModel options) {
       if (!VerifyAccess(out var session)) {
         return RedirectToAction("SignIn", "User");
       }
 
-      _dataAccessor.SetSettingValue(AdminSettings.AllowRegistration, options.AllowRegistration.ToString(), session.EventId);
-      _dataAccessor.SetSettingValue(AdminSettings.AllowMatching, options.AllowMatching.ToString(), session.EventId);
+      var eventId = session.EventId;
+
+      _dataAccessor.SetSettingValue(AdminSettings.AllowRegistration, options.AllowRegistration.ToString(), eventId);
+      _dataAccessor.SetSettingValue(AdminSettings.AllowMatching, options.AllowMatching.ToString(), eventId);
 
       return RedirectToAction("Index");
     }
@@ -81,28 +79,24 @@ namespace SecretSanta.Controllers {
       if (!VerifyAccess(out var session)) {
         return RedirectToAction("SignIn", "User");
       }
-      User user = _dataAccessor.GetUserById(userId);
+      var user = _dataAccessor.GetUserById(userId);
       var eventId = _sessionManager.GetCurrentEventId();
       var userIsAnAdminForThisEvent = _dataAccessor.GetEventAdmins(eventId).Any(u => u.Id == userId);
       _dataAccessor.SetUserAdmin(eventId, userId, !userIsAnAdminForThisEvent);
       return RedirectToAction("Index");
     }
-
+    
     [HttpPost]
-    public IActionResult ResetUserPassword(int userId) {
+    public IActionResult RemoveUserFromEvent(int userId) {
       if (!VerifyAccess(out var session)) {
         return RedirectToAction("SignIn", "User");
       }
-      _dataAccessor.UpdateUserPassword(userId, "password");
-      return RedirectToAction("Index");
-    }
 
-    [HttpPost]
-    public IActionResult DeRegisterUser(int userId) {
-      if (!VerifyAccess(out var session)) {
-        return RedirectToAction("SignIn", "User");
-      }
-      _dataAccessor.DeRegisterAccount(userId);
+      var user = _dataAccessor.GetUserById(userId);
+      var eventId = _sessionManager.GetCurrentEventId();
+      _dataAccessor.RemoveUserFromEvent(user.Id, eventId);
+      //We want a new Shared ID for this event so the removed user cannot easily rejoin.
+      _dataAccessor.RegenerateSharedIdForEvent(eventId);
       return RedirectToAction("Index");
     }
 

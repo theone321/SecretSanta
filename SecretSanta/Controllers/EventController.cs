@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SecretSanta.Constants;
 using SecretSanta.DataAccess;
-using SecretSanta.Models;
+using SecretSanta.Models.Event;
 using SecretSanta.Users;
 using System;
 using System.Linq;
@@ -14,11 +14,11 @@ namespace SecretSanta.Controllers {
     [HttpGet]
     public IActionResult NewEvent() {
       _sessionManager.SetCurrentEventId(0);
-      return View("Create", new Event { SharedId = new Guid() });
+      return View("Create", new CreateEventModel { SharedId = Guid.NewGuid() });
     }
 
     [HttpPost]
-    public IActionResult NewEvent(Event newEvent) {
+    public IActionResult NewEvent(CreateEventModel newEvent) {
       if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
         var session = _dataAccessor.GetSessionData(sessionId);
 
@@ -34,11 +34,10 @@ namespace SecretSanta.Controllers {
         var createdEventId = _dataAccessor.CreateEvent(dbEvent, user.Id);
         _dataAccessor.AddSetting(AdminSettings.AllowMatching, newEvent.AllowMatching.ToString(), createdEventId);
         _dataAccessor.AddSetting(AdminSettings.AllowRegistration, newEvent.AllowRegistration.ToString(), createdEventId);
-        _dataAccessor.AddSetting(AdminSettings.SessionTimeout, "15", createdEventId);
         _dataAccessor.SetUserAdmin(createdEventId, user.Id, true);
         _sessionManager.SetCurrentEventId(createdEventId);
 
-        return RedirectToAction("GetMatch", "Match", new { eventId = createdEventId });
+        return RedirectToAction("GetMatchEvent", "Match", new { eventId = createdEventId });
       }
 
       return RedirectToAction("SignIn", "User");
@@ -55,10 +54,6 @@ namespace SecretSanta.Controllers {
           Events = _dataAccessor.GetEventsForUser(user.Id),
         };
 
-        //if (model.Events.Count == 1) {
-        //  return RedirectToAction("GetMatch", "Match", new { eventId = model.Events.First().Id });
-        //}
-
         return View("Choose", model);
       }
 
@@ -68,7 +63,7 @@ namespace SecretSanta.Controllers {
     [HttpPost]
     public IActionResult ChooseEvent(int chosenEventId) {
       _sessionManager.SetCurrentEventId(chosenEventId);
-      return RedirectToAction("GetMatch", "Match", new { eventId = chosenEventId });
+      return RedirectToAction("GetMatchEvent", "Match", new { eventId = chosenEventId });
     }
 
     [HttpGet]
@@ -93,10 +88,23 @@ namespace SecretSanta.Controllers {
 
         _dataAccessor.AddUserToEvent(user.Id, guid);
         _sessionManager.SetCurrentEventId(theEvent.Id);
-        return RedirectToAction("GetMatch", "Match", new { EventId = theEvent.Id });
+        return RedirectToAction("GetMatchEvent", "Match", new { EventId = theEvent.Id });
       }
 
       return RedirectToAction("SignIn", "User");
+    }
+
+    [HttpGet]
+    public IActionResult Attendees(int eventId) {
+      var registeredUsernames = _dataAccessor.GetAllUsersForEvent(eventId).Select(n => n.RegisteredName).ToList();
+      int matchCount = _dataAccessor.GetAllExistingMatchesForEvent(eventId).Count;
+      var theEvent = _dataAccessor.GetEvent(eventId);
+      return View("Attendees", new AttendeesModel() {
+        RegisteredNames = registeredUsernames,
+        MatchCounts = matchCount,
+        EventId = eventId,
+        EventName = theEvent.Name
+      });
     }
   }
 }

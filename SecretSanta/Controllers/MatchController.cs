@@ -3,33 +3,24 @@ using Microsoft.AspNetCore.Mvc;
 using SecretSanta.Constants;
 using SecretSanta.DataAccess;
 using SecretSanta.Matching;
-using SecretSanta.Models;
+using SecretSanta.Models.Event;
 using SecretSanta.Users;
 using System.Linq;
 
 namespace SecretSanta.Controllers {
   public class MatchController : BaseController {
     private readonly ICreateSecretMatch _createSecretMatch;
-    private readonly IEventPageModelBuilder _pageModelBuilder;
+    private readonly IEventPageModelBuilder _eventPageModelBuilder;
 
     public MatchController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch,
-        ISessionManager sessionManager, IEventPageModelBuilder pageModelBuilder)
+        ISessionManager sessionManager, IEventPageModelBuilder eventPageModelBuilder)
         : base(sessionManager, dataAccessor) {
       _createSecretMatch = createSecretMatch;
-      _pageModelBuilder = pageModelBuilder;
+      _eventPageModelBuilder = eventPageModelBuilder;
     }
 
     [HttpGet]
-    public IActionResult Index(int eventId) {
-      var registeredUsernames = _dataAccessor.GetAllUsersForEvent(eventId).Select(n => n.RegisteredName).ToList();
-      int matchCount = _dataAccessor.GetAllExistingMatchesForEvent(eventId).Count;
-      return View("Index", new IndexModel() { RegisteredNames = registeredUsernames, MatchCounts = matchCount, EventId = eventId });
-    }
-
-    //Rename this action... it's weird. You're not getting a match, just loading the user's page for a certain event.
-    //Maybe move to User or Event controller?
-    [HttpGet]
-    public IActionResult GetMatch(int eventId) {
+    public IActionResult GetMatchEvent(int eventId) {
       //verify access
       if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
         return View("InvalidCredentials");
@@ -37,7 +28,7 @@ namespace SecretSanta.Controllers {
 
       _sessionManager.SetCurrentEventId(eventId);
 
-      var userModel = _pageModelBuilder.BuildEventPageModelFromDB(session.User, eventId);
+      var userModel = _eventPageModelBuilder.BuildEventPageModelFromDB(session.User, eventId);
       return View("UserPage", userModel);
     }
 
@@ -47,8 +38,8 @@ namespace SecretSanta.Controllers {
         return View("InvalidCredentials");
       }
       bool.TryParse(_dataAccessor.GetSettingValue(AdminSettings.AllowMatching, session.EventId), out var allowMatch);
-      userModel.Event.AllowMatching = allowMatch;
-      if (userModel.UserId <= 0 || !userModel.Event.AllowMatching) {
+      userModel.AllowMatching = allowMatch;
+      if (userModel.UserId <= 0 || !userModel.AllowMatching) {
         //How? Why? Just start over
         return RedirectToAction("SignIn", "User");
       }
@@ -59,7 +50,7 @@ namespace SecretSanta.Controllers {
       userModel.TheirSecretMatchName = _dataAccessor.GetUserById(userModel.TheirSecretMatchId).RegisteredName;
       _dataAccessor.CreateMatch(userModel.UserId, userModel.TheirSecretMatchId, userModel.AllowReroll, eventId);
 
-      userModel = _pageModelBuilder.BuildEventPageModelFromDB(userModel.UserId, userModel.EventId);
+      userModel = _eventPageModelBuilder.BuildEventPageModelFromDB(userModel.UserId, eventId);
 
       return View("UserPage", userModel);
     }
@@ -70,8 +61,8 @@ namespace SecretSanta.Controllers {
         return View("InvalidCredentials");
       }
       bool.TryParse(_dataAccessor.GetSettingValue(AdminSettings.AllowMatching, session.EventId), out var allowMatch);
-      userModel.Event.AllowMatching = allowMatch;
-      if (userModel.UserId <= 0 || !userModel.Event.AllowMatching) {
+      userModel.AllowMatching = allowMatch;
+      if (userModel.UserId <= 0 || !userModel.AllowMatching) {
         //How? Why? Just start over
         return RedirectToAction("SignIn", "User");
       }
@@ -98,7 +89,7 @@ namespace SecretSanta.Controllers {
         _dataAccessor.CreateRestriction(userModel.UserId, userModel.SignificantOther.UserId, true, false, eventId);
       }
 
-      userModel = _pageModelBuilder.BuildEventPageModelFromDB(userModel.UserId, eventId);
+      userModel = _eventPageModelBuilder.BuildEventPageModelFromDB(userModel.UserId, eventId);
 
       return View("UserPage", userModel);
     }

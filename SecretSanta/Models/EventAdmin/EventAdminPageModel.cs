@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SecretSanta.Models {
-  public class AdminModel {
+namespace SecretSanta.Models.EventAdmin {
+  public class EventAdminPageModel {
     public int UserId { get; set; }
-    public string User { get; set; }
+    public string UserName { get; set; }
     public Guid SharedEventId { get; set; }
     public int EventId { get; set; }
     public string EventName { get; set; }
 
     public bool AllowRegistration { get; set; }
     public bool AllowMatching { get; set; }
-    public List<UserAdminSettings> UserList { get; set; } = new List<UserAdminSettings>();
+    public List<EventAdminUserSettings> UserList { get; set; } = new List<EventAdminUserSettings>();
   }
 
-  public class UserAdminSettings {
+  public class EventAdminUserSettings {
     /// <summary>
     /// The User's Id
     /// </summary>

@@ -1,9 +1,9 @@
-﻿@model SecretSanta.Models.AdminModel
+﻿@model SecretSanta.Models.EventAdmin.EventAdminPageModel
 @{
-    ViewData["Title"] = "Admin";
+    ViewData["Title"] = "Event Admin";
 }
 
-<h2>Welcome to the Admin Page for @Model.EventName, @Model.User</h2>
+<h2>Welcome to the Admin Page for @Model.EventName, @Model.UserName</h2>
 
 <p>This events Shared ID: @Model.SharedEventId.ToString()</p>
 <p>Share this ID with people you'd like to invite to this event.</p>
@@ -31,19 +31,17 @@
         </thead>
         <tbody>
             @for (int i=0; i<Model.UserList.Count; i++) {
-                UserAdminSettings user = Model.UserList[i];
+                var user = Model.UserList[i];
 
                 <tr>
                     <td>@user.Name (@user.UserName)</td>
                     <td>@user.HasMatched</td>
                     <td>@user.IsMatched</td>
                     <td align="justify">
-                        <button type="submit" asp-action="ResetUserPassword" asp-route-userId="@user.UserId">Reset Password</button>
                         @if (Model.UserId != user.UserId) { @*Sorry, you can't delete yourself*@
-                            <button type="submit" asp-action="DeRegisterUser" asp-route-userId="@user.UserId">Delete User</button>
-
                             var adminText = user.IsAdmin ? "Revoke Admin" : "Make Admin";
                             <button type="submit" asp-action="ToggleAdminAccess" asp-route-userId="@user.UserId">@adminText</button>
+                            <button type="submit" asp-action="RemoveUserFromEvent" asp-route-userId="@user.UserId">Remove User</button>
                         }
                     </td>
                 </tr>
@@ -52,4 +50,4 @@
     </table>
 </form>
 
-<a asp-controller="Match" asp-action="GetMatch" asp-route-eventId="@Model.EventId">Back to event</a>
+<a asp-controller="Match" asp-action="GetMatchEvent" asp-route-eventId="@Model.EventId">Back to event</a>

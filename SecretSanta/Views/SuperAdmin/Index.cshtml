@@ -1,0 +1,35 @@
+﻿@model SecretSanta.Models.SuperAdmin.SuperAdminPageModel
+@{
+    ViewData["Title"] = "Event Admin";
+}
+
+<h2>Welcome to the Super Admin Page, @Model.UserName</h2>
+
+<form method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.UserList.Count; i++) {
+                var user = Model.UserList[i];
+
+                <tr>
+                    <td>@user.Name (@user.UserName)</td>
+                    <td align="justify">
+                        <button type="submit" asp-action="ResetUserPassword" asp-route-userId="@user.UserId">Reset Password</button>
+                        @if (Model.UserId != user.UserId) {
+                            var adminText = user.IsSuperAdmin ? "Revoke Super Admin" : "Make Super Admin";
+                            <button type="submit" asp-action="ToggleAdminAccess" asp-route-userId="@user.UserId">@adminText</button>
+                            <button type="submit" asp-action="DeRegisterUser" asp-route-userId="@user.UserId">DeRegister User</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+<a asp-controller="Event" asp-action="ChooseEvent">Choose an event</a>

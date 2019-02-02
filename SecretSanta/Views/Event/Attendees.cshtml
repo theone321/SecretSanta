@@ -1,9 +1,9 @@
-﻿@model SecretSanta.Models.IndexModel
+﻿@model SecretSanta.Models.Event.AttendeesModel
 @{
     ViewData["Title"] = "Index";
 }
 
-<h2>Who's Registered?</h2>
+<h2>@Model.EventName Attendees</h2>
 
 
 <h4>@Model.MatchCounts / @Model.RegisteredNames.Count Matches Made</h4>
@@ -18,4 +18,4 @@
     }
 </ul>
 
-<a asp-controller="Match" asp-action="GetMatch" asp-route-eventId="@Model.EventId">Back to event</a>
+<a asp-controller="Match" asp-action="GetMatchEvent" asp-route-eventId="@Model.EventId">Back to event</a>

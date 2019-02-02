@@ -29,6 +29,7 @@ namespace SecretSanta.Controllers {
         TempData["IsUserSignedIn"] = true;
         TempData["EventId"] = session.EventId;
         TempData["UserHasMultipleEvents"] = _dataAccessor.GetEventsForUser(user.Id).Count > 1;
+        TempData["IsUserSuperAdmin"] = user.IsSuperAdmin;
 
         if (session.EventId > 0) {
           var isEventAdmin = _dataAccessor.GetEventAdmins(session.EventId).Any(u => u.Id == user.Id);
@@ -41,6 +42,8 @@ namespace SecretSanta.Controllers {
       else {
         TempData["IsUserSignedIn"] = false;
         TempData["IsUserAdmin"] = false;
+        TempData["UserHasMultipleEvents"] = false;
+        TempData["IsUserSuperAdmin"] = false;
       }
     }
   }

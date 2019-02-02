@@ -7,7 +7,7 @@ namespace SecretSanta.DataAccess.Models {
         public string UserName { get; set; }
         public string RegisteredName { get; set; }
         public string Password { get; set; }
-        //public bool IsAdmin { get; set; }
+        public bool IsSuperAdmin { get; set; }
         public string Interests { get; set; }
     }
 }

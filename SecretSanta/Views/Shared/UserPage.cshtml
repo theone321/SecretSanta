@@ -1,16 +1,16 @@
-﻿@model SecretSanta.Models.EventPageModel
+﻿@model SecretSanta.Models.Event.EventPageModel
 @{
-    ViewData["Title"] = Model.Event.EventName;
+    ViewData["Title"] = Model.EventName;
 }
-<h2>@Model.Event.EventName</h2>
+<h2>@Model.EventName</h2>
 <h3>Welcome, @Model.Name</h3>
 <hr />
 <h4>Event Details</h4>
-<label asp-for="Event.EventDescription">What: @Model.Event.EventDescription</label>
+<label asp-for="EventDescription">What: @Model.EventDescription</label>
 <br />
-<label asp-for="Event.Location">Where: @Model.Event.Location</label>
+<label asp-for="Location">Where: @Model.Location</label>
 <br />
-<label asp-for="Event.EventDate">When: @Model.Event.EventDate</label>
+<label asp-for="EventDate">When: @Model.EventDate</label>
 <hr />
 @if (!string.IsNullOrEmpty(Model.TheirSecretMatchName)) {
     <div class="alert-info">
@@ -18,7 +18,7 @@
     </div>
 }
 
-@if (Model.Event.AllowMatching) {
+@if (Model.AllowMatching) {
     <form asp-action="CreateMatch">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
@@ -54,7 +54,7 @@ else {
     <h3>Matching is currently disabled, sorry!</h3>
 }
 
-<a asp-controller="Match" asp-action="Index" asp-route-eventId="@Model.EventId">Who's Registered?</a>
+<a asp-controller="Event" asp-action="Attendees" asp-route-eventId="@Model.EventId">See event attendees</a>
 
 
 @if (Model.TheirSecretMatchId > 0) {
@@ -66,7 +66,7 @@ else {
 
 <div>
     <h4>What are your interests?</h4>
-    <form asp-action="UpdateInterests">
+    <form asp-action="UpdateInterests" asp-controller="User">
         @Html.HiddenFor(m => m.UserId, "userId")
         @Html.HiddenFor(m => m.Name, "name")
         @Html.HiddenFor(m => m.AllowReroll, "allowReroll")
@@ -82,7 +82,7 @@ else {
 <hr />
 
 @if (Model.SignificantOther.UserId <= 0) {
-    var others = Model.OtherUsers ?? new List<EventPageModel.LimitedUser>();
+    var others = Model.OtherUsers ?? new List<SecretSanta.Models.Event.EventPageModel.LimitedUser>();
 
     <h4>Set Significant Other</h4>
     <p>You can one-time set a restriction on another person so you will not get them as a match. This cannot be changed later and it cannot be undone and is intended so you will not get your significant other as a match.</p>

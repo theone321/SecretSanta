@@ -1,7 +1,7 @@
 ﻿using SecretSanta.Constants;
 using SecretSanta.DataAccess;
 using SecretSanta.DataAccess.Models;
-using SecretSanta.Models;
+using SecretSanta.Models.Event;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,19 +14,19 @@ namespace SecretSanta.Users {
     }
 
     public EventPageModel BuildEventPageModelFromDB(string userName, int eventId) {
-      User user = _dataAccessor.GetUserByUserName(userName);
+      var user = _dataAccessor.GetUserByUserName(userName);
       return Build(user, eventId);
     }
 
     public EventPageModel BuildEventPageModelFromDB(int userId, int eventId) {
-      User user = _dataAccessor.GetUserById(userId);
+      var user = _dataAccessor.GetUserById(userId);
       return Build(user, eventId);
     }
 
     private EventPageModel Build(User user, int eventId) {
-      Match existingMatch = _dataAccessor.GetExistingMatch(user.Id, eventId);
-      string myInterests = user.Interests;
-      bool allowReroll = true;
+      var existingMatch = _dataAccessor.GetExistingMatch(user.Id, eventId);
+      var myInterests = user.Interests;
+      var allowReroll = true;
       User theirMatch = null;
       if (existingMatch != null) {
         theirMatch = _dataAccessor.GetUserById(existingMatch.MatchedId);
@@ -36,33 +36,24 @@ namespace SecretSanta.Users {
       //bool isAdmin = _dataAccessor.GetEventAdmins(eventId).Any(u => u.Id == user.Id);
       bool.TryParse(_dataAccessor.GetSettingValue(AdminSettings.AllowMatching, eventId), out bool allowMatch);
 
-      MatchRestriction restriction = _dataAccessor.GetMatchRestrictions(user.Id, eventId).FirstOrDefault(r => r.StrictRestriction);
-      List<EventPageModel.LimitedUser> others = new List<EventPageModel.LimitedUser>();
-      EventPageModel.LimitedUser sigOther = new EventPageModel.LimitedUser();
+      var restriction = _dataAccessor.GetMatchRestrictions(user.Id, eventId).FirstOrDefault(r => r.StrictRestriction);
+      var others = new List<EventPageModel.LimitedUser>();
+      var sigOther = new EventPageModel.LimitedUser();
       if (restriction != null) {
-        User sigOtherUser = _dataAccessor.GetUserById(restriction.RestrictedId);
+        var sigOtherUser = _dataAccessor.GetUserById(restriction.RestrictedId);
         if (sigOtherUser != null) {
           sigOther = new EventPageModel.LimitedUser() { UserId = sigOtherUser.Id, UserRealName = sigOtherUser.RegisteredName };
         }
       }
       if (sigOther.UserId <= 0) {
         //we only need this list if their significant other isn't set
-        foreach (User other in _dataAccessor.GetAllUsersForEvent(eventId)) {
+        foreach (var other in _dataAccessor.GetAllUsersForEvent(eventId)) {
           if (other.Id == user.Id) { continue; }
           others.Add(new EventPageModel.LimitedUser() { UserId = other.Id, UserRealName = other.RegisteredName });
         }
       }
 
       var dbEvent = _dataAccessor.GetEvent(eventId);
-
-      var userEvent = new Models.Event {
-        AllowMatching = allowMatch,
-        EventDate = dbEvent.StartDate,
-        EventName = dbEvent.Name,
-        Location = dbEvent.Location,
-        EventDescription = dbEvent.Description,
-        SharedId = dbEvent.SharedId
-      };
 
       return new EventPageModel() {
         UserId = user.Id,
@@ -75,7 +66,12 @@ namespace SecretSanta.Users {
         MatchInterests = theirMatch?.Interests,
         //UserIsAdmin = isAdmin,
         EventId = eventId,
-        Event = userEvent,
+        AllowMatching = allowMatch,
+        EventDate = dbEvent.StartDate,
+        EventName = dbEvent.Name,
+        Location = dbEvent.Location,
+        EventDescription = dbEvent.Description,
+        SharedId = dbEvent.SharedId,
         SignificantOther = sigOther,
         OtherUsers = others
       };

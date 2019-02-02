@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SecretSanta.Models {
+namespace SecretSanta.Models.User {
   public class ChangePasswordModel {
     [DataType(DataType.Password)]
     public string CurrentPassword { get; set; }

@@ -1,7 +1,7 @@
 ﻿using System;
 
-namespace SecretSanta.Models {
-  public class Event {
+namespace SecretSanta.Models.Event {
+  public class CreateEventModel {
     public string EventName { get; set; }
     public string EventDescription { get; set; }
     public string Location { get; set; }
