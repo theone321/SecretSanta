@@ -331,7 +331,7 @@ namespace SecretSanta.DataAccess {
       _events.Add(newEvent);
       _userEvents.Add(new UserEvent {
         EventId = newEvent.Id,
-        UserId = eventOwnerUserId
+        UserId = eventOwnerUserId,
       });
       return newEvent.Id;
     }

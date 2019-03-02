@@ -6,9 +6,9 @@
 <h2>New Event</h2>
 
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-5">
         <form asp-action="NewEvent">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <table>
                     <tr>
@@ -17,6 +17,7 @@
                         </td>
                         <td>
                             <input asp-for="EventName" />
+                            <span asp-validation-for="EventName" />
                         </td>
                     </tr>
                     <tr>
@@ -25,6 +26,7 @@
                         </td>
                         <td>
                             <input asp-for="EventDescription" />
+                            <span asp-validation-for="EventDescription" />
                         </td>
                     </tr>
                     <tr>
@@ -32,7 +34,10 @@
                             <label asp-for="EventDate">Event Date:</label>
                         </td>
                         <td>
-                            <input asp-for="EventDate" />
+                            <div id="flatpickrcontainer">
+                                <input type="text" placeholder="Select Date.." data-input asp-for="EventDate">
+                            </div>
+                            <span asp-validation-for="EventDate" />
                         </td>
                     </tr>
                     <tr>
@@ -41,6 +46,20 @@
                         </td>
                         <td>
                             <input asp-for="Location" />
+                            <span asp-validation-for="Location" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="AllowRegistration">Allow Registration Right Away</label>
+                        </td>
+                        <td>
+                            <input type="checkbox" asp-for="AllowRegistration" />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <input asp-for="SharedId" />
                         </td>
                     </tr>
                 </table>
@@ -55,3 +74,23 @@
     </div>
 </div>
 
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <script type="text/javascript">
+        flatpickr.l10ns.default.firstDayOfWeek = 0; // Monday. default is sunday
+
+        document.getElementById("flatpickrcontainer").flatpickr({
+            wrap: true,
+            defaultDate: new Date(),
+            dateFormat: "Y-m-d h:i K",
+            minDate: new Date(),
+            enableTime: true, // enables timepicker. default is false
+            time_24hr: false, // set to false for AM/PM. default is false
+            onChange: function (selectedDates, dateStr, instance) {
+                console.log("changed");
+            }
+        });
+    </script>
+}

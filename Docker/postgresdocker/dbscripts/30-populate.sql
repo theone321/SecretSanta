@@ -12,6 +12,4 @@ SET row_security = off;
 
 
 -- Settings
-INSERT INTO "Settings" VALUES ('AllowRegistration', 'true');
-INSERT INTO "Settings" VALUES ('AllowMatching', 'false');
 INSERT INTO "Settings" VALUES ('SessionTimeout', '50000'); --about 34 days

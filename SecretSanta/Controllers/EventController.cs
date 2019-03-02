@@ -22,6 +22,10 @@ namespace SecretSanta.Controllers {
       if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
         var session = _dataAccessor.GetSessionData(sessionId);
 
+        if (!ModelState.IsValid) {
+          return View("Create", newEvent);
+        }
+
         var dbEvent = new DataAccess.Models.Event {
           Description = newEvent.EventDescription,
           Name = newEvent.EventName,

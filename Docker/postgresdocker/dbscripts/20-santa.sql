@@ -67,7 +67,7 @@ CREATE TABLE "Users" (
 	"UserName" text NOT NULL,
     "RegisteredName" text,
     "Password" text,
-    "IsAdmin" bool DEFAULT FALSE,
+    "IsSuperAdmin" bool DEFAULT FALSE,
     "Interests" text
 );
 
@@ -93,6 +93,7 @@ ALTER TABLE ONLY "Users"
 
 CREATE TABLE "Matches" (
     "Id" int NOT NULL,
+	"EventId" int NOT NULL,
     "RequestorId" int,
     "MatchedId" int,
     "RerollAllowed" bool DEFAULT TRUE
@@ -120,6 +121,7 @@ ALTER TABLE ONLY "Matches"
 -- Create MatchRestrictions
 CREATE TABLE "MatchRestrictions" (
     "Id" int NOT NULL,
+	"EventId" int,
     "RequestorId" int,
     "RestrictedId" int,
     "StrictRestriction" bool DEFAULT TRUE
@@ -147,7 +149,8 @@ ALTER TABLE ONLY "MatchRestrictions"
 -- Create Settings
 CREATE TABLE "Settings" (
     "Name" text NOT NULL,
-    "Value" text
+    "Value" text,
+	"EventId" int
 );
 
 ALTER TABLE "MatchRestrictions" OWNER TO santa;
@@ -156,5 +159,84 @@ ALTER TABLE "MatchRestrictions" OWNER TO santa;
 CREATE TABLE "Sessions" (
     "SessionId" text NOT NULL,
     "User" text NOT NULL,
-    "TimeStamp" timestamp NOT NULL
+    "TimeStamp" timestamp NOT NULL,
+	"EventId" int
 );
+
+-- Create Events
+CREATE TABLE "Events" (
+	"Id" int NOT NULL,
+	"Name" text NOT NULL,
+	"StartDate" timestamp NOT NULL,
+	"Location" text,
+	"Description" text,
+	"SharedId" text NOT NULL
+)
+
+ALTER TABLE "Events" OWNER TO santa;
+
+CREATE SEQUENCE "Events_Id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE "Events_Id_seq" OWNER TO santa;
+
+ALTER SEQUENCE "Events_Id_seq" OWNED BY "Events"."Id";
+
+ALTER TABLE ONLY "Events" ALTER COLUMN "Id" SET DEFAULT nextval('"Events_Id_seq"'::regclass);
+
+ALTER TABLE ONLY "Events"
+    ADD CONSTRAINT "PK_Events" PRIMARY KEY ("Id");
+	
+-- Create EventAdmins
+CREATE TABLE "EventAdmins" (
+	"Id" int NOT NULL,
+	"EventId" int NOT NULL,
+	"AdminId" int NOT NULL
+)
+
+ALTER TABLE "EventAdmins" OWNER TO santa;
+
+CREATE SEQUENCE "EventAdmins_Id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE "EventAdmins_Id_seq" OWNER TO santa;
+
+ALTER SEQUENCE "EventAdmins_Id_seq" OWNED BY "EventAdmins"."Id";
+
+ALTER TABLE ONLY "EventAdmins" ALTER COLUMN "Id" SET DEFAULT nextval('"EventAdmins_Id_seq"'::regclass);
+
+ALTER TABLE ONLY "EventAdmins"
+    ADD CONSTRAINT "PK_EventAdmins" PRIMARY KEY ("Id");
+	
+-- Create UserEvents
+CREATE TABLE "UserEvents" (
+	"Id" int NOT NULL,
+	"UserId" int NOT NULL,
+	"EventId" int NOT NULL
+)
+
+ALTER TABLE "UserEvents" OWNER TO santa;
+
+CREATE SEQUENCE "UserEvents_Id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE "UserEvents_Id_seq" OWNER TO santa;
+
+ALTER SEQUENCE "UserEvents_Id_seq" OWNED BY "UserEvents"."Id";
+
+ALTER TABLE ONLY "UserEvents" ALTER COLUMN "Id" SET DEFAULT nextval('"UserEvents_Id_seq"'::regclass);
+
+ALTER TABLE ONLY "UserEvents"
+    ADD CONSTRAINT "PK_UserEvents" PRIMARY KEY ("Id");
