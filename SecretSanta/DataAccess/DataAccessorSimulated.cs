@@ -389,5 +389,15 @@ namespace SecretSanta.DataAccess {
         theEvent.SharedId = Guid.NewGuid();
       }
     }
+
+    public void UpdateEvent(Event updatedEvent) {
+      var existingEvent = _events.FirstOrDefault(e => e.Id == updatedEvent.Id);
+      if (existingEvent != null) {
+        existingEvent.Name = updatedEvent.Name;
+        existingEvent.Description = updatedEvent.Description;
+        existingEvent.Location = updatedEvent.Location;
+        existingEvent.StartDate = updatedEvent.StartDate;
+      }
+    }
   }
 }

@@ -377,5 +377,17 @@ namespace SecretSanta.DataAccess {
         _context.SaveChanges();
       }
     }
+
+    public void UpdateEvent(Event updatedEvent) {
+      var existingEvent = _context.Events.FirstOrDefault(e => e.Id == updatedEvent.Id);
+      if (existingEvent != null) {
+        existingEvent.Name = updatedEvent.Name;
+        existingEvent.Description = updatedEvent.Description;
+        existingEvent.Location = updatedEvent.Location;
+        existingEvent.StartDate = updatedEvent.StartDate;
+        _context.Events.Update(existingEvent);
+        _context.SaveChanges();
+      }
+    }
   }
 }

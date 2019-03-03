@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SecretSanta.Models.Event {
   public class CreateEventModel {
-    [Required]
+    [Required(ErrorMessage = "You must fill in the Event Name.")]
     public string EventName { get; set; }
-    [Required]
+    [Required(ErrorMessage = "You must fill in the Event Description.")]
     public string EventDescription { get; set; }
-    [Required]
+    [Required(ErrorMessage = "You must fill in the Event Location.")]
     public string Location { get; set; }
-    [Required]
+    [Required(ErrorMessage = "You must fill in the Event Date.")]
     public DateTime EventDate { get; set; }
     public Guid SharedId { get; set; }
     public bool AllowMatching { get; set; }

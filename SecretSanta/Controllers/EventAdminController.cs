@@ -24,37 +24,25 @@ namespace SecretSanta.Controllers {
 
       var theEvent = _dataAccessor.GetEvent(session.EventId);
 
-      var displayList = new List<EventAdminUserSettings>();
-      var users = _dataAccessor.GetAllUsersForEvent(theEvent.Id);
-      var matches = _dataAccessor.GetAllExistingMatchesForEvent(theEvent.Id);
-      User currentUser = null;
-      foreach (var user in users) {
-        var isAdmin = _dataAccessor.GetEventAdmins(theEvent.Id).Any(ea => ea.Id == user.Id);
-        var display = new EventAdminUserSettings {
-          UserId = user.Id,
-          Name = user.RegisteredName,
-          UserName = user.UserName,
-          HasMatched = matches.Any(m => m.RequestorId == user.Id),
-          IsMatched = matches.Any(m => m.MatchedId == user.Id),
-          IsAdmin = isAdmin
-        };
+      var displayList = BuildUserSettingsModel(theEvent.Id);
 
-        displayList.Add(display);
-
-        if (string.Equals(user.UserName, session.User, StringComparison.Ordinal)) {
-          currentUser = user;
-        }
-      }
+      var currentUserId = _dataAccessor.GetUserByUserName(session.User).Id;
 
       var options = new EventAdminPageModel {
         UserName = session.User,
-        UserId = currentUser?.Id ?? 0,
-        AllowRegistration = allowRegistration,
-        AllowMatching = allowMatching,
+        UserId = currentUserId,
         SharedEventId = theEvent.SharedId,
         EventName = theEvent.Name,
         EventId = theEvent.Id,
-        UserList = displayList
+        EventSettings = new EventSettingsModel {
+          AllowRegistration = allowRegistration,
+          AllowMatching = allowMatching,
+          EventName = theEvent.Name,
+          EventDescription = theEvent.Description,
+          Location = theEvent.Location,
+          EventDate = theEvent.StartDate
+        },
+        UserSettings = displayList
       };
 
       return View(options);
@@ -66,10 +54,28 @@ namespace SecretSanta.Controllers {
         return RedirectToAction("SignIn", "User");
       }
 
-      var eventId = session.EventId;
+      var eventId = options.EventId;
 
-      _dataAccessor.SetSettingValue(AdminSettings.AllowRegistration, options.AllowRegistration.ToString(), eventId);
-      _dataAccessor.SetSettingValue(AdminSettings.AllowMatching, options.AllowMatching.ToString(), eventId);
+      if (!ModelState.IsValid) {
+        var theEvent = _dataAccessor.GetEvent(eventId);
+        options.SharedEventId = theEvent.SharedId;
+        options.EventName = theEvent.Name;
+        options.UserName = session.User;
+        options.UserId = _dataAccessor.GetUserByUserName(session.User).Id;
+        options.UserSettings = BuildUserSettingsModel(eventId);
+        return View("Index", options);
+      }
+
+      _dataAccessor.SetSettingValue(AdminSettings.AllowRegistration, options.EventSettings.AllowRegistration.ToString(), eventId);
+      _dataAccessor.SetSettingValue(AdminSettings.AllowMatching, options.EventSettings.AllowMatching.ToString(), eventId);
+
+      _dataAccessor.UpdateEvent(new Event {
+        Id = options.EventId,
+        Name = options.EventSettings.EventName,
+        Description = options.EventSettings.EventDescription,
+        Location = options.EventSettings.Location,
+        StartDate = options.EventSettings.EventDate
+      });
 
       return RedirectToAction("Index");
     }
@@ -98,6 +104,27 @@ namespace SecretSanta.Controllers {
       //We want a new Shared ID for this event so the removed user cannot easily rejoin.
       _dataAccessor.RegenerateSharedIdForEvent(eventId);
       return RedirectToAction("Index");
+    }
+
+    private List<EventAdminUserSettingsModel> BuildUserSettingsModel(int eventId) {
+      var displayList = new List<EventAdminUserSettingsModel>();
+      var users = _dataAccessor.GetAllUsersForEvent(eventId);
+      var matches = _dataAccessor.GetAllExistingMatchesForEvent(eventId);
+      foreach (var user in users) {
+        var isAdmin = _dataAccessor.GetEventAdmins(eventId).Any(ea => ea.Id == user.Id);
+        var display = new EventAdminUserSettingsModel {
+          UserId = user.Id,
+          Name = user.RegisteredName,
+          UserName = user.UserName,
+          HasMatched = matches.Any(m => m.RequestorId == user.Id),
+          IsMatched = matches.Any(m => m.MatchedId == user.Id),
+          IsAdmin = isAdmin
+        };
+
+        displayList.Add(display);
+      }
+
+      return displayList;
     }
 
     private bool VerifyAccess(out ISession session) {

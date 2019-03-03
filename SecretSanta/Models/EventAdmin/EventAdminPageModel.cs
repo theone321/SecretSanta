@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace SecretSanta.Models.EventAdmin {
   public class EventAdminPageModel {
@@ -9,12 +10,11 @@ namespace SecretSanta.Models.EventAdmin {
     public int EventId { get; set; }
     public string EventName { get; set; }
 
-    public bool AllowRegistration { get; set; }
-    public bool AllowMatching { get; set; }
-    public List<EventAdminUserSettings> UserList { get; set; } = new List<EventAdminUserSettings>();
+    public EventSettingsModel EventSettings { get; set; }
+    public List<EventAdminUserSettingsModel> UserSettings { get; set; } = new List<EventAdminUserSettingsModel>();
   }
 
-  public class EventAdminUserSettings {
+  public class EventAdminUserSettingsModel {
     /// <summary>
     /// The User's Id
     /// </summary>
@@ -39,5 +39,18 @@ namespace SecretSanta.Models.EventAdmin {
     /// Is this user an Admin?
     /// </summary>
     public bool IsAdmin { get; set; }
+  }
+
+  public class EventSettingsModel {
+    public bool AllowRegistration { get; set; }
+    public bool AllowMatching { get; set; }
+    [Required(ErrorMessage = "You must fill in the Event Name.")]
+    public string EventName { get; set; }
+    [Required(ErrorMessage = "You must fill in the Event Description.")]
+    public string EventDescription { get; set; }
+    [Required(ErrorMessage = "You must fill in the Event Location.")]
+    public string Location { get; set; }
+    [Required(ErrorMessage = "You must fill in the Event Date.")]
+    public DateTime EventDate { get; set; }
   }
 }
