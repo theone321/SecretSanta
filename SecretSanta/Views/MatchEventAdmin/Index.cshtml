@@ -1,4 +1,4 @@
-﻿@model SecretSanta.Models.EventAdmin.EventAdminPageModel
+﻿@model SecretSanta.Models.EventAdmin.SecretMatch.MatchEventAdminPageModel
 @{
     ViewData["Title"] = "Event Admin";
 }
@@ -78,7 +78,7 @@
                 </table>
             </div>
             <div class="form-group">
-                <input id="updateEvent" type="submit" value="Update" />
+                <input id="updateEvent" class="btn btn-default" type="submit" value="Update" />
             </div>
         </form>
     </div>
@@ -103,10 +103,10 @@
                     <td>@user.IsMatched</td>
                     <td align="justify">
                         @if (Model.UserId != user.UserId) {@*Sorry, you can't delete yourself*@
-                        var adminText = user.IsAdmin ? "Revoke Admin" : "Make Admin";
-                        <button type="submit" asp-action="ToggleAdminAccess" asp-route-userId="@user.UserId">@adminText</button>
-                        <button type="submit" asp-action="RemoveUserFromEvent" asp-route-userId="@user.UserId">Remove User</button>
-                    }
+                            var adminText = user.IsAdmin ? "Revoke Admin" : "Make Admin";
+                            <button type="submit" class="btn btn-default" asp-action="ToggleAdminAccess" asp-route-userId="@user.UserId">@adminText</button>
+                            <button type="submit" class="btn btn-default" asp-action="RemoveUserFromEvent" asp-route-userId="@user.UserId">Remove User</button>
+                        }
                     </td>
                 </tr>
             }
@@ -114,7 +114,7 @@
     </table>
 </form>
 
-<a asp-controller="Match" asp-action="GetMatchEvent" asp-route-eventId="@Model.EventId">Back to event</a>
+<a asp-action="GoToEventUserPage" asp-route-eventId="@Model.EventId">Back to event</a>
 
 @section Scripts {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">

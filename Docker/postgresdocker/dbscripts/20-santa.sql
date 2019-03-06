@@ -170,7 +170,10 @@ CREATE TABLE "Events" (
 	"StartDate" timestamp NOT NULL,
 	"Location" text,
 	"Description" text,
-	"SharedId" text NOT NULL
+	"SharedId" text NOT NULL,
+	"EventTypeId" int NOT NULL,
+	"BirthdayPersonUserId" int,
+	"IsSurpriseEvent" bit NOT NULL
 )
 
 ALTER TABLE "Events" OWNER TO santa;
@@ -240,3 +243,55 @@ ALTER TABLE ONLY "UserEvents" ALTER COLUMN "Id" SET DEFAULT nextval('"UserEvents
 
 ALTER TABLE ONLY "UserEvents"
     ADD CONSTRAINT "PK_UserEvents" PRIMARY KEY ("Id");
+	
+-- Create EventTypes
+CREATE TABLE "EventTypes" (
+	"Id" int NOT NULL,
+	"Name" text NOT NULL
+)
+
+ALTER TABLE "EventTypes" OWNER TO santa;
+
+CREATE SEQUENCE "EventTypes_Id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE "EventTypes_Id_seq" OWNER TO santa;
+
+ALTER SEQUENCE "EventTypes_Id_seq" OWNED BY "EventTypes"."Id";
+
+ALTER TABLE ONLY "EventTypes" ALTER COLUMN "Id" SET DEFAULT nextval('"EventTypes_Id_seq"'::regclass);
+
+ALTER TABLE ONLY "EventTypes"
+    ADD CONSTRAINT "PK_EventTypes" PRIMARY KEY ("Id");
+	
+-- Create EventItems
+CREATE TABLE "EventItems" (
+	"Id" int NOT NULL,
+	"EventId" int NOT NULL,
+	"ItemText" text NOT NULL,
+	"IsGiftIdea" bit NOT NULL,
+	"IsBroughtItem" bit NOT NULL,
+	"UserIdBringingItem" int
+)
+
+ALTER TABLE "EventItems" OWNER TO santa;
+
+CREATE SEQUENCE "EventItems_Id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE "EventItems_Id_seq" OWNER TO santa;
+
+ALTER SEQUENCE "EventItems_Id_seq" OWNED BY "EventItems"."Id";
+
+ALTER TABLE ONLY "EventItems" ALTER COLUMN "Id" SET DEFAULT nextval('"EventItems_Id_seq"'::regclass);
+
+ALTER TABLE ONLY "EventItems"
+    ADD CONSTRAINT "PK_EventItems" PRIMARY KEY ("Id");

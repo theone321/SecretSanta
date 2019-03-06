@@ -13,6 +13,8 @@ namespace SecretSanta.DataAccess {
     public DbSet<Event> Events { get; set; }
     public DbSet<EventAdmin> EventAdmins { get; set; }
     public DbSet<UserEvent> UserEvents { get; set; }
+    public DbSet<EventType> EventTypes { get; set; }
+    public DbSet<EventItem> EventItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
       modelBuilder.Entity<User>().HasKey(m => m.Id); //I think this makes it only save if the id was assigned?
@@ -21,6 +23,8 @@ namespace SecretSanta.DataAccess {
       modelBuilder.Entity<Event>().HasKey(m => m.Id);
       modelBuilder.Entity<EventAdmin>().HasKey(m => m.Id);
       modelBuilder.Entity<UserEvent>().HasKey(m => m.Id);
+      modelBuilder.Entity<EventType>().HasKey(m => m.Id);
+      modelBuilder.Entity<EventItem>().HasKey(m => m.Id);
 
       base.OnModelCreating(modelBuilder);
     }

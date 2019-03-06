@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SecretSanta.Models.Event {
@@ -14,5 +16,7 @@ namespace SecretSanta.Models.Event {
     public Guid SharedId { get; set; }
     public bool AllowMatching { get; set; }
     public bool AllowRegistration { get; set; }
+    public List<SelectListItem> EventTypes { get; set; }
+    public string ChosenEventType { get; set; }
   }
 }

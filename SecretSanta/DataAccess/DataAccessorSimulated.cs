@@ -42,7 +42,13 @@ namespace SecretSanta.DataAccess {
       new Setting() { Name = AdminSettings.AllowMatching, Value = "true", EventId = 1 },
       new Setting() { Name = AdminSettings.AllowRegistration, Value = "true", EventId = 2 },
       new Setting() { Name = AdminSettings.AllowMatching, Value = "false", EventId = 2 },
+      new Setting() { Name = AdminSettings.AllowRegistration, Value = "false", EventId = 3 },
       new Setting() { Name = AdminSettings.SessionTimeout, Value = "15" }, //value is in minutes
+    };
+
+    private static List<EventType> _eventTypes = new List<EventType> {
+      new EventType { Id = 1, Name = "Secret Match" },
+      new EventType { Id = 2, Name = "Birthday Party" }
     };
 
     private static List<Event> _events = new List<Event> {
@@ -52,7 +58,8 @@ namespace SecretSanta.DataAccess {
         Description = "Annual secret santa gift exchange",
         Location = "My house",
         StartDate = new DateTime(2019, 12, 15, 19, 30, 00),
-        SharedId = new Guid("0123456789ABCDEFFEDCBA9876543210")
+        SharedId = new Guid("0123456789ABCDEFFEDCBA9876543210"),
+        EventType = 1
       },
       new Event {
         Id = 2,
@@ -60,13 +67,25 @@ namespace SecretSanta.DataAccess {
         Description = "The other event",
         Location = "Somebody's House",
         StartDate = new DateTime(2019, 12, 17, 18, 30, 00),
-        SharedId = new Guid("FEDCBA98765432100123456789ABCDEF")
+        SharedId = new Guid("FEDCBA98765432100123456789ABCDEF"),
+        EventType = 1
+      },
+      new Event {
+        Id = 3,
+        Name = "Birthday Party",
+        Description = "My friend's bday party",
+        Location = "Somebody's House",
+        StartDate = new DateTime(2019, 8, 19, 19, 15, 00),
+        SharedId = new Guid("ABCDEF12345678900987654321FEDCBA"),
+        EventType = 2,
+        BirthdayPersonUserId = 3
       }
     };
 
     private static List<EventAdmin> _eventAdmins = new List<EventAdmin> {
       new EventAdmin { Id = 1, EventId = 1, AdminId = 1 },
-      new EventAdmin { Id = 2, EventId = 2, AdminId = 3 }
+      new EventAdmin { Id = 2, EventId = 2, AdminId = 3 },
+      new EventAdmin { Id = 3, EventId = 3, AdminId = 1 }
     };
 
     private static List<UserEvent> _userEvents = new List<UserEvent> {
@@ -84,10 +103,18 @@ namespace SecretSanta.DataAccess {
       new UserEvent { Id = 12, UserId = 9, EventId = 2 },
       new UserEvent { Id = 13, UserId = 10, EventId = 1 },
       new UserEvent { Id = 14, UserId = 10, EventId = 2 },
-      new UserEvent { Id = 15, UserId = 11, EventId = 2 }
+      new UserEvent { Id = 15, UserId = 11, EventId = 2 },
+      new UserEvent { Id = 16, UserId = 1, EventId = 3 }
     };
 
     private static List<Session> _sessions = new List<Session>();
+
+    private static List<EventItem> _eventItems = new List<EventItem> {
+      new EventItem { Id = 1, EventId = 3, ItemText = "Pokemon Game", IsGiftIdea = true, IsBroughtItem = false, UserIdBringingItem = 4 },
+      new EventItem { Id = 2, EventId = 3, ItemText = "Board Game", IsGiftIdea = true, IsBroughtItem = false },
+      new EventItem { Id = 3, EventId = 3, ItemText = "Buffalo Chicken Dip", IsGiftIdea = false, IsBroughtItem = true, UserIdBringingItem = 3 },
+      new EventItem { Id = 4, EventId = 3, ItemText = "Salad", IsGiftIdea = false, IsBroughtItem = true, UserIdBringingItem = 2 }
+    };
 
     public IList<User> GetAllUsersForEvent(int eventId) {
       return _users.Where(u => _userEvents.Where(ue => ue.EventId == eventId).Any(ue => ue.UserId == u.Id)).ToList();
@@ -222,6 +249,9 @@ namespace SecretSanta.DataAccess {
       var settingObj = _settings.FirstOrDefault(s => s.EventId == eventId && string.Equals(s.Name, setting, StringComparison.Ordinal));
       if (settingObj != null) {
         settingObj.Value = value;
+      }
+      else {
+        AddSetting(setting, value, eventId);
       }
     }
 
@@ -397,6 +427,41 @@ namespace SecretSanta.DataAccess {
         existingEvent.Description = updatedEvent.Description;
         existingEvent.Location = updatedEvent.Location;
         existingEvent.StartDate = updatedEvent.StartDate;
+      }
+    }
+
+    public string GetEventTypeName(int id) {
+      var eventType = _eventTypes.FirstOrDefault(et => et.Id == id);
+      if (eventType != null) {
+        return eventType.Name;
+      }
+      return string.Empty;
+    }
+
+    public List<EventType> GetEventTypes() {
+      return _eventTypes.ToList();
+    }
+
+    public List<EventItem> GetItemsForEvent(int eventId) {
+      return _eventItems.Where(ei => ei.EventId == eventId).ToList();
+    }
+
+    public void AddEventItem(EventItem theItem) {
+      theItem.Id = _eventItems?.Max(e => e.Id) + 1 ?? 1;
+      _eventItems.Add(theItem);
+    }
+
+    public void ClaimGift(int itemId, int userId) {
+      var item = _eventItems.FirstOrDefault(ei => ei.Id == itemId);
+      if (item != null) {
+        item.UserIdBringingItem = userId;
+      }
+    }
+
+    public void RemoveEventItem(int itemId) {
+      var item = _eventItems.FirstOrDefault(ei => ei.Id == itemId);
+      if (item != null) {
+        _eventItems.Remove(item);
       }
     }
   }

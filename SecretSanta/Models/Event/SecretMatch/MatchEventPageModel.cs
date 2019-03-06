@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SecretSanta.Models.Event {
-  public class EventPageModel {
+namespace SecretSanta.Models.Event.SecretMatch {
+  public class MatchEventPageModel {
     public int UserId { get; set; }
     public string UserName { get; set; }
     public string Name { get; set; }
@@ -18,9 +18,10 @@ namespace SecretSanta.Models.Event {
     public string Location { get; set; }
     public string EventDescription { get; set; }
     public Guid SharedId { get; set; }
-    //public bool UserIsAdmin { get; set; }
     public LimitedUser SignificantOther { get; set; }
     public List<LimitedUser> OtherUsers { get; set; }
+    public int RegisteredCount { get; set; }
+    public int MatchCounts { get; set; }
 
     public class LimitedUser {
       public int UserId { get; set; }

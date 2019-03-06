@@ -22,6 +22,26 @@ namespace SecretSanta.Controllers {
       SetTempDataValues();
     }
 
+    public IActionResult GoToEventUserPage(int eventId) {
+      var theEvent = _dataAccessor.GetEvent(eventId);
+      if (theEvent.EventType == 1) {
+        return RedirectToAction("GetMatchEvent", "Match", new { eventId = eventId });
+      }
+      else {
+        return RedirectToAction("GetBirthdayEvent", "Birthday", new { eventId = eventId });
+      }
+    }
+
+    public IActionResult GoToEventAdminPage(int eventId) {
+      var theEvent = _dataAccessor.GetEvent(eventId);
+      if (theEvent.EventType == 1) {
+        return RedirectToAction("Index", "MatchEventAdmin");
+      }
+      else {
+        return RedirectToAction("Index", "BirthdayEventAdmin");
+      }
+    }
+
     private void SetTempDataValues() {
       if (_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
         var user = _dataAccessor.GetUserByUserName(session.User);

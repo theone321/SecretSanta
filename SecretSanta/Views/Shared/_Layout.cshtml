@@ -36,7 +36,7 @@
                                 <li>@Html.ActionLink("New Event", "NewEvent", "Event")</li>
                                 <li>@Html.ActionLink("Join Event", "ConnectWithEvent", "Event")</li>
                                 @if (TempData["IsUserAdmin"] != null && (bool)TempData.Peek("IsUserAdmin")) {
-                                    <li>@Html.ActionLink("Admin Options", "Index", "EventAdmin")</li>
+                                    <li>@Html.ActionLink("Admin Options", "OpenEventAdmin", "Event")</li>
                                 }
                             </ul>
                         </li>

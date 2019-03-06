@@ -1,0 +1,155 @@
+﻿@model SecretSanta.Models.EventAdmin.Birthday.BirthdayEventAdminPageModel
+@{
+    ViewData["Title"] = "Event Admin";
+}
+
+<h2>Welcome to the Admin Page for @Model.EventName, @Model.UserName</h2>
+
+<p>This events Shared ID: @Model.SharedEventId.ToString()</p>
+<p>Share this ID with people you'd like to invite to this event.</p>
+
+<br />
+
+<div class="row">
+    <div class="col-md-5">
+        <form asp-action="UpdateSettings">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <table>
+                    <tr>
+                        <td>
+                            <label asp-for="EventSettings.EventName">Event Name</label>
+                        </td>
+                        <td>
+                            <input id="eventName" asp-for="EventSettings.EventName" />
+                            <span asp-validation-for="EventSettings.EventName" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="EventSettings.EventDescription">Event Description</label>
+                        </td>
+                        <td>
+                            <input id="eventDescription" asp-for="EventSettings.EventDescription" />
+                            <span asp-validation-for="EventSettings.EventDescription" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="EventSettings.Location">Location</label>
+                        </td>
+                        <td>
+                            <input id="Location" asp-for="EventSettings.Location" />
+                            <span asp-validation-for="EventSettings.Location" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="EventSettings.EventDate">Event Date</label>
+                        </td>
+                        <td>
+                            <div id="flatpickrcontainer">
+                                <input id="eventDate" type="text" placeholder="Select Date.." data-input asp-for="EventSettings.EventDate">
+                                <span asp-validation-for="EventSettings.EventDate" />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label asp-for="EventSettings.AllowRegistration">Allow Registration</label>
+                        </td>
+                        <td>
+                            <input asp-for="EventSettings.AllowRegistration" />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <input asp-for="EventId" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="form-group">
+                <input id="updateEvent" class="btn btn-default" type="submit" value="Update" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<form method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.UserSettings.Count; i++) {
+                var user = Model.UserSettings[i];
+
+                <tr>
+                    <td>@user.Name (@user.UserName)</td>
+                    <td align="justify">
+                        @if (Model.UserId != user.UserId) {
+                            var adminText = user.IsAdmin ? "Revoke Admin" : "Make Admin";
+                            <button type="submit" class="btn btn-default" asp-action="ToggleAdminAccess" asp-route-userId="@user.UserId">@adminText</button>
+                            <button type="submit" class="btn btn-default" asp-action="RemoveUserFromEvent" asp-route-userId="@user.UserId">Remove User</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+<form method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Gift Idea</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.GiftIdeas.Count; i++) {
+                var giftIdea = Model.GiftIdeas[i];
+
+                <tr>
+                    <td>@giftIdea.GiftIdeaText</td>
+                    <td align="justify">
+                        <button type="submit" class="btn btn-default" asp-action="RemoveGiftIdea" asp-route-eventItemId="@giftIdea.Id">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+<a class="btn btn-default" asp-action="AddGiftIdea" asp-route-eventId="@Model.EventId">Add Gift Idea</a>
+<br />
+<br />
+<a asp-action="GoToEventUserPage" asp-route-eventId="@Model.EventId">Back to event</a>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script type="text/javascript">
+        flatpickr.l10ns.default.firstDayOfWeek = 0; // Monday. default is sunday
+
+        document.getElementById("flatpickrcontainer").flatpickr({
+            wrap: true,
+            defaultDate: new Date(@Model.EventSettings.EventDate.Year,
+                @Model.EventSettings.EventDate.Month - 1,
+                @Model.EventSettings.EventDate.Day,
+                @Model.EventSettings.EventDate.Hour,
+                @Model.EventSettings.EventDate.Minute),
+            dateFormat: "Y-m-d h:i K",
+            minDate: new Date(),
+            enableTime: true, // enables timepicker. default is false
+            time_24hr: false, // set to false for AM/PM. default is false
+            onChange: function (selectedDates, dateStr, instance) {
+                console.log("changed");
+            }
+        });
+    </script>
+}

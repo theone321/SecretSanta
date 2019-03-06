@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using SecretSanta.DataAccess;
 using SecretSanta.DependencyWrappers;
 using SecretSanta.Matching;
+using SecretSanta.Users.SecretMatch;
+using SecretSanta.Users.Birthday;
 using SecretSanta.Users;
 
 namespace SecretSanta {
@@ -24,7 +26,8 @@ namespace SecretSanta {
       services.AddTransient<ICreateSecretMatch, CreateSecretMatch>();
       services.AddTransient<IRandomWrapper, RandomWrapper>();
       services.AddTransient<ISessionManager, SessionManager>();
-      services.AddTransient<IEventPageModelBuilder, PageModelBuilder>();
+      services.AddTransient<IMatchEventPageModelBuilder, MatchEventPageModelBuilder>();
+      services.AddTransient<IBirthdayEventPageModelBuilder, BirthdayEventPageModelBuilder>();
 
       //testing
 #if SIMULATE

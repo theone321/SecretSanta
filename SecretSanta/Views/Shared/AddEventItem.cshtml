@@ -1,0 +1,45 @@
+﻿@model  SecretSanta.Models.Event.Shared.NewEventItemModel
+@{
+    ViewData["Title"] = "Add Item";
+}
+
+<h2>Add Item</h2>
+
+<div class="row">
+    <div class="col-md-1">
+        <form asp-controller=@Model.ControllerName asp-action=@Model.ActionName>
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <table>
+                    <tr>
+                        <td>
+                            <label asp-for="ItemText">Description:</label>
+                        </td>
+                        <td>
+                            <input type="text" asp-for="ItemText" />
+                            <span asp-validation-for="ItemText" />
+                        </td>
+                    </tr>
+                    <tr hidden>
+                        <td>
+                            <input asp-for="EventId" />
+                            <input asp-for="UserIdBringingItem" />
+                            <input asp-for="IsGiftIdea" />
+                            <input asp-for="IsBroughtItem" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Add Item" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.FromEventAdmin) {
+    <a asp-action="GoToEventAdminPage" asp-route-eventId="@Model.EventId">Back to event admin</a>
+}
+else {
+    <a asp-action="GoToEventUserPage" asp-route-eventId="@Model.EventId">Back to event</a>
+}

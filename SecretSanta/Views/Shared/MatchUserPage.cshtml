@@ -1,4 +1,4 @@
-﻿@model SecretSanta.Models.Event.EventPageModel
+﻿@model SecretSanta.Models.Event.SecretMatch.MatchEventPageModel
 @{
     ViewData["Title"] = Model.EventName;
 }
@@ -11,7 +11,12 @@
 <label asp-for="Location">Where: @Model.Location</label>
 <br />
 <label asp-for="EventDate">When: @Model.EventDate</label>
+<br />
+<a asp-controller="Event" asp-action="Attendees" asp-route-eventId="@Model.EventId">See event attendees</a>
 <hr />
+
+<h4>@Model.MatchCounts / @Model.RegisteredCount Matches Made</h4>
+
 @if (!string.IsNullOrEmpty(Model.TheirSecretMatchName)) {
     <div class="alert-info">
         <label>Your match is @Model.TheirSecretMatchName</label>
@@ -54,9 +59,6 @@ else {
     <h3>Matching is currently disabled, sorry!</h3>
 }
 
-<a asp-controller="Event" asp-action="Attendees" asp-route-eventId="@Model.EventId">See event attendees</a>
-
-
 @if (Model.TheirSecretMatchId > 0) {
     <div>
         <h4>@Model.TheirSecretMatchName's Interests:</h4>
@@ -82,7 +84,7 @@ else {
 <hr />
 
 @if (Model.SignificantOther.UserId <= 0) {
-    var others = Model.OtherUsers ?? new List<SecretSanta.Models.Event.EventPageModel.LimitedUser>();
+    var others = Model.OtherUsers ?? new List<SecretSanta.Models.Event.SecretMatch.MatchEventPageModel.LimitedUser>();
 
     <h4>Set Significant Other</h4>
     <p>You can one-time set a restriction on another person so you will not get them as a match. This cannot be changed later and it cannot be undone and is intended so you will not get your significant other as a match.</p>

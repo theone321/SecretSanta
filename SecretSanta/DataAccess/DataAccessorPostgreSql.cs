@@ -176,6 +176,9 @@ namespace SecretSanta.DataAccess {
 
         _context.SaveChanges();
       }
+      else {
+        AddSetting(setting, value, eventId);
+      }
     }
 
     public Setting AddSetting(string settingName, string value, int eventId) {
@@ -386,6 +389,43 @@ namespace SecretSanta.DataAccess {
         existingEvent.Location = updatedEvent.Location;
         existingEvent.StartDate = updatedEvent.StartDate;
         _context.Events.Update(existingEvent);
+        _context.SaveChanges();
+      }
+    }
+
+    public string GetEventTypeName(int id) {
+      var eventType = _context.EventTypes.FirstOrDefault(et => et.Id == id);
+      if (eventType != null) {
+        return eventType.Name;
+      }
+      return string.Empty;
+    }
+
+    public List<EventType> GetEventTypes() {
+      return _context.EventTypes.ToList();
+    }
+
+    public List<EventItem> GetItemsForEvent(int eventId) {
+      return _context.EventItems.Where(ei => ei.EventId == eventId).ToList();
+    }
+
+    public void AddEventItem(EventItem theItem) {
+      _context.EventItems.Add(theItem);
+      _context.SaveChanges();
+    }
+
+    public void ClaimGift(int itemId, int userId) {
+      var item = _context.EventItems.FirstOrDefault(ei => ei.Id == itemId);
+      if (item != null) {
+        item.UserIdBringingItem = userId;
+        _context.SaveChanges();
+      }
+    }
+
+    public void RemoveEventItem(int itemId) {
+      var item = _context.EventItems.FirstOrDefault(ei => ei.Id == itemId);
+      if (item != null) {
+        _context.EventItems.Remove(item);
         _context.SaveChanges();
       }
     }

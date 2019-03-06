@@ -3,17 +3,17 @@ using Microsoft.AspNetCore.Mvc;
 using SecretSanta.Constants;
 using SecretSanta.DataAccess;
 using SecretSanta.Matching;
-using SecretSanta.Models.Event;
+using SecretSanta.Models.Event.SecretMatch;
+using SecretSanta.Users.SecretMatch;
 using SecretSanta.Users;
-using System.Linq;
 
 namespace SecretSanta.Controllers {
   public class MatchController : BaseController {
     private readonly ICreateSecretMatch _createSecretMatch;
-    private readonly IEventPageModelBuilder _eventPageModelBuilder;
+    private readonly IMatchEventPageModelBuilder _eventPageModelBuilder;
 
     public MatchController(IDataAccessor dataAccessor, ICreateSecretMatch createSecretMatch,
-        ISessionManager sessionManager, IEventPageModelBuilder eventPageModelBuilder)
+        ISessionManager sessionManager, IMatchEventPageModelBuilder eventPageModelBuilder)
         : base(sessionManager, dataAccessor) {
       _createSecretMatch = createSecretMatch;
       _eventPageModelBuilder = eventPageModelBuilder;
@@ -29,10 +29,10 @@ namespace SecretSanta.Controllers {
       _sessionManager.SetCurrentEventId(eventId);
 
       var userModel = _eventPageModelBuilder.BuildEventPageModelFromDB(session.User, eventId);
-      return View("UserPage", userModel);
+      return View("MatchUserPage", userModel);
     }
 
-    public IActionResult CreateMatch(EventPageModel userModel) {
+    public IActionResult CreateMatch(MatchEventPageModel userModel) {
       //verify access
       if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
         return View("InvalidCredentials");
@@ -52,10 +52,10 @@ namespace SecretSanta.Controllers {
 
       userModel = _eventPageModelBuilder.BuildEventPageModelFromDB(userModel.UserId, eventId);
 
-      return View("UserPage", userModel);
+      return View("MatchUserPage", userModel);
     }
 
-    public IActionResult RerollResult(EventPageModel userModel) {
+    public IActionResult RerollResult(MatchEventPageModel userModel) {
       //verify access
       if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
         return View("InvalidCredentials");
@@ -77,7 +77,7 @@ namespace SecretSanta.Controllers {
     }
 
     [HttpPost]
-    public IActionResult MakeHardRestriction(EventPageModel userModel) {
+    public IActionResult MakeHardRestriction(MatchEventPageModel userModel) {
       //verify access
       if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
         return View("InvalidCredentials");
@@ -91,7 +91,7 @@ namespace SecretSanta.Controllers {
 
       userModel = _eventPageModelBuilder.BuildEventPageModelFromDB(userModel.UserId, eventId);
 
-      return View("UserPage", userModel);
+      return View("MatchUserPage", userModel);
     }
   }
 }

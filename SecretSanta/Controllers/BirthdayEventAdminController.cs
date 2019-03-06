@@ -2,33 +2,33 @@
 using SecretSanta.Constants;
 using SecretSanta.DataAccess;
 using SecretSanta.DataAccess.Models;
-using SecretSanta.Models.EventAdmin;
+using SecretSanta.Models.Event.Shared;
+using SecretSanta.Models.EventAdmin.Birthday;
 using SecretSanta.Users;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SecretSanta.Controllers {
-  public class EventAdminController : BaseController {
-    public EventAdminController(IDataAccessor dataAccessor, ISessionManager sessionManager)
+  public class BirthdayEventAdminController : BaseController {
+    public BirthdayEventAdminController(IDataAccessor dataAccessor, ISessionManager sessionManager)
         : base(sessionManager, dataAccessor) { }
 
-    [HttpGet]
     public IActionResult Index() {
       if (!VerifyAccess(out var session)) {
         return RedirectToAction("LogIn", "User");
       }
 
       bool.TryParse(_dataAccessor.GetSettingValue("AllowRegistration", session.EventId), out bool allowRegistration);
-      bool.TryParse(_dataAccessor.GetSettingValue("AllowMatching", session.EventId), out bool allowMatching);
 
       var theEvent = _dataAccessor.GetEvent(session.EventId);
 
-      var displayList = BuildUserSettingsModel(theEvent.Id);
+      var giftIdeas = BuildGiftIdeasModel(theEvent.Id);
+
+      var userList = BuildUserSettingsModel(theEvent.Id);
 
       var currentUserId = _dataAccessor.GetUserByUserName(session.User).Id;
 
-      var options = new EventAdminPageModel {
+      var model = new BirthdayEventAdminPageModel {
         UserName = session.User,
         UserId = currentUserId,
         SharedEventId = theEvent.SharedId,
@@ -36,45 +36,45 @@ namespace SecretSanta.Controllers {
         EventId = theEvent.Id,
         EventSettings = new EventSettingsModel {
           AllowRegistration = allowRegistration,
-          AllowMatching = allowMatching,
           EventName = theEvent.Name,
           EventDescription = theEvent.Description,
           Location = theEvent.Location,
           EventDate = theEvent.StartDate
         },
-        UserSettings = displayList
+        GiftIdeas = giftIdeas,
+        UserSettings = userList
       };
 
-      return View(options);
+      return View(model);
     }
 
     [HttpPost]
-    public IActionResult UpdateSettings(EventAdminPageModel options) {
+    public IActionResult UpdateSettings(BirthdayEventAdminPageModel model) {
       if (!VerifyAccess(out var session)) {
         return RedirectToAction("SignIn", "User");
       }
 
-      var eventId = options.EventId;
+      var eventId = model.EventId;
 
       if (!ModelState.IsValid) {
         var theEvent = _dataAccessor.GetEvent(eventId);
-        options.SharedEventId = theEvent.SharedId;
-        options.EventName = theEvent.Name;
-        options.UserName = session.User;
-        options.UserId = _dataAccessor.GetUserByUserName(session.User).Id;
-        options.UserSettings = BuildUserSettingsModel(eventId);
-        return View("Index", options);
+        model.SharedEventId = theEvent.SharedId;
+        model.EventName = theEvent.Name;
+        model.UserName = session.User;
+        model.UserId = _dataAccessor.GetUserByUserName(session.User).Id;
+        model.GiftIdeas = BuildGiftIdeasModel(eventId);
+        model.UserSettings = BuildUserSettingsModel(eventId);
+        return View("Index", model);
       }
 
-      _dataAccessor.SetSettingValue(AdminSettings.AllowRegistration, options.EventSettings.AllowRegistration.ToString(), eventId);
-      _dataAccessor.SetSettingValue(AdminSettings.AllowMatching, options.EventSettings.AllowMatching.ToString(), eventId);
+      _dataAccessor.SetSettingValue(AdminSettings.AllowRegistration, model.EventSettings.AllowRegistration.ToString(), eventId);
 
       _dataAccessor.UpdateEvent(new Event {
-        Id = options.EventId,
-        Name = options.EventSettings.EventName,
-        Description = options.EventSettings.EventDescription,
-        Location = options.EventSettings.Location,
-        StartDate = options.EventSettings.EventDate
+        Id = model.EventId,
+        Name = model.EventSettings.EventName,
+        Description = model.EventSettings.EventDescription,
+        Location = model.EventSettings.Location,
+        StartDate = model.EventSettings.EventDate
       });
 
       return RedirectToAction("Index");
@@ -91,7 +91,7 @@ namespace SecretSanta.Controllers {
       _dataAccessor.SetUserAdmin(eventId, userId, !userIsAnAdminForThisEvent);
       return RedirectToAction("Index");
     }
-    
+
     [HttpPost]
     public IActionResult RemoveUserFromEvent(int userId) {
       if (!VerifyAccess(out var session)) {
@@ -106,18 +106,60 @@ namespace SecretSanta.Controllers {
       return RedirectToAction("Index");
     }
 
+    [HttpPost]
+    public IActionResult RemoveGiftIdea(int eventItemId) {
+      if (!VerifyAccess(out var session)) {
+        return RedirectToAction("SignIn", "User");
+      }
+
+      _dataAccessor.RemoveEventItem(eventItemId);
+
+      return RedirectToAction("Index");
+    }
+
+    [HttpGet]
+    public IActionResult AddGiftIdea(int eventId) {
+      if (!VerifyAccess(out var session)) {
+        return RedirectToAction("SignIn", "User");
+      }
+
+      var model = new NewEventItemModel {
+        EventId = eventId,
+        IsGiftIdea = true,
+        IsBroughtItem = false,
+        FromEventAdmin = true,
+        ControllerName = "BirthdayEventAdmin",
+        ActionName = "AddGiftIdea"
+      };
+
+      return View("AddEventItem", model);
+    }
+
+    [HttpPost]
+    public IActionResult AddGiftIdea(NewEventItemModel model) {
+      if (!VerifyAccess(out var session)) {
+        return RedirectToAction("SignIn", "User");
+      }
+
+      _dataAccessor.AddEventItem(new EventItem {
+        EventId = model.EventId,
+        IsGiftIdea = model.IsGiftIdea,
+        IsBroughtItem = model.IsBroughtItem,
+        ItemText = model.ItemText
+      });
+
+      return RedirectToAction("Index");
+    }
+
     private List<EventAdminUserSettingsModel> BuildUserSettingsModel(int eventId) {
       var displayList = new List<EventAdminUserSettingsModel>();
       var users = _dataAccessor.GetAllUsersForEvent(eventId);
-      var matches = _dataAccessor.GetAllExistingMatchesForEvent(eventId);
       foreach (var user in users) {
         var isAdmin = _dataAccessor.GetEventAdmins(eventId).Any(ea => ea.Id == user.Id);
         var display = new EventAdminUserSettingsModel {
           UserId = user.Id,
           Name = user.RegisteredName,
           UserName = user.UserName,
-          HasMatched = matches.Any(m => m.RequestorId == user.Id),
-          IsMatched = matches.Any(m => m.MatchedId == user.Id),
           IsAdmin = isAdmin
         };
 
@@ -125,6 +167,18 @@ namespace SecretSanta.Controllers {
       }
 
       return displayList;
+    }
+
+    private List<GiftIdeaModel> BuildGiftIdeasModel(int eventId) {
+      var giftIdeas = _dataAccessor.GetItemsForEvent(eventId).Where(ei => ei.IsGiftIdea);
+      var giftIdeasModel = new List<GiftIdeaModel>();
+      foreach (var giftIdea in giftIdeas) {
+        giftIdeasModel.Add(new GiftIdeaModel {
+          Id = giftIdea.Id,
+          GiftIdeaText = giftIdea.ItemText
+        });
+      }
+      return giftIdeasModel;
     }
 
     private bool VerifyAccess(out ISession session) {

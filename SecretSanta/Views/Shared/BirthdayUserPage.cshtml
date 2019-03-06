@@ -1,0 +1,81 @@
+﻿@model SecretSanta.Models.Event.Birthday.BirthdayEventPageModel
+@{
+    ViewData["Title"] = Model.EventName;
+}
+<h2>@Model.EventName</h2>
+<h3>Welcome, @Model.Name</h3>
+<hr />
+<h4>Event Details</h4>
+<label asp-for="EventDescription">What: @Model.EventDescription</label>
+<br />
+<label asp-for="Location">Where: @Model.Location</label>
+<br />
+<label asp-for="EventDate">When: @Model.EventDate</label>
+<br />
+<a asp-controller="Event" asp-action="Attendees" asp-route-eventId="@Model.EventId">See event attendees</a>
+<hr />
+
+<h4>Gift Ideas</h4>
+<p>The birthday person will not be able to see who is bringing which gift, or even which gifts are being brought.</p>
+<form method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th width="50%">Idea</th>
+                @if (Model.BirthdayPersonUserId == null || Model.BirthdayPersonUserId != Model.UserId) {
+                    <th>Will be brought by</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.GiftIdeas.Count; i++) {
+                var giftIdea = Model.GiftIdeas[i];
+
+                <tr>
+                    <td>@giftIdea.Gift</td>
+                    <td align="justify">
+                        @if (Model.BirthdayPersonUserId == null || Model.BirthdayPersonUserId != Model.UserId) {
+                            @if (giftIdea.WillBeBrought) {
+                                @giftIdea.BroughtBy
+                            }
+                            else {
+                                <button type="submit" class="btn btn-default" asp-controller="Birthday" asp-action="ClaimGift" asp-route-userId="@Model.UserId" asp-route-giftId="@giftIdea.Id">I Will Bring This</button>
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+<hr />
+
+<h4>Additional Items</h4>
+<p>If you are bringing something else for the party, please list it here.</p>
+<p>DO NOT list gifts you are bringing here, as everyone will be able to see it.</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th width="50%">Item</th>
+            <th>Will be brought by</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.ItemsBeingBrought.Count; i++) {
+            var additionalItem = Model.ItemsBeingBrought[i];
+            <tr>
+                <td>@additionalItem.Item</td>
+                <td align="justify">
+                     @additionalItem.BroughtBy
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a class="btn btn-default" asp-controller="Birthday" asp-action="AddAdditionalItem" asp-route-eventId="@Model.EventId">I am bringing something!</a>
+<br/>
+<hr />
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

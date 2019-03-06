@@ -3,15 +3,16 @@ using SecretSanta.DataAccess;
 using SecretSanta.DataAccess.Models;
 using SecretSanta.Exceptions;
 using SecretSanta.Models.User;
-using SecretSanta.Models.Event;
+using SecretSanta.Models.Event.SecretMatch;
+using SecretSanta.Users.SecretMatch;
 using SecretSanta.Users;
 using System;
 
 namespace SecretSanta.Controllers {
   public class UserController : BaseController {
-    private readonly IEventPageModelBuilder _pageModelBuilder;
+    private readonly IMatchEventPageModelBuilder _pageModelBuilder;
 
-    public UserController(IDataAccessor dataAccessor, ISessionManager sessionManager, IEventPageModelBuilder pageModelBuilder)
+    public UserController(IDataAccessor dataAccessor, ISessionManager sessionManager, IMatchEventPageModelBuilder pageModelBuilder)
         : base(sessionManager, dataAccessor) {
       _pageModelBuilder = pageModelBuilder;
     }
@@ -112,7 +113,7 @@ namespace SecretSanta.Controllers {
     }
 
     [HttpPost]
-    public IActionResult UpdateInterests(EventPageModel user) {
+    public IActionResult UpdateInterests(MatchEventPageModel user) {
       //verify access
       if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
         return View("InvalidCredentials");
@@ -121,7 +122,7 @@ namespace SecretSanta.Controllers {
       var eventId = _sessionManager.GetCurrentEventId();
       if (user.TheirSecretMatchId > 0) {
         user = _pageModelBuilder.BuildEventPageModelFromDB(user.UserId, eventId);
-        return View("UserPage", user);
+        return View("MatchUserPage", user);
       }
       return RedirectToAction("GetMatchEvent", "Match", new { eventId = _sessionManager.GetCurrentEventId() });
     }
@@ -173,7 +174,8 @@ namespace SecretSanta.Controllers {
       _dataAccessor.UpdateUserPassword(user.Id, changePasswordModel.NewPassword);
 
       if (changePasswordModel.EventId > 0) {
-        return RedirectToAction("GetMatchEvent", "Match", new { eventId = changePasswordModel.EventId });
+        return GoToEventUserPage(changePasswordModel.EventId);
+        //return RedirectToAction("GetMatchEvent", "Match", new { eventId = changePasswordModel.EventId });
       }
       else {
         return RedirectToAction("ChooseEvent", "Event");

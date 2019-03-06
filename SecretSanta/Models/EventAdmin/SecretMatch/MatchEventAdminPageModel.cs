@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace SecretSanta.Models.EventAdmin {
-  public class EventAdminPageModel {
+namespace SecretSanta.Models.EventAdmin.SecretMatch {
+  public class MatchEventAdminPageModel {
     public int UserId { get; set; }
     public string UserName { get; set; }
     public Guid SharedEventId { get; set; }

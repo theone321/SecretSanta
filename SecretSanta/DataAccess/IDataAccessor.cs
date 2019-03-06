@@ -42,5 +42,11 @@ namespace SecretSanta.DataAccess {
     void RemoveUserFromEvent(int userId, int eventId);
     void RegenerateSharedIdForEvent(int eventId);
     void UpdateEvent(Event updatedEvent);
+    List<EventType> GetEventTypes();
+    string GetEventTypeName(int id);
+    List<EventItem> GetItemsForEvent(int eventId);
+    void AddEventItem(EventItem theItem);
+    void ClaimGift(int itemId, int userId);
+    void RemoveEventItem(int itemId);
   }
 }
