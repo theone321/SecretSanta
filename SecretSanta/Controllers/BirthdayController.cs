@@ -3,10 +3,6 @@ using SecretSanta.DataAccess;
 using SecretSanta.Models.Event.Shared;
 using SecretSanta.Users;
 using SecretSanta.Users.Birthday;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SecretSanta.Controllers {
   public class BirthdayController : BaseController {
@@ -55,7 +51,10 @@ namespace SecretSanta.Controllers {
         UserIdBringingItem = userId,
         EventId = eventId,
         IsGiftIdea = false,
-        IsBroughtItem = true
+        IsBroughtItem = true,
+        ControllerName = "Birthday",
+        ActionName = "AddAdditionalItem",
+        FromEventAdmin = false
       };
 
       return View("AddEventItem", model);
@@ -77,6 +76,18 @@ namespace SecretSanta.Controllers {
       });
 
       return RedirectToAction("GetBirthdayEvent", new { eventId = model.EventId });
+    }
+
+    [HttpPost]
+    public IActionResult RemoveAdditionalItem(int eventId, int itemId) {
+      //verify access
+      if (!_sessionManager.TryGetSessionCookie(HttpContext.Request.Cookies, out var session)) {
+        return View("InvalidCredentials");
+      }
+
+      _dataAccessor.RemoveEventItem(itemId);
+
+      return RedirectToAction("GetBirthdayEvent", new { eventId = eventId });
     }
   }
 }

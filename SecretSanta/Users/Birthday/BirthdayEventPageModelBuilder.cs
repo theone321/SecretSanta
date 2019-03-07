@@ -32,7 +32,7 @@ namespace SecretSanta.Users.Birthday {
           Id = giftIdea.Id,
           Gift = giftIdea.ItemText,
           WillBeBrought = giftIdea.UserIdBringingItem != null,
-          BroughtBy = giftIdea.UserIdBringingItem != null ? _dataAccessor.GetUserById((int)giftIdea.UserIdBringingItem).UserName : null
+          BroughtBy = giftIdea.UserIdBringingItem != null ? _dataAccessor.GetUserById((int)giftIdea.UserIdBringingItem).RegisteredName : null
         });
       }
 
@@ -41,7 +41,7 @@ namespace SecretSanta.Users.Birthday {
         broughtItems.Add(new BirthdayEventPageModel.BringingItemModel {
           Id = broughtItem.Id,
           Item = broughtItem.ItemText,
-          BroughtBy = _dataAccessor.GetUserById((int)broughtItem.UserIdBringingItem).UserName
+          BroughtBy = _dataAccessor.GetUserById((int)broughtItem.UserIdBringingItem).RegisteredName
         });
       }
 

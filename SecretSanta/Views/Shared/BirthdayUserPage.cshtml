@@ -53,28 +53,38 @@
 <h4>Additional Items</h4>
 <p>If you are bringing something else for the party, please list it here.</p>
 <p>DO NOT list gifts you are bringing here, as everyone will be able to see it.</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th width="50%">Item</th>
-            <th>Will be brought by</th>
-        </tr>
-    </thead>
-    <tbody>
-        @for (int i = 0; i < Model.ItemsBeingBrought.Count; i++) {
-            var additionalItem = Model.ItemsBeingBrought[i];
+<form method="post">
+    <table class="table">
+        <thead>
             <tr>
-                <td>@additionalItem.Item</td>
-                <td align="justify">
-                     @additionalItem.BroughtBy
-                </td>
+                <th width="50%">Item</th>
+                <th>Will be brought by</th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.ItemsBeingBrought.Count; i++) {
+                var additionalItem = Model.ItemsBeingBrought[i];
+                <tr>
+                    <td>@additionalItem.Item</td>
+                    <td align="justify">
+                        @additionalItem.BroughtBy
+                    </td>
+                    @if (additionalItem.BroughtBy.Equals(Model.Name, StringComparison.OrdinalIgnoreCase)) {
+                        <td>
+                            <button type="submit" class="btn btn-default" asp-controller="Birthday" asp-action="RemoveAdditionalItem" asp-route-eventId="@Model.EventId" asp-route-itemId="@additionalItem.Id">Remove</button>
+                        </td>
+                    }
+                    else {
+                      <td></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
 <a class="btn btn-default" asp-controller="Birthday" asp-action="AddAdditionalItem" asp-route-eventId="@Model.EventId">I am bringing something!</a>
-<br/>
-<hr />
+<br />
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
