@@ -9,7 +9,7 @@ namespace SecretSanta.DataAccess.Models {
     public DateTime StartDate { get; set; }
     public string Location { get; set; }
     public string Description { get; set; }
-    public Guid SharedId { get; set; }
+    public string SharedId { get; set; }
     public int EventType { get; set; }
     public int BirthdayPersonUserId { get; set; }
     public bool IsSurpriseEvent { get; set; }

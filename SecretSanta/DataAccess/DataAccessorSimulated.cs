@@ -58,7 +58,7 @@ namespace SecretSanta.DataAccess {
         Description = "Annual secret santa gift exchange",
         Location = "My house",
         StartDate = new DateTime(2019, 12, 15, 19, 30, 00),
-        SharedId = new Guid("0123456789ABCDEFFEDCBA9876543210"),
+        SharedId = "0123456789ABCDEFFEDCBA9876543210",
         EventType = 1
       },
       new Event {
@@ -67,7 +67,7 @@ namespace SecretSanta.DataAccess {
         Description = "The other event",
         Location = "Somebody's House",
         StartDate = new DateTime(2019, 12, 17, 18, 30, 00),
-        SharedId = new Guid("FEDCBA98765432100123456789ABCDEF"),
+        SharedId = "FEDCBA98765432100123456789ABCDEF",
         EventType = 1
       },
       new Event {
@@ -76,7 +76,7 @@ namespace SecretSanta.DataAccess {
         Description = "My friend's bday party",
         Location = "Somebody's House",
         StartDate = new DateTime(2019, 8, 19, 19, 15, 00),
-        SharedId = new Guid("ABCDEF12345678900987654321FEDCBA"),
+        SharedId = "ABCDEF12345678900987654321FEDCBA",
         EventType = 2,
         BirthdayPersonUserId = 3
       }
@@ -346,7 +346,7 @@ namespace SecretSanta.DataAccess {
       return _events.FirstOrDefault(e => e.Id == id);
     }
 
-    public Event GetEvent(Guid sharedEventId) {
+    public Event GetEvent(string sharedEventId) {
       return _events.FirstOrDefault(e => e.SharedId.Equals(sharedEventId));
     }
 
@@ -386,7 +386,7 @@ namespace SecretSanta.DataAccess {
       return _events.Where(e => userEvents.Any(ue => e.Id == ue.EventId)).ToList();
     }
 
-    public void AddUserToEvent(int userId, Guid sharedEventGuid) {
+    public void AddUserToEvent(int userId, string sharedEventGuid) {
       var theEvent = _events.FirstOrDefault(e => e.SharedId == sharedEventGuid);
       if (theEvent != null) {
         _userEvents.Add(new UserEvent {
@@ -416,7 +416,7 @@ namespace SecretSanta.DataAccess {
     public void RegenerateSharedIdForEvent(int eventId) {
       var theEvent = _events.FirstOrDefault(e => e.Id == eventId);
       if (theEvent != null) {
-        theEvent.SharedId = Guid.NewGuid();
+        theEvent.SharedId = Guid.NewGuid().ToString();
       }
     }
 

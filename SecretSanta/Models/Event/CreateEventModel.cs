@@ -13,7 +13,7 @@ namespace SecretSanta.Models.Event {
     public string Location { get; set; }
     [Required(ErrorMessage = "You must fill in the Event Date.")]
     public DateTime EventDate { get; set; }
-    public Guid SharedId { get; set; }
+    public string SharedId { get; set; }
     public bool AllowMatching { get; set; }
     public bool AllowRegistration { get; set; }
     public List<SelectListItem> EventTypes { get; set; }

@@ -17,7 +17,7 @@ namespace SecretSanta.Models.Event.SecretMatch {
     public string EventName { get; set; }
     public string Location { get; set; }
     public string EventDescription { get; set; }
-    public Guid SharedId { get; set; }
+    public string SharedId { get; set; }
     public LimitedUser SignificantOther { get; set; }
     public List<LimitedUser> OtherUsers { get; set; }
     public int RegisteredCount { get; set; }

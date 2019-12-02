@@ -12,7 +12,7 @@ namespace SecretSanta.Models.Event {
     public DateTime StartDate { get; set; }
     public string Location { get; set; }
     public string Description { get; set; }
-    public Guid SharedId { get; set; }
+    public string SharedId { get; set; }
     public string EventType { get; set; }
   }
 }

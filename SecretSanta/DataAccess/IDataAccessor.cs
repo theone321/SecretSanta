@@ -33,12 +33,12 @@ namespace SecretSanta.DataAccess {
     bool VerifySession(string username, string sessionId);
     void EndSession(string sessionId);
     Event GetEvent(int id);
-    Event GetEvent(Guid sharedEventId);
+    Event GetEvent(string sharedEventId);
     List<User> GetEventAdmins(int eventId);
     int CreateEvent(Event newEvent, int eventOwnerUserId);
     void SetUserAdmin(int eventId, int userId, bool admin);
     List<Event> GetEventsForUser(int userId);
-    void AddUserToEvent(int userId, Guid sharedEventGuid);
+    void AddUserToEvent(int userId, string sharedEventGuid);
     void RemoveUserFromEvent(int userId, int eventId);
     void RegenerateSharedIdForEvent(int eventId);
     void UpdateEvent(Event updatedEvent);

@@ -12,8 +12,8 @@ SET row_security = off;
 
 
 -- Settings
-INSERT INTO "Settings" VALUES ('SessionTimeout', '50000'); --about 34 days
+INSERT INTO "Settings" VALUES ('SessionTimeout', '50000', 0); --about 34 days
 
 --EventTypes
-INSERT INTO "EventTypes" VALUES ('Secret Match');
-INSERT INTO "EventTypes" VALUES ('Birthday Party');
+INSERT INTO "EventTypes" VALUES (1, 'Secret Match');
+INSERT INTO "EventTypes" VALUES (2, 'Birthday Party');

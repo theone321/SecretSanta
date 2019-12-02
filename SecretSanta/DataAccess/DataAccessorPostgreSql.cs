@@ -300,7 +300,7 @@ namespace SecretSanta.DataAccess {
       return _context.Events.FirstOrDefault(e => e.Id == id);
     }
 
-    public Event GetEvent(Guid sharedEventId) {
+    public Event GetEvent(string sharedEventId) {
       return _context.Events.FirstOrDefault(e => e.SharedId.Equals(sharedEventId));
     }
 
@@ -311,13 +311,13 @@ namespace SecretSanta.DataAccess {
 
     public int CreateEvent(Event newEvent, int eventOwnerUserId) {
       var e = _context.Events.Add(newEvent);
-      var eventId = e.Entity.Id;
+      _context.SaveChanges();
       _context.UserEvents.Add(new UserEvent {
-        EventId = eventId,
+        EventId = newEvent.Id,
         UserId = eventOwnerUserId
       });
       _context.SaveChanges();
-      return eventId;
+      return newEvent.Id;
     }
 
     public void SetUserAdmin(int eventId, int userId, bool admin) {
@@ -343,7 +343,7 @@ namespace SecretSanta.DataAccess {
       return _context.Events.Where(e => userEvents.Any(ue => ue.EventId == e.Id)).ToList();
     }
 
-    public void AddUserToEvent(int userId, Guid sharedEventGuid) {
+    public void AddUserToEvent(int userId, string sharedEventGuid) {
       var theEvent = _context.Events.FirstOrDefault(e => e.SharedId == sharedEventGuid);
       if (theEvent != null) {
         _context.UserEvents.Add(new UserEvent {
@@ -375,7 +375,7 @@ namespace SecretSanta.DataAccess {
     public void RegenerateSharedIdForEvent(int eventId) {
       var theEvent = _context.Events.FirstOrDefault(e => e.Id == eventId);
       if (theEvent != null) {
-        theEvent.SharedId = Guid.NewGuid();
+        theEvent.SharedId = Guid.NewGuid().ToString();
         _context.Events.Update(theEvent);
         _context.SaveChanges();
       }

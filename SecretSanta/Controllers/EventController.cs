@@ -18,7 +18,7 @@ namespace SecretSanta.Controllers {
       _sessionManager.SetCurrentEventId(0);
 
       var model = new CreateEventModel {
-        SharedId = Guid.NewGuid(),
+        SharedId = Guid.NewGuid().ToString(),
         EventTypes = BuildEventTypeList()
       };
       
@@ -108,7 +108,7 @@ namespace SecretSanta.Controllers {
     [HttpPost]
     public IActionResult ConnectWithEvent(JoinEventModel model) {
       if (HttpContext.Request.Cookies.TryGetValue("sessionId", out string sessionId)) {
-        var guid = new Guid(model.SharedEventGuid);
+        var guid = model.SharedEventGuid;
 
         var theEvent = _dataAccessor.GetEvent(guid);
         var allowRegistration = _dataAccessor.GetSettingValue(AdminSettings.AllowRegistration, theEvent.Id);

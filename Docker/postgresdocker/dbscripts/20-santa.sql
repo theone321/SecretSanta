@@ -171,19 +171,14 @@ CREATE TABLE "Events" (
 	"Location" text,
 	"Description" text,
 	"SharedId" text NOT NULL,
-	"EventTypeId" int NOT NULL,
+	"EventType" int NOT NULL,
 	"BirthdayPersonUserId" int,
-	"IsSurpriseEvent" bit NOT NULL
-)
+	"IsSurpriseEvent" boolean NOT NULL
+);
 
 ALTER TABLE "Events" OWNER TO santa;
 
-CREATE SEQUENCE "Events_Id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+CREATE SEQUENCE "Events_Id_seq";
 
 ALTER TABLE "Events_Id_seq" OWNER TO santa;
 
@@ -199,16 +194,11 @@ CREATE TABLE "EventAdmins" (
 	"Id" int NOT NULL,
 	"EventId" int NOT NULL,
 	"AdminId" int NOT NULL
-)
+);
 
 ALTER TABLE "EventAdmins" OWNER TO santa;
 
-CREATE SEQUENCE "EventAdmins_Id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+CREATE SEQUENCE "EventAdmins_Id_seq";
 
 ALTER TABLE "EventAdmins_Id_seq" OWNER TO santa;
 
@@ -224,7 +214,7 @@ CREATE TABLE "UserEvents" (
 	"Id" int NOT NULL,
 	"UserId" int NOT NULL,
 	"EventId" int NOT NULL
-)
+);
 
 ALTER TABLE "UserEvents" OWNER TO santa;
 
@@ -248,16 +238,11 @@ ALTER TABLE ONLY "UserEvents"
 CREATE TABLE "EventTypes" (
 	"Id" int NOT NULL,
 	"Name" text NOT NULL
-)
+);
 
 ALTER TABLE "EventTypes" OWNER TO santa;
 
-CREATE SEQUENCE "EventTypes_Id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+CREATE SEQUENCE "EventTypes_Id_seq";
 
 ALTER TABLE "EventTypes_Id_seq" OWNER TO santa;
 
@@ -273,19 +258,14 @@ CREATE TABLE "EventItems" (
 	"Id" int NOT NULL,
 	"EventId" int NOT NULL,
 	"ItemText" text NOT NULL,
-	"IsGiftIdea" bit NOT NULL,
-	"IsBroughtItem" bit NOT NULL,
+	"IsGiftIdea" boolean NOT NULL,
+	"IsBroughtItem" boolean NOT NULL,
 	"UserIdBringingItem" int
-)
+);
 
 ALTER TABLE "EventItems" OWNER TO santa;
 
-CREATE SEQUENCE "EventItems_Id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+CREATE SEQUENCE "EventItems_Id_seq";
 
 ALTER TABLE "EventItems_Id_seq" OWNER TO santa;
 

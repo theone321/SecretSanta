@@ -14,7 +14,7 @@ namespace SecretSanta.Models.Event.Birthday {
     public string EventName { get; set; }
     public string Location { get; set; }
     public string EventDescription { get; set; }
-    public Guid SharedId { get; set; }
+    public string SharedId { get; set; }
     public int? BirthdayPersonUserId { get; set; }
 
     public class GiftIdeaModel {
