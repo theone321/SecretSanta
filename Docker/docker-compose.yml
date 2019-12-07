@@ -8,7 +8,8 @@ services:
             context: ./santadocker/
             dockerfile: Dockerfile
         ports:
-            - 8081:80
+            - 80:80
+            - 443:443
         links:
             - santapostgres
         depends_on:
